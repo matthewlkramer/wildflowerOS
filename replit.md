@@ -34,6 +34,8 @@ Preferred communication style: Simple, everyday language.
     - Calculated religious holidays: Good Friday (from Easter), Rosh Hashanah (2-day), Yom Kippur, Eid al-Fitr  
     - School-specific Winter Break: December 24 - January 1 (9 days)
     - Each holiday has proper startDate, endDate, and duration fields for accurate multi-day tracking
+  - **Fixed timezone issues** - replaced toLocaleDateString() with direct string formatting to prevent date display shifting
+  - **UTC date storage** - all holiday dates now stored in UTC to ensure consistent display across timezones
 - **Enhanced auto-population functionality for network school years**
   - Fixed regex pattern to support both 2-digit and 4-digit year formats ("2024-25" and "2024-2025")
   - Added logic to convert 2-digit years to 4-digit years (e.g., "25" becomes "2025")

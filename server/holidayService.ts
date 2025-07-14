@@ -116,9 +116,9 @@ export class HolidayService {
     }
     
     // Add missing holidays that aren't well-represented in US federal calendar
-    // Winter Break: December 24 to January 1 (9 days)
-    const winterBreakStart = new Date(year, 11, 24); // December 24
-    const winterBreakEnd = new Date(year + 1, 0, 1); // January 1 next year
+    // Winter Break: December 24 to January 1 (9 days) - using UTC to avoid timezone issues
+    const winterBreakStart = new Date(Date.UTC(year, 11, 24)); // December 24
+    const winterBreakEnd = new Date(Date.UTC(year + 1, 0, 1)); // January 1 next year
     holidays.set('Winter Break', { 
       name: 'Winter Break', 
       startDate: winterBreakStart, 
@@ -130,10 +130,10 @@ export class HolidayService {
     if (!holidays.has('Rosh Hashanah')) {
       // Rosh Hashanah 2024: Sept 15-17, 2025: Sept 5-7, 2026: Sept 25-27, 2027: Sept 13-15
       const roshDates = {
-        2024: new Date(2024, 8, 15), // Sept 15
-        2025: new Date(2025, 8, 5),  // Sept 5  
-        2026: new Date(2026, 8, 25), // Sept 25
-        2027: new Date(2027, 8, 13)  // Sept 13
+        2024: new Date(Date.UTC(2024, 8, 15)), // Sept 15
+        2025: new Date(Date.UTC(2025, 8, 5)),  // Sept 5  
+        2026: new Date(Date.UTC(2026, 8, 25)), // Sept 25
+        2027: new Date(Date.UTC(2027, 8, 13))  // Sept 13
       };
       if (roshDates[year]) {
         const roshEnd = new Date(roshDates[year]);
@@ -150,10 +150,10 @@ export class HolidayService {
     if (!holidays.has('Yom Kippur')) {
       // Yom Kippur is 10 days after Rosh Hashanah
       const yomKippurDates = {
-        2024: new Date(2024, 8, 24), // Sept 24
-        2025: new Date(2025, 8, 14), // Sept 14
-        2026: new Date(2026, 9, 4),  // Oct 4
-        2027: new Date(2027, 8, 22)  // Sept 22
+        2024: new Date(Date.UTC(2024, 8, 24)), // Sept 24
+        2025: new Date(Date.UTC(2025, 8, 14)), // Sept 14
+        2026: new Date(Date.UTC(2026, 9, 4)),  // Oct 4
+        2027: new Date(Date.UTC(2027, 8, 22))  // Sept 22
       };
       if (yomKippurDates[year]) {
         holidays.set('Yom Kippur', {
@@ -168,10 +168,10 @@ export class HolidayService {
     if (!holidays.has('Eid')) {
       // Eid al-Fitr approximate dates (lunar calendar varies)
       const eidDates = {
-        2024: new Date(2024, 3, 10), // April 10
-        2025: new Date(2025, 2, 30), // March 30
-        2026: new Date(2026, 2, 20), // March 20
-        2027: new Date(2027, 2, 9)   // March 9
+        2024: new Date(Date.UTC(2024, 3, 10)), // April 10
+        2025: new Date(Date.UTC(2025, 2, 30)), // March 30
+        2026: new Date(Date.UTC(2026, 2, 20)), // March 20
+        2027: new Date(Date.UTC(2027, 2, 9))   // March 9
       };
       if (eidDates[year]) {
         holidays.set('Eid', {

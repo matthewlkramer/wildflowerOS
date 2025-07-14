@@ -188,7 +188,7 @@ function NetworkSchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
                   <div className="flex-1">
                     <div className="font-medium text-sm">{holiday.name}</div>
                     <div className="text-xs text-gray-600">
-                      {holiday.date ? new Date(holiday.date).toLocaleDateString() : holiday.rule}
+                      {holiday.date ? holiday.date.split('T')[0] : holiday.rule}
                     </div>
                     {holiday.description && (
                       <div className="text-xs text-gray-500 mt-1">{holiday.description}</div>
@@ -824,7 +824,7 @@ function AcademicCalendarOverview({
             <h4 className="font-medium text-blue-800">First Day of School</h4>
             <p className="text-sm text-blue-600 mt-1">
               {academicCalendar?.firstDayOfSchool 
-                ? new Date(academicCalendar.firstDayOfSchool).toLocaleDateString()
+                ? academicCalendar.firstDayOfSchool.split('T')[0]
                 : "Not set"
               }
             </p>
@@ -835,7 +835,7 @@ function AcademicCalendarOverview({
             <h4 className="font-medium text-purple-800">Last Day of School</h4>
             <p className="text-sm text-purple-600 mt-1">
               {academicCalendar?.lastDayOfSchool 
-                ? new Date(academicCalendar.lastDayOfSchool).toLocaleDateString()
+                ? academicCalendar.lastDayOfSchool.split('T')[0]
                 : "Not set"
               }
             </p>
@@ -875,7 +875,7 @@ function AcademicCalendarOverview({
                     <div>
                       <span className="font-medium">{closure.name}</span>
                       <span className="text-sm text-gray-600 ml-2">
-                        {new Date(closure.date).toLocaleDateString()}
+                        {closure.date.split('T')[0]}
                       </span>
                     </div>
                   </div>
@@ -1011,7 +1011,7 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
           <CardTitle className="text-lg">Academic Calendar Settings - {schoolYear?.name}</CardTitle>
           {academicCalendar ? (
             <p className="text-sm text-gray-600">
-              Editing existing calendar (created {new Date(academicCalendar.createdAt).toLocaleDateString()})
+              Editing existing calendar (created {academicCalendar.createdAt.split('T')[0]})
             </p>
           ) : (
             <p className="text-sm text-gray-600">
@@ -1076,7 +1076,7 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
                   <div>
                     <p className="font-medium">{closure.name}</p>
                     <p className="text-sm text-gray-600">
-                      {new Date(closure.date).toLocaleDateString()}
+                      {closure.date.split('T')[0]}
                     </p>
                     {closure.description && (
                       <p className="text-xs text-gray-500 mt-1">{closure.description}</p>

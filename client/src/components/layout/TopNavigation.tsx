@@ -153,32 +153,33 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               </Select>
             </div>
 
-            {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-4 w-4" />
-              {notificationCount > 0 && (
-                <Badge 
-                  className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center p-0"
-                >
-                  {notificationCount}
-                </Badge>
-              )}
-            </Button>
-            
-            {/* Messages */}
-            <Button variant="ghost" size="sm" className="relative">
-              <MessageCircle className="h-4 w-4" />
-              {messageCount > 0 && (
-                <Badge 
-                  className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center p-0"
-                >
-                  {messageCount}
-                </Badge>
-              )}
-            </Button>
-            
-            {/* User Profile */}
-            <DropdownMenu>
+            <div className="flex items-center space-x-1">
+              {/* Notifications */}
+              <Button variant="ghost" size="sm" className="relative p-2">
+                <Bell className="h-4 w-4" />
+                {notificationCount > 0 && (
+                  <Badge 
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center p-0"
+                  >
+                    {notificationCount}
+                  </Badge>
+                )}
+              </Button>
+              
+              {/* Messages */}
+              <Button variant="ghost" size="sm" className="relative p-2">
+                <MessageCircle className="h-4 w-4" />
+                {messageCount > 0 && (
+                  <Badge 
+                    className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center p-0"
+                  >
+                    {messageCount}
+                  </Badge>
+                )}
+              </Button>
+              
+              {/* User Profile */}
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center space-x-2">
                   {user.profileImageUrl ? (
@@ -213,6 +214,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </div>
           </div>
         </div>
       </div>

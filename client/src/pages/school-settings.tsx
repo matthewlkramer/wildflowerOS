@@ -17,6 +17,7 @@ import {
 import { 
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -360,7 +361,10 @@ export default function SchoolSettingsPage() {
   };
 
   const handleAddSchoolYear = () => {
-    addSchoolYearMutation.mutate(schoolYearForm);
+    addSchoolYearMutation.mutate({
+      ...schoolYearForm,
+      schoolId: schoolId
+    });
   };
 
   const handleSetActiveSchoolYear = (yearId: string) => {

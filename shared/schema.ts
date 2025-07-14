@@ -121,10 +121,12 @@ export const schools = pgTable("schools", {
 
 export const schoolYears = pgTable("school_years", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 20 }).notNull(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id),
+  name: varchar("name", { length: 50 }).notNull(),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   isActive: boolean("is_active").notNull().default(false),
+  networkDefault: boolean("network_default").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

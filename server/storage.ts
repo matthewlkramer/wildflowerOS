@@ -479,10 +479,12 @@ export class DatabaseStorage implements IStorage {
       const [newSchoolYear] = await db
         .insert(schoolYears)
         .values({
+          schoolId: tuitionData.schoolId,
           name: `${currentYear}-${currentYear + 1}`,
           startDate: new Date(`${currentYear}-08-01`),
           endDate: new Date(`${currentYear + 1}-06-30`),
           isActive: true,
+          networkDefault: false,
         })
         .returning();
       
@@ -511,11 +513,19 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(schoolYears)
+      .where(eq(schoolYears.schoolId, schoolId))
       .orderBy(desc(schoolYears.startDate));
   }
 
   async createSchoolYear(schoolYearData: any): Promise<any> {
-    const [schoolYear] = await db.insert(schoolYears).values(schoolYearData).returning();
+    // Convert date strings to Date objects if they exist
+    const processedData = {
+      ...schoolYearData,
+      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate) : undefined,
+      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate) : undefined,
+    };
+    
+    const [schoolYear] = await db.insert(schoolYears).values(processedData).returning();
     return schoolYear;
   }
 

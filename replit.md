@@ -69,6 +69,13 @@ Preferred communication style: Simple, everyday language.
   - Added proper active state detection and routing with Wouter Link components
   - Integrated role-based school settings visibility for mobile users
   - Mobile navigation now provides consistent experience across all device sizes
+- **Fixed school year creation functionality**
+  - Resolved date handling issue where HTML date inputs were passing strings instead of Date objects
+  - Added proper date conversion in createSchoolYear storage method
+  - Added schoolId field to school_years table to associate years with specific schools
+  - Added networkDefault boolean field to identify network-wide default school years
+  - Updated storage methods to properly filter school years by schoolId
+  - School year creation now works properly with start/end date validation
 
 ## System Architecture
 

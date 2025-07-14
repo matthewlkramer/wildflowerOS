@@ -858,6 +858,325 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== PUBLIC SUBSIDY PROGRAMS ========================
+
+  app.get('/api/schools/:schoolId/public-subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const programs = await storage.getPublicSubsidyProgramsBySchool(schoolId);
+      res.json(programs);
+    } catch (error) {
+      console.error("Error fetching public subsidy programs:", error);
+      res.status(500).json({ message: "Failed to fetch public subsidy programs" });
+    }
+  });
+
+  app.get('/api/schools/:schoolId/public-subsidies/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const programs = await storage.getActivePublicSubsidyProgramsBySchool(schoolId);
+      res.json(programs);
+    } catch (error) {
+      console.error("Error fetching active public subsidy programs:", error);
+      res.status(500).json({ message: "Failed to fetch active public subsidy programs" });
+    }
+  });
+
+  app.get('/api/public-subsidies/:programId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      const program = await storage.getPublicSubsidyProgramById(programId);
+      if (!program) {
+        return res.status(404).json({ message: "Public subsidy program not found" });
+      }
+      res.json(program);
+    } catch (error) {
+      console.error("Error fetching public subsidy program:", error);
+      res.status(500).json({ message: "Failed to fetch public subsidy program" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/public-subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const programData = { ...req.body, schoolId };
+      const program = await storage.createPublicSubsidyProgram(programData);
+      res.status(201).json(program);
+    } catch (error) {
+      console.error("Error creating public subsidy program:", error);
+      res.status(500).json({ message: "Failed to create public subsidy program" });
+    }
+  });
+
+  app.patch('/api/public-subsidies/:programId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      const program = await storage.updatePublicSubsidyProgram(programId, req.body);
+      res.json(program);
+    } catch (error) {
+      console.error("Error updating public subsidy program:", error);
+      res.status(500).json({ message: "Failed to update public subsidy program" });
+    }
+  });
+
+  app.post('/api/public-subsidies/:programId/deactivate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      const program = await storage.deactivatePublicSubsidyProgram(programId);
+      res.json(program);
+    } catch (error) {
+      console.error("Error deactivating public subsidy program:", error);
+      res.status(500).json({ message: "Failed to deactivate public subsidy program" });
+    }
+  });
+
+  app.delete('/api/public-subsidies/:programId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      await storage.deletePublicSubsidyProgram(programId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting public subsidy program:", error);
+      res.status(500).json({ message: "Failed to delete public subsidy program" });
+    }
+  });
+
+  // ======================== SUBSIDY RATES ========================
+
+  app.get('/api/public-subsidies/:programId/rates', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      const rates = await storage.getSubsidyRatesByProgram(programId);
+      res.json(rates);
+    } catch (error) {
+      console.error("Error fetching subsidy rates:", error);
+      res.status(500).json({ message: "Failed to fetch subsidy rates" });
+    }
+  });
+
+  app.get('/api/public-subsidies/:programId/rates/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      const rates = await storage.getActiveSubsidyRatesByProgram(programId);
+      res.json(rates);
+    } catch (error) {
+      console.error("Error fetching active subsidy rates:", error);
+      res.status(500).json({ message: "Failed to fetch active subsidy rates" });
+    }
+  });
+
+  app.get('/api/subsidy-rates/:rateId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { rateId } = req.params;
+      const rate = await storage.getSubsidyRateById(rateId);
+      if (!rate) {
+        return res.status(404).json({ message: "Subsidy rate not found" });
+      }
+      res.json(rate);
+    } catch (error) {
+      console.error("Error fetching subsidy rate:", error);
+      res.status(500).json({ message: "Failed to fetch subsidy rate" });
+    }
+  });
+
+  app.post('/api/public-subsidies/:programId/rates', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programId } = req.params;
+      const rateData = { ...req.body, programId };
+      const rate = await storage.createSubsidyRate(rateData);
+      res.status(201).json(rate);
+    } catch (error) {
+      console.error("Error creating subsidy rate:", error);
+      res.status(500).json({ message: "Failed to create subsidy rate" });
+    }
+  });
+
+  app.patch('/api/subsidy-rates/:rateId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { rateId } = req.params;
+      const rate = await storage.updateSubsidyRate(rateId, req.body);
+      res.json(rate);
+    } catch (error) {
+      console.error("Error updating subsidy rate:", error);
+      res.status(500).json({ message: "Failed to update subsidy rate" });
+    }
+  });
+
+  app.post('/api/subsidy-rates/:rateId/deactivate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { rateId } = req.params;
+      const rate = await storage.deactivateSubsidyRate(rateId);
+      res.json(rate);
+    } catch (error) {
+      console.error("Error deactivating subsidy rate:", error);
+      res.status(500).json({ message: "Failed to deactivate subsidy rate" });
+    }
+  });
+
+  app.delete('/api/subsidy-rates/:rateId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { rateId } = req.params;
+      await storage.deleteSubsidyRate(rateId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting subsidy rate:", error);
+      res.status(500).json({ message: "Failed to delete subsidy rate" });
+    }
+  });
+
+  // ======================== CHILD SUBSIDY ASSIGNMENTS ========================
+
+  app.get('/api/children/:childId/subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { childId } = req.params;
+      const assignments = await storage.getChildSubsidyAssignmentsByChild(childId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching child subsidy assignments:", error);
+      res.status(500).json({ message: "Failed to fetch child subsidy assignments" });
+    }
+  });
+
+  app.get('/api/children/:childId/subsidies/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const { childId } = req.params;
+      const assignments = await storage.getActiveChildSubsidyAssignmentsByChild(childId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching active child subsidy assignments:", error);
+      res.status(500).json({ message: "Failed to fetch active child subsidy assignments" });
+    }
+  });
+
+  app.get('/api/families/:familyId/subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { familyId } = req.params;
+      const assignments = await storage.getChildSubsidyAssignmentsByFamily(familyId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching family subsidy assignments:", error);
+      res.status(500).json({ message: "Failed to fetch family subsidy assignments" });
+    }
+  });
+
+  app.get('/api/schools/:schoolId/subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const assignments = await storage.getChildSubsidyAssignmentsBySchool(schoolId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching school subsidy assignments:", error);
+      res.status(500).json({ message: "Failed to fetch school subsidy assignments" });
+    }
+  });
+
+  app.get('/api/child-subsidies/:assignmentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { assignmentId } = req.params;
+      const assignment = await storage.getChildSubsidyAssignmentById(assignmentId);
+      if (!assignment) {
+        return res.status(404).json({ message: "Child subsidy assignment not found" });
+      }
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error fetching child subsidy assignment:", error);
+      res.status(500).json({ message: "Failed to fetch child subsidy assignment" });
+    }
+  });
+
+  app.post('/api/children/:childId/subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { childId } = req.params;
+      const assignmentData = { ...req.body, childId };
+      const assignment = await storage.createChildSubsidyAssignment(assignmentData);
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("Error creating child subsidy assignment:", error);
+      res.status(500).json({ message: "Failed to create child subsidy assignment" });
+    }
+  });
+
+  app.patch('/api/child-subsidies/:assignmentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { assignmentId } = req.params;
+      const assignment = await storage.updateChildSubsidyAssignment(assignmentId, req.body);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error updating child subsidy assignment:", error);
+      res.status(500).json({ message: "Failed to update child subsidy assignment" });
+    }
+  });
+
+  app.post('/api/child-subsidies/:assignmentId/end', isAuthenticated, async (req: any, res) => {
+    try {
+      const { assignmentId } = req.params;
+      const { endDate } = req.body;
+      const assignment = await storage.endChildSubsidyAssignment(assignmentId, endDate ? new Date(endDate) : undefined);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error ending child subsidy assignment:", error);
+      res.status(500).json({ message: "Failed to end child subsidy assignment" });
+    }
+  });
+
+  app.delete('/api/child-subsidies/:assignmentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { assignmentId } = req.params;
+      await storage.deleteChildSubsidyAssignment(assignmentId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting child subsidy assignment:", error);
+      res.status(500).json({ message: "Failed to delete child subsidy assignment" });
+    }
+  });
+
+  // ======================== TUITION CALCULATION FOR ENROLLMENT ========================
+
+  app.post('/api/enrollment/calculate-tuition', isAuthenticated, async (req: any, res) => {
+    try {
+      const { programOfferingId, familyIncome, familySize, childId } = req.body;
+      
+      if (!programOfferingId || !familyIncome || !familySize || !childId) {
+        return res.status(400).json({ message: "Missing required fields: programOfferingId, familyIncome, familySize, childId" });
+      }
+
+      const calculation = await storage.calculateFamilyTuitionObligation(
+        programOfferingId,
+        parseFloat(familyIncome),
+        parseInt(familySize),
+        childId
+      );
+      
+      res.json(calculation);
+    } catch (error) {
+      console.error("Error calculating family tuition obligation:", error);
+      res.status(500).json({ message: "Failed to calculate family tuition obligation" });
+    }
+  });
+
+  app.get('/api/children/:childId/eligible-subsidies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { childId } = req.params;
+      const { schoolId, familyIncome, familySize } = req.query;
+      
+      if (!schoolId || !familyIncome || !familySize) {
+        return res.status(400).json({ message: "Missing required query parameters: schoolId, familyIncome, familySize" });
+      }
+
+      const eligiblePrograms = await storage.getEligibleSubsidyProgramsForChild(
+        childId,
+        schoolId as string,
+        parseFloat(familyIncome as string),
+        parseInt(familySize as string)
+      );
+      
+      res.json(eligiblePrograms);
+    } catch (error) {
+      console.error("Error fetching eligible subsidy programs:", error);
+      res.status(500).json({ message: "Failed to fetch eligible subsidy programs" });
+    }
+  });
+
   // Families
   app.get('/api/schools/:schoolId/families', isAuthenticated, async (req: any, res) => {
     try {

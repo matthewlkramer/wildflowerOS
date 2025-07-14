@@ -800,6 +800,152 @@ export const slidingScaleRulesRelations = relations(slidingScaleRules, ({ one })
   }),
 }));
 
+// ======================== PUBLIC SUBSIDIES MODELS ========================
+
+// Public subsidy programs available in a region/state
+export const publicSubsidyPrograms = pgTable("public_subsidy_programs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolId: uuid("school_id").references(() => schools.id, { onDelete: "cascade" }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  type: varchar("type", { 
+    enum: ["charter", "childcare_subsidy", "esa", "scholarship", "universal_preschool"] 
+  }).notNull(),
+  description: text("description"),
+  agencyName: varchar("agency_name", { length: 255 }), // Which agency administers this
+  isActive: boolean("is_active").notNull().default(true),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  applicationDeadline: timestamp("application_deadline"),
+  renewalPeriod: varchar("renewal_period", { 
+    enum: ["monthly", "quarterly", "annually", "per_school_year"] 
+  }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Subsidy rates based on age/grade and child characteristics
+export const subsidyRates = pgTable("subsidy_rates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  programId: uuid("program_id").references(() => publicSubsidyPrograms.id, { onDelete: "cascade" }).notNull(),
+  
+  // Age-based eligibility (for childcare subsidies and some programs)
+  minAgeMonths: integer("min_age_months"), // Age in months
+  maxAgeMonths: integer("max_age_months"),
+  
+  // Grade-based eligibility (for charter/ESA programs)
+  gradeLevel: varchar("grade_level", { 
+    enum: ["pk3", "pk4", "k", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"] 
+  }),
+  
+  // Program year eligibility (for programs that switch from age to program year)
+  programYear: varchar("program_year", { enum: ["pk3", "pk4"] }),
+  
+  // Child characteristics that affect rates
+  childType: varchar("child_type", { 
+    enum: ["baseline", "special_education", "low_income", "high_risk", "refugee", "foster_care", "homeless"] 
+  }).notNull().default("baseline"),
+  
+  // Base per-pupil amount
+  baseAmount: decimal("base_amount", { precision: 10, scale: 2 }).notNull(),
+  
+  // Billing frequency for this rate
+  billingFrequency: varchar("billing_frequency", { 
+    enum: ["monthly", "quarterly", "annually", "per_school_year"] 
+  }).notNull(),
+  
+  // Income eligibility and phase-out rules
+  incomeEligibilityMin: decimal("income_eligibility_min", { precision: 12, scale: 2 }), // Minimum income to qualify
+  incomeEligibilityMax: decimal("income_eligibility_max", { precision: 12, scale: 2 }), // Maximum income to qualify
+  incomePhaseOutStart: decimal("income_phase_out_start", { precision: 12, scale: 2 }), // Income where benefits start reducing
+  incomePhaseOutEnd: decimal("income_phase_out_end", { precision: 12, scale: 2 }), // Income where benefits end
+  phaseOutType: varchar("phase_out_type", { 
+    enum: ["linear", "stepped", "cliff"] 
+  }).default("linear"),
+  
+  // Family size considerations
+  baseFamilySize: integer("base_family_size").default(4), // What family size the income limits are based on
+  familySizeAdjustment: decimal("family_size_adjustment", { precision: 5, scale: 4 }).default("0.1000"), // Per additional family member
+  
+  isActive: boolean("is_active").notNull().default(true),
+  effectiveDate: timestamp("effective_date").notNull(),
+  expirationDate: timestamp("expiration_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual child subsidy assignments
+export const childSubsidyAssignments = pgTable("child_subsidy_assignments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  childId: uuid("child_id").references(() => children.id, { onDelete: "cascade" }).notNull(),
+  programId: uuid("program_id").references(() => publicSubsidyPrograms.id, { onDelete: "cascade" }).notNull(),
+  rateId: uuid("rate_id").references(() => subsidyRates.id, { onDelete: "cascade" }).notNull(),
+  
+  // Assignment period
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  
+  // Application and approval details
+  applicationDate: timestamp("application_date"),
+  approvalDate: timestamp("approval_date"),
+  applicationStatus: varchar("application_status", { 
+    enum: ["pending", "approved", "denied", "expired", "suspended", "under_review"] 
+  }).notNull().default("pending"),
+  
+  // Calculated subsidy amount based on family income and child characteristics
+  approvedAmount: decimal("approved_amount", { precision: 10, scale: 2 }),
+  familyIncomeAtApplication: decimal("family_income_at_application", { precision: 12, scale: 2 }),
+  familySizeAtApplication: integer("family_size_at_application"),
+  
+  // Tracking and compliance
+  externalId: varchar("external_id", { length: 100 }), // ID from the subsidy agency
+  lastVerificationDate: timestamp("last_verification_date"),
+  nextVerificationDue: timestamp("next_verification_due"),
+  complianceNotes: text("compliance_notes"),
+  
+  // Administrative details
+  caseworkerName: varchar("caseworker_name", { length: 255 }),
+  caseworkerPhone: varchar("caseworker_phone", { length: 20 }),
+  caseworkerEmail: varchar("caseworker_email", { length: 255 }),
+  
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Relations for public subsidies
+export const publicSubsidyProgramsRelations = relations(publicSubsidyPrograms, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [publicSubsidyPrograms.schoolId],
+    references: [schools.id],
+  }),
+  rates: many(subsidyRates),
+  assignments: many(childSubsidyAssignments),
+}));
+
+export const subsidyRatesRelations = relations(subsidyRates, ({ one, many }) => ({
+  program: one(publicSubsidyPrograms, {
+    fields: [subsidyRates.programId],
+    references: [publicSubsidyPrograms.id],
+  }),
+  assignments: many(childSubsidyAssignments),
+}));
+
+export const childSubsidyAssignmentsRelations = relations(childSubsidyAssignments, ({ one }) => ({
+  child: one(children, {
+    fields: [childSubsidyAssignments.childId],
+    references: [children.id],
+  }),
+  program: one(publicSubsidyPrograms, {
+    fields: [childSubsidyAssignments.programId],
+    references: [publicSubsidyPrograms.id],
+  }),
+  rate: one(subsidyRates, {
+    fields: [childSubsidyAssignments.rateId],
+    references: [subsidyRates.id],
+  }),
+}));
+
 
 
 export const familiesRelations = relations(families, ({ many }) => ({
@@ -1209,6 +1355,14 @@ export type InsertSlidingScalePolicy = typeof slidingScalePolicies.$inferInsert;
 export type SlidingScaleRule = typeof slidingScaleRules.$inferSelect;
 export type InsertSlidingScaleRule = typeof slidingScaleRules.$inferInsert;
 
+// Public Subsidies types
+export type PublicSubsidyProgram = typeof publicSubsidyPrograms.$inferSelect;
+export type InsertPublicSubsidyProgram = typeof publicSubsidyPrograms.$inferInsert;
+export type SubsidyRate = typeof subsidyRates.$inferSelect;
+export type InsertSubsidyRate = typeof subsidyRates.$inferInsert;
+export type ChildSubsidyAssignment = typeof childSubsidyAssignments.$inferSelect;
+export type InsertChildSubsidyAssignment = typeof childSubsidyAssignments.$inferInsert;
+
 // ======================== ZOD SCHEMAS ========================
 
 export const insertUserRoleSchema = createInsertSchema(userRoles);
@@ -1240,3 +1394,6 @@ export const insertProgramOfferingSchema = createInsertSchema(programOfferings);
 export const insertTuitionPlanSchema = createInsertSchema(tuitionPlans);
 export const insertSlidingScalePolicySchema = createInsertSchema(slidingScalePolicies);
 export const insertSlidingScaleRuleSchema = createInsertSchema(slidingScaleRules);
+export const insertPublicSubsidyProgramSchema = createInsertSchema(publicSubsidyPrograms);
+export const insertSubsidyRateSchema = createInsertSchema(subsidyRates);
+export const insertChildSubsidyAssignmentSchema = createInsertSchema(childSubsidyAssignments);

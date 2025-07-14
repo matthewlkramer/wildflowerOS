@@ -13,6 +13,9 @@ import {
   tuitionPlans,
   slidingScalePolicies,
   slidingScaleRules,
+  publicSubsidyPrograms,
+  subsidyRates,
+  childSubsidyAssignments,
   families,
   children,
   enrollments,
@@ -47,6 +50,12 @@ import {
   type InsertSlidingScalePolicy,
   type SlidingScaleRule,
   type InsertSlidingScaleRule,
+  type PublicSubsidyProgram,
+  type InsertPublicSubsidyProgram,
+  type SubsidyRate,
+  type InsertSubsidyRate,
+  type ChildSubsidyAssignment,
+  type InsertChildSubsidyAssignment,
   type Classroom,
   type Family,
   type Child,
@@ -116,6 +125,35 @@ export interface IStorage {
   updateSlidingScalePolicy(id: string, data: Partial<InsertSlidingScalePolicy>): Promise<SlidingScalePolicy>;
   deactivateSlidingScalePolicy(id: string): Promise<SlidingScalePolicy>;
   deleteSlidingScalePolicy(id: string): Promise<void>;
+  
+  // Public subsidy programs
+  getPublicSubsidyProgramsBySchool(schoolId: string): Promise<PublicSubsidyProgram[]>;
+  getActivePublicSubsidyProgramsBySchool(schoolId: string): Promise<PublicSubsidyProgram[]>;
+  getPublicSubsidyProgramById(id: string): Promise<PublicSubsidyProgram | undefined>;
+  createPublicSubsidyProgram(data: InsertPublicSubsidyProgram): Promise<PublicSubsidyProgram>;
+  updatePublicSubsidyProgram(id: string, data: Partial<InsertPublicSubsidyProgram>): Promise<PublicSubsidyProgram>;
+  deactivatePublicSubsidyProgram(id: string): Promise<PublicSubsidyProgram>;
+  deletePublicSubsidyProgram(id: string): Promise<void>;
+  
+  // Subsidy rates
+  getSubsidyRatesByProgram(programId: string): Promise<SubsidyRate[]>;
+  getActiveSubsidyRatesByProgram(programId: string): Promise<SubsidyRate[]>;
+  getSubsidyRateById(id: string): Promise<SubsidyRate | undefined>;
+  createSubsidyRate(data: InsertSubsidyRate): Promise<SubsidyRate>;
+  updateSubsidyRate(id: string, data: Partial<InsertSubsidyRate>): Promise<SubsidyRate>;
+  deactivateSubsidyRate(id: string): Promise<SubsidyRate>;
+  deleteSubsidyRate(id: string): Promise<void>;
+  
+  // Child subsidy assignments
+  getChildSubsidyAssignmentsByChild(childId: string): Promise<ChildSubsidyAssignment[]>;
+  getActiveChildSubsidyAssignmentsByChild(childId: string): Promise<ChildSubsidyAssignment[]>;
+  getChildSubsidyAssignmentsByFamily(familyId: string): Promise<ChildSubsidyAssignment[]>;
+  getChildSubsidyAssignmentsBySchool(schoolId: string): Promise<ChildSubsidyAssignment[]>;
+  getChildSubsidyAssignmentById(id: string): Promise<ChildSubsidyAssignment | undefined>;
+  createChildSubsidyAssignment(data: InsertChildSubsidyAssignment): Promise<ChildSubsidyAssignment>;
+  updateChildSubsidyAssignment(id: string, data: Partial<InsertChildSubsidyAssignment>): Promise<ChildSubsidyAssignment>;
+  endChildSubsidyAssignment(id: string, endDate?: Date): Promise<ChildSubsidyAssignment>;
+  deleteChildSubsidyAssignment(id: string): Promise<void>;
   
   // School years
   getSchoolYearsBySchool(schoolId: string): Promise<SchoolYear[]>;
@@ -1252,6 +1290,609 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSlidingScalePolicy(id: string): Promise<void> {
     await db.delete(slidingScalePolicies).where(eq(slidingScalePolicies.id, id));
+  }
+
+  // ======================== PUBLIC SUBSIDY PROGRAMS ========================
+  
+  async getPublicSubsidyProgramsBySchool(schoolId: string): Promise<PublicSubsidyProgram[]> {
+    return await db
+      .select()
+      .from(publicSubsidyPrograms)
+      .where(eq(publicSubsidyPrograms.schoolId, schoolId))
+      .orderBy(asc(publicSubsidyPrograms.type), asc(publicSubsidyPrograms.name));
+  }
+
+  async getActivePublicSubsidyProgramsBySchool(schoolId: string): Promise<PublicSubsidyProgram[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(publicSubsidyPrograms)
+      .where(and(
+        eq(publicSubsidyPrograms.schoolId, schoolId),
+        eq(publicSubsidyPrograms.isActive, true),
+        or(
+          isNull(publicSubsidyPrograms.endDate),
+          gte(publicSubsidyPrograms.endDate, now)
+        )
+      ))
+      .orderBy(asc(publicSubsidyPrograms.type), asc(publicSubsidyPrograms.name));
+  }
+
+  async getPublicSubsidyProgramById(id: string): Promise<PublicSubsidyProgram | undefined> {
+    const [program] = await db
+      .select()
+      .from(publicSubsidyPrograms)
+      .where(eq(publicSubsidyPrograms.id, id));
+    return program;
+  }
+
+  async createPublicSubsidyProgram(data: InsertPublicSubsidyProgram): Promise<PublicSubsidyProgram> {
+    // Convert date strings to Date objects
+    const insertData = { ...data };
+    if (insertData.startDate && typeof insertData.startDate === 'string') {
+      insertData.startDate = new Date(insertData.startDate);
+    }
+    if (insertData.endDate && typeof insertData.endDate === 'string') {
+      insertData.endDate = new Date(insertData.endDate);
+    }
+    if (insertData.applicationDeadline && typeof insertData.applicationDeadline === 'string') {
+      insertData.applicationDeadline = new Date(insertData.applicationDeadline);
+    }
+
+    const [program] = await db
+      .insert(publicSubsidyPrograms)
+      .values(insertData)
+      .returning();
+    return program;
+  }
+
+  async updatePublicSubsidyProgram(id: string, data: Partial<InsertPublicSubsidyProgram>): Promise<PublicSubsidyProgram> {
+    const updateData = { ...data, updatedAt: new Date() };
+    if (updateData.startDate && typeof updateData.startDate === 'string') {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.endDate && typeof updateData.endDate === 'string') {
+      updateData.endDate = new Date(updateData.endDate);
+    }
+    if (updateData.applicationDeadline && typeof updateData.applicationDeadline === 'string') {
+      updateData.applicationDeadline = new Date(updateData.applicationDeadline);
+    }
+
+    const [program] = await db
+      .update(publicSubsidyPrograms)
+      .set(updateData)
+      .where(eq(publicSubsidyPrograms.id, id))
+      .returning();
+    return program;
+  }
+
+  async deactivatePublicSubsidyProgram(id: string): Promise<PublicSubsidyProgram> {
+    const [program] = await db
+      .update(publicSubsidyPrograms)
+      .set({ 
+        isActive: false,
+        endDate: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(publicSubsidyPrograms.id, id))
+      .returning();
+    return program;
+  }
+
+  async deletePublicSubsidyProgram(id: string): Promise<void> {
+    await db.delete(publicSubsidyPrograms).where(eq(publicSubsidyPrograms.id, id));
+  }
+
+  // ======================== SUBSIDY RATES ========================
+  
+  async getSubsidyRatesByProgram(programId: string): Promise<SubsidyRate[]> {
+    return await db
+      .select()
+      .from(subsidyRates)
+      .where(eq(subsidyRates.programId, programId))
+      .orderBy(asc(subsidyRates.childType), asc(subsidyRates.effectiveDate));
+  }
+
+  async getActiveSubsidyRatesByProgram(programId: string): Promise<SubsidyRate[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(subsidyRates)
+      .where(and(
+        eq(subsidyRates.programId, programId),
+        eq(subsidyRates.isActive, true),
+        lte(subsidyRates.effectiveDate, now),
+        or(
+          isNull(subsidyRates.expirationDate),
+          gte(subsidyRates.expirationDate, now)
+        )
+      ))
+      .orderBy(asc(subsidyRates.childType), desc(subsidyRates.effectiveDate));
+  }
+
+  async getSubsidyRateById(id: string): Promise<SubsidyRate | undefined> {
+    const [rate] = await db
+      .select()
+      .from(subsidyRates)
+      .where(eq(subsidyRates.id, id));
+    return rate;
+  }
+
+  async createSubsidyRate(data: InsertSubsidyRate): Promise<SubsidyRate> {
+    const insertData = { ...data };
+    if (insertData.effectiveDate && typeof insertData.effectiveDate === 'string') {
+      insertData.effectiveDate = new Date(insertData.effectiveDate);
+    }
+    if (insertData.expirationDate && typeof insertData.expirationDate === 'string') {
+      insertData.expirationDate = new Date(insertData.expirationDate);
+    }
+
+    const [rate] = await db
+      .insert(subsidyRates)
+      .values(insertData)
+      .returning();
+    return rate;
+  }
+
+  async updateSubsidyRate(id: string, data: Partial<InsertSubsidyRate>): Promise<SubsidyRate> {
+    const updateData = { ...data, updatedAt: new Date() };
+    if (updateData.effectiveDate && typeof updateData.effectiveDate === 'string') {
+      updateData.effectiveDate = new Date(updateData.effectiveDate);
+    }
+    if (updateData.expirationDate && typeof updateData.expirationDate === 'string') {
+      updateData.expirationDate = new Date(updateData.expirationDate);
+    }
+
+    const [rate] = await db
+      .update(subsidyRates)
+      .set(updateData)
+      .where(eq(subsidyRates.id, id))
+      .returning();
+    return rate;
+  }
+
+  async deactivateSubsidyRate(id: string): Promise<SubsidyRate> {
+    const [rate] = await db
+      .update(subsidyRates)
+      .set({ 
+        isActive: false,
+        expirationDate: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(subsidyRates.id, id))
+      .returning();
+    return rate;
+  }
+
+  async deleteSubsidyRate(id: string): Promise<void> {
+    await db.delete(subsidyRates).where(eq(subsidyRates.id, id));
+  }
+
+  // ======================== CHILD SUBSIDY ASSIGNMENTS ========================
+  
+  async getChildSubsidyAssignmentsByChild(childId: string): Promise<ChildSubsidyAssignment[]> {
+    return await db
+      .select()
+      .from(childSubsidyAssignments)
+      .where(eq(childSubsidyAssignments.childId, childId))
+      .orderBy(desc(childSubsidyAssignments.startDate));
+  }
+
+  async getActiveChildSubsidyAssignmentsByChild(childId: string): Promise<ChildSubsidyAssignment[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(childSubsidyAssignments)
+      .where(and(
+        eq(childSubsidyAssignments.childId, childId),
+        eq(childSubsidyAssignments.isActive, true),
+        lte(childSubsidyAssignments.startDate, now),
+        or(
+          isNull(childSubsidyAssignments.endDate),
+          gte(childSubsidyAssignments.endDate, now)
+        )
+      ))
+      .orderBy(desc(childSubsidyAssignments.startDate));
+  }
+
+  async getChildSubsidyAssignmentsByFamily(familyId: string): Promise<ChildSubsidyAssignment[]> {
+    return await db
+      .select({
+        id: childSubsidyAssignments.id,
+        childId: childSubsidyAssignments.childId,
+        programId: childSubsidyAssignments.programId,
+        rateId: childSubsidyAssignments.rateId,
+        startDate: childSubsidyAssignments.startDate,
+        endDate: childSubsidyAssignments.endDate,
+        applicationDate: childSubsidyAssignments.applicationDate,
+        approvalDate: childSubsidyAssignments.approvalDate,
+        applicationStatus: childSubsidyAssignments.applicationStatus,
+        approvedAmount: childSubsidyAssignments.approvedAmount,
+        familyIncomeAtApplication: childSubsidyAssignments.familyIncomeAtApplication,
+        familySizeAtApplication: childSubsidyAssignments.familySizeAtApplication,
+        externalId: childSubsidyAssignments.externalId,
+        lastVerificationDate: childSubsidyAssignments.lastVerificationDate,
+        nextVerificationDue: childSubsidyAssignments.nextVerificationDue,
+        complianceNotes: childSubsidyAssignments.complianceNotes,
+        caseworkerName: childSubsidyAssignments.caseworkerName,
+        caseworkerPhone: childSubsidyAssignments.caseworkerPhone,
+        caseworkerEmail: childSubsidyAssignments.caseworkerEmail,
+        isActive: childSubsidyAssignments.isActive,
+        createdAt: childSubsidyAssignments.createdAt,
+        updatedAt: childSubsidyAssignments.updatedAt,
+      })
+      .from(childSubsidyAssignments)
+      .innerJoin(children, eq(childSubsidyAssignments.childId, children.id))
+      .where(eq(children.familyId, familyId))
+      .orderBy(desc(childSubsidyAssignments.startDate));
+  }
+
+  async getChildSubsidyAssignmentsBySchool(schoolId: string): Promise<ChildSubsidyAssignment[]> {
+    return await db
+      .select({
+        id: childSubsidyAssignments.id,
+        childId: childSubsidyAssignments.childId,
+        programId: childSubsidyAssignments.programId,
+        rateId: childSubsidyAssignments.rateId,
+        startDate: childSubsidyAssignments.startDate,
+        endDate: childSubsidyAssignments.endDate,
+        applicationDate: childSubsidyAssignments.applicationDate,
+        approvalDate: childSubsidyAssignments.approvalDate,
+        applicationStatus: childSubsidyAssignments.applicationStatus,
+        approvedAmount: childSubsidyAssignments.approvedAmount,
+        familyIncomeAtApplication: childSubsidyAssignments.familyIncomeAtApplication,
+        familySizeAtApplication: childSubsidyAssignments.familySizeAtApplication,
+        externalId: childSubsidyAssignments.externalId,
+        lastVerificationDate: childSubsidyAssignments.lastVerificationDate,
+        nextVerificationDue: childSubsidyAssignments.nextVerificationDue,
+        complianceNotes: childSubsidyAssignments.complianceNotes,
+        caseworkerName: childSubsidyAssignments.caseworkerName,
+        caseworkerPhone: childSubsidyAssignments.caseworkerPhone,
+        caseworkerEmail: childSubsidyAssignments.caseworkerEmail,
+        isActive: childSubsidyAssignments.isActive,
+        createdAt: childSubsidyAssignments.createdAt,
+        updatedAt: childSubsidyAssignments.updatedAt,
+      })
+      .from(childSubsidyAssignments)
+      .innerJoin(children, eq(childSubsidyAssignments.childId, children.id))
+      .innerJoin(enrollments, eq(children.id, enrollments.childId))
+      .where(eq(enrollments.schoolId, schoolId))
+      .orderBy(desc(childSubsidyAssignments.startDate));
+  }
+
+  async getChildSubsidyAssignmentById(id: string): Promise<ChildSubsidyAssignment | undefined> {
+    const [assignment] = await db
+      .select()
+      .from(childSubsidyAssignments)
+      .where(eq(childSubsidyAssignments.id, id));
+    return assignment;
+  }
+
+  async createChildSubsidyAssignment(data: InsertChildSubsidyAssignment): Promise<ChildSubsidyAssignment> {
+    const insertData = { ...data };
+    if (insertData.startDate && typeof insertData.startDate === 'string') {
+      insertData.startDate = new Date(insertData.startDate);
+    }
+    if (insertData.endDate && typeof insertData.endDate === 'string') {
+      insertData.endDate = new Date(insertData.endDate);
+    }
+    if (insertData.applicationDate && typeof insertData.applicationDate === 'string') {
+      insertData.applicationDate = new Date(insertData.applicationDate);
+    }
+    if (insertData.approvalDate && typeof insertData.approvalDate === 'string') {
+      insertData.approvalDate = new Date(insertData.approvalDate);
+    }
+    if (insertData.lastVerificationDate && typeof insertData.lastVerificationDate === 'string') {
+      insertData.lastVerificationDate = new Date(insertData.lastVerificationDate);
+    }
+    if (insertData.nextVerificationDue && typeof insertData.nextVerificationDue === 'string') {
+      insertData.nextVerificationDue = new Date(insertData.nextVerificationDue);
+    }
+
+    const [assignment] = await db
+      .insert(childSubsidyAssignments)
+      .values(insertData)
+      .returning();
+    return assignment;
+  }
+
+  async updateChildSubsidyAssignment(id: string, data: Partial<InsertChildSubsidyAssignment>): Promise<ChildSubsidyAssignment> {
+    const updateData = { ...data, updatedAt: new Date() };
+    if (updateData.startDate && typeof updateData.startDate === 'string') {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.endDate && typeof updateData.endDate === 'string') {
+      updateData.endDate = new Date(updateData.endDate);
+    }
+    if (updateData.applicationDate && typeof updateData.applicationDate === 'string') {
+      updateData.applicationDate = new Date(updateData.applicationDate);
+    }
+    if (updateData.approvalDate && typeof updateData.approvalDate === 'string') {
+      updateData.approvalDate = new Date(updateData.approvalDate);
+    }
+    if (updateData.lastVerificationDate && typeof updateData.lastVerificationDate === 'string') {
+      updateData.lastVerificationDate = new Date(updateData.lastVerificationDate);
+    }
+    if (updateData.nextVerificationDue && typeof updateData.nextVerificationDue === 'string') {
+      updateData.nextVerificationDue = new Date(updateData.nextVerificationDue);
+    }
+
+    const [assignment] = await db
+      .update(childSubsidyAssignments)
+      .set(updateData)
+      .where(eq(childSubsidyAssignments.id, id))
+      .returning();
+    return assignment;
+  }
+
+  async endChildSubsidyAssignment(id: string, endDate?: Date): Promise<ChildSubsidyAssignment> {
+    const [assignment] = await db
+      .update(childSubsidyAssignments)
+      .set({ 
+        endDate: endDate || new Date(),
+        isActive: false,
+        updatedAt: new Date() 
+      })
+      .where(eq(childSubsidyAssignments.id, id))
+      .returning();
+    return assignment;
+  }
+
+  async deleteChildSubsidyAssignment(id: string): Promise<void> {
+    await db.delete(childSubsidyAssignments).where(eq(childSubsidyAssignments.id, id));
+  }
+
+  // ======================== TUITION CALCULATION FOR ENROLLMENT ========================
+  
+  // Legacy method needed for existing routes
+  async getTuitionPlansBySchool(schoolId: string): Promise<TuitionPlan[]> {
+    return await db
+      .select({
+        id: tuitionPlans.id,
+        programOfferingId: tuitionPlans.programOfferingId,
+        slidingScalePolicyId: tuitionPlans.slidingScalePolicyId,
+        name: tuitionPlans.name,
+        fullPrice: tuitionPlans.fullPrice,
+        billingFrequency: tuitionPlans.billingFrequency,
+        isActive: tuitionPlans.isActive,
+        createdAt: tuitionPlans.createdAt,
+        updatedAt: tuitionPlans.updatedAt,
+      })
+      .from(tuitionPlans)
+      .innerJoin(programOfferings, eq(tuitionPlans.programOfferingId, programOfferings.id))
+      .innerJoin(classrooms, eq(programOfferings.classroomId, classrooms.id))
+      .where(eq(classrooms.schoolId, schoolId))
+      .orderBy(asc(tuitionPlans.name));
+  }
+
+  // Calculate family tuition obligation based on program, income, and subsidies
+  async calculateFamilyTuitionObligation(
+    programOfferingId: string,
+    familyIncome: number,
+    familySize: number,
+    childId: string
+  ): Promise<{
+    fullPrice: number;
+    slidingScaleDiscount: number;
+    subsidyAmount: number;
+    familyObligation: number;
+    calculations: {
+      tuitionPlan: TuitionPlan;
+      slidingScaleRule?: SlidingScaleRule;
+      applicableSubsidies: Array<{
+        program: PublicSubsidyProgram;
+        rate: SubsidyRate;
+        calculatedAmount: number;
+      }>;
+    };
+  }> {
+    // Get the tuition plan for this program offering
+    const [tuitionPlan] = await db
+      .select()
+      .from(tuitionPlans)
+      .where(and(
+        eq(tuitionPlans.programOfferingId, programOfferingId),
+        eq(tuitionPlans.isActive, true)
+      ))
+      .limit(1);
+
+    if (!tuitionPlan) {
+      throw new Error('No active tuition plan found for this program offering');
+    }
+
+    const fullPrice = parseFloat(tuitionPlan.fullPrice);
+    let slidingScaleDiscount = 0;
+    let subsidyAmount = 0;
+    let applicableSubsidies: any[] = [];
+    let slidingScaleRule: SlidingScaleRule | undefined;
+
+    // Apply sliding scale discount based on family income
+    if (tuitionPlan.slidingScalePolicyId) {
+      const policy = await this.getSlidingScalePolicyWithRules(tuitionPlan.slidingScalePolicyId);
+      if (policy && policy.rules) {
+        // Find the applicable rule based on family income (adjusted for family size)
+        const adjustedIncome = this.adjustIncomeForFamilySize(familyIncome, familySize, policy.baseFamilySize || 4, policy.familySizeAdjustment || 0.1);
+        
+        for (const rule of policy.rules) {
+          const minIncome = parseFloat(rule.minIncomeThreshold || '0');
+          const maxIncome = parseFloat(rule.maxIncomeThreshold || '999999999');
+          
+          if (adjustedIncome >= minIncome && adjustedIncome <= maxIncome) {
+            slidingScaleRule = rule;
+            slidingScaleDiscount = fullPrice * (parseFloat(rule.discountPercentage) / 100);
+            break;
+          }
+        }
+      }
+    }
+
+    // Calculate public subsidies
+    const child = await db.select().from(children).where(eq(children.id, childId)).limit(1);
+    if (child.length > 0) {
+      const activeSubsidies = await this.getActiveChildSubsidyAssignmentsByChild(childId);
+      
+      for (const subsidyAssignment of activeSubsidies) {
+        if (subsidyAssignment.applicationStatus === 'approved' && subsidyAssignment.approvedAmount) {
+          const program = await this.getPublicSubsidyProgramById(subsidyAssignment.programId);
+          const rate = await this.getSubsidyRateById(subsidyAssignment.rateId);
+          
+          if (program && rate) {
+            const subsidyAmountForThisProgram = parseFloat(subsidyAssignment.approvedAmount);
+            subsidyAmount += subsidyAmountForThisProgram;
+            
+            applicableSubsidies.push({
+              program,
+              rate,
+              calculatedAmount: subsidyAmountForThisProgram,
+            });
+          }
+        }
+      }
+    }
+
+    // Calculate final family obligation
+    const priceAfterSlidingScale = fullPrice - slidingScaleDiscount;
+    const familyObligation = Math.max(0, priceAfterSlidingScale - subsidyAmount);
+
+    return {
+      fullPrice,
+      slidingScaleDiscount,
+      subsidyAmount,
+      familyObligation,
+      calculations: {
+        tuitionPlan,
+        slidingScaleRule,
+        applicableSubsidies,
+      },
+    };
+  }
+
+  private adjustIncomeForFamilySize(
+    income: number,
+    actualFamilySize: number,
+    baseFamilySize: number,
+    adjustmentRate: number
+  ): number {
+    const sizeDifference = actualFamilySize - baseFamilySize;
+    if (sizeDifference === 0) return income;
+    
+    // For larger families, we effectively reduce their income for qualification purposes
+    // For smaller families, we increase their effective income
+    const adjustmentFactor = 1 - (sizeDifference * adjustmentRate);
+    return income * adjustmentFactor;
+  }
+
+  // Get available subsidy programs for a child based on age, grade, and eligibility
+  async getEligibleSubsidyProgramsForChild(
+    childId: string,
+    schoolId: string,
+    familyIncome: number,
+    familySize: number
+  ): Promise<Array<{
+    program: PublicSubsidyProgram;
+    eligibleRates: Array<{
+      rate: SubsidyRate;
+      estimatedAmount: number;
+    }>;
+  }>> {
+    const [child] = await db.select().from(children).where(eq(children.id, childId));
+    if (!child) return [];
+
+    const childAgeMonths = this.calculateAgeInMonths(child.birthDate);
+    const activePrograms = await this.getActivePublicSubsidyProgramsBySchool(schoolId);
+    const eligiblePrograms: any[] = [];
+
+    for (const program of activePrograms) {
+      const rates = await this.getActiveSubsidyRatesByProgram(program.id);
+      const eligibleRates: any[] = [];
+
+      for (const rate of rates) {
+        let isEligible = false;
+
+        // Check age eligibility
+        if (rate.minAgeMonths !== null && rate.maxAgeMonths !== null) {
+          isEligible = childAgeMonths >= rate.minAgeMonths && childAgeMonths <= rate.maxAgeMonths;
+        }
+
+        // Check grade eligibility (would need child's current grade - for now assume eligible)
+        if (rate.gradeLevel) {
+          isEligible = true; // Would check against child's enrollment grade
+        }
+
+        // Check income eligibility
+        if (isEligible && (rate.incomeEligibilityMin || rate.incomeEligibilityMax)) {
+          const adjustedIncome = this.adjustIncomeForFamilySize(
+            familyIncome,
+            familySize,
+            rate.baseFamilySize || 4,
+            parseFloat(rate.familySizeAdjustment || '0.1')
+          );
+
+          const minIncome = parseFloat(rate.incomeEligibilityMin || '0');
+          const maxIncome = parseFloat(rate.incomeEligibilityMax || '999999999');
+          isEligible = adjustedIncome >= minIncome && adjustedIncome <= maxIncome;
+        }
+
+        if (isEligible) {
+          const estimatedAmount = this.calculateSubsidyAmount(rate, familyIncome, familySize);
+          eligibleRates.push({ rate, estimatedAmount });
+        }
+      }
+
+      if (eligibleRates.length > 0) {
+        eligiblePrograms.push({ program, eligibleRates });
+      }
+    }
+
+    return eligiblePrograms;
+  }
+
+  private calculateAgeInMonths(dateOfBirth: Date): number {
+    const now = new Date();
+    const birth = new Date(dateOfBirth);
+    const diffTime = Math.abs(now.getTime() - birth.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return Math.floor(diffDays / 30.44); // Average days per month
+  }
+
+  private calculateSubsidyAmount(rate: SubsidyRate, familyIncome: number, familySize: number): number {
+    const baseAmount = parseFloat(rate.baseAmount);
+    
+    // If there's income phase-out, calculate the reduced amount
+    if (rate.incomePhaseOutStart && rate.incomePhaseOutEnd) {
+      const adjustedIncome = this.adjustIncomeForFamilySize(
+        familyIncome,
+        familySize,
+        rate.baseFamilySize || 4,
+        parseFloat(rate.familySizeAdjustment || '0.1')
+      );
+
+      const phaseOutStart = parseFloat(rate.incomePhaseOutStart);
+      const phaseOutEnd = parseFloat(rate.incomePhaseOutEnd);
+
+      if (adjustedIncome >= phaseOutStart) {
+        if (adjustedIncome >= phaseOutEnd) {
+          return 0; // No subsidy above phase-out end
+        }
+
+        // Calculate reduced amount based on phase-out type
+        const phaseOutProgress = (adjustedIncome - phaseOutStart) / (phaseOutEnd - phaseOutStart);
+        
+        switch (rate.phaseOutType) {
+          case 'linear':
+            return baseAmount * (1 - phaseOutProgress);
+          case 'cliff':
+            return 0; // Cliff means immediate cutoff at phase-out start
+          case 'stepped':
+            // Could implement stepped reductions here
+            return baseAmount * (1 - Math.floor(phaseOutProgress * 4) / 4);
+          default:
+            return baseAmount * (1 - phaseOutProgress);
+        }
+      }
+    }
+
+    return baseAmount;
   }
 }
 

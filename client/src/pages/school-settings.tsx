@@ -266,6 +266,7 @@ export default function SchoolSettingsPage() {
   const [deletingSchoolYear, setDeletingSchoolYear] = useState<any>(null);
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<any>(null);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [addingSubsidy, setAddingSubsidy] = useState(false);
   
   const [staffForm, setStaffForm] = useState({
     firstName: "",
@@ -308,6 +309,17 @@ export default function SchoolSettingsPage() {
     description: ""
   });
 
+  const [subsidyForm, setSubsidyForm] = useState({
+    name: "",
+    type: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    externalId: "",
+    applicationDeadline: "",
+    requiredDocumentation: ""
+  });
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -342,6 +354,12 @@ export default function SchoolSettingsPage() {
   // Fetch tuition plans
   const { data: tuitionPlans = [] } = useQuery({
     queryKey: ["/api/schools", schoolId, "tuition-plans"],
+    enabled: !!schoolId,
+  });
+
+  // Fetch public subsidies
+  const { data: publicSubsidies = [] } = useQuery({
+    queryKey: ["/api/schools", schoolId, "public-subsidies"],
     enabled: !!schoolId,
   });
 
@@ -544,6 +562,38 @@ export default function SchoolSettingsPage() {
     },
   });
 
+  // Add public subsidy mutation
+  const addSubsidyMutation = useMutation({
+    mutationFn: async (subsidyData: any) => {
+      return apiRequest('POST', `/api/schools/${schoolId}/public-subsidies`, subsidyData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "public-subsidies"] });
+      setAddingSubsidy(false);
+      setSubsidyForm({
+        name: "",
+        type: "",
+        description: "",
+        startDate: "",
+        endDate: "",
+        externalId: "",
+        applicationDeadline: "",
+        requiredDocumentation: ""
+      });
+      toast({
+        title: "Public subsidy program added",
+        description: "New subsidy program has been created successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error adding subsidy program",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddStaff = () => {
     addStaffMutation.mutate(staffForm);
   };
@@ -639,6 +689,10 @@ export default function SchoolSettingsPage() {
     setActiveSchoolYearMutation.mutate(yearId);
   };
 
+  const handleAddSubsidy = () => {
+    addSubsidyMutation.mutate(subsidyForm);
+  };
+
   const handleViewCalendar = (year: any) => {
     setSelectedSchoolYear(year);
     setShowCalendar(true);
@@ -712,7 +766,7 @@ export default function SchoolSettingsPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="staff" className="flex items-center">
               <Users className="mr-2 h-4 w-4" />
               Staff
@@ -732,6 +786,10 @@ export default function SchoolSettingsPage() {
             <TabsTrigger value="tuition" className="flex items-center">
               <DollarSign className="mr-2 h-4 w-4" />
               Tuition Plans
+            </TabsTrigger>
+            <TabsTrigger value="subsidies" className="flex items-center">
+              <School className="mr-2 h-4 w-4" />
+              Public Subsidies
             </TabsTrigger>
           </TabsList>
 
@@ -1661,6 +1719,302 @@ export default function SchoolSettingsPage() {
                       <Button className="mt-2" onClick={() => setAddingTuitionPlan(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add First Tuition Plan
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Public Subsidies Tab */}
+          <TabsContent value="subsidies" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Public Subsidy Programs</CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Manage charter funding, childcare subsidies, ESA funding, and other public support programs
+                    </p>
+                  </div>
+                  <Dialog open={addingSubsidy} onOpenChange={setAddingSubsidy}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Subsidy Program
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl">
+                      <DialogHeader>
+                        <DialogTitle>Add New Public Subsidy Program</DialogTitle>
+                        <DialogDescription>
+                          Create a new public subsidy program with specific eligibility criteria and rates
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 max-h-96 overflow-y-auto">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Program Name</Label>
+                            <Input
+                              value={subsidyForm.name}
+                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, name: e.target.value }))}
+                              placeholder="e.g., State Childcare Subsidy"
+                            />
+                          </div>
+                          <div>
+                            <Label>Program Type</Label>
+                            <Select onValueChange={(value) => setSubsidyForm(prev => ({ ...prev, type: value }))}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="charter">Charter School Funding</SelectItem>
+                                <SelectItem value="childcare_subsidy">Childcare Subsidy</SelectItem>
+                                <SelectItem value="esa">Education Savings Account (ESA)</SelectItem>
+                                <SelectItem value="scholarship">Private Scholarship</SelectItem>
+                                <SelectItem value="universal_prek">Universal Pre-K</SelectItem>
+                                <SelectItem value="head_start">Head Start</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label>Description</Label>
+                          <Textarea
+                            value={subsidyForm.description}
+                            onChange={(e) => setSubsidyForm(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Program details, eligibility requirements, application process..."
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Start Date</Label>
+                            <Input
+                              type="date"
+                              value={subsidyForm.startDate}
+                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>End Date (Optional)</Label>
+                            <Input
+                              type="date"
+                              value={subsidyForm.endDate}
+                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, endDate: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>External Program ID</Label>
+                            <Input
+                              value={subsidyForm.externalId}
+                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, externalId: e.target.value }))}
+                              placeholder="State/federal program ID"
+                            />
+                          </div>
+                          <div>
+                            <Label>Application Deadline</Label>
+                            <Input
+                              type="date"
+                              value={subsidyForm.applicationDeadline}
+                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, applicationDeadline: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label>Required Documentation</Label>
+                          <Textarea
+                            value={subsidyForm.requiredDocumentation}
+                            onChange={(e) => setSubsidyForm(prev => ({ ...prev, requiredDocumentation: e.target.value }))}
+                            placeholder="List required documents for application..."
+                          />
+                        </div>
+
+                        <div className="flex justify-end space-x-2 pt-4">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => setAddingSubsidy(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleAddSubsidy}
+                            disabled={addSubsidyMutation.isPending}
+                          >
+                            {addSubsidyMutation.isPending ? "Adding..." : "Add Program"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {publicSubsidies.map((program: any) => (
+                    <Card key={program.id} className="border-l-4 border-l-blue-500">
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div>
+                              <h3 className="font-semibold">{program.name}</h3>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Badge variant="secondary">
+                                  {program.type.replace('_', ' ').toUpperCase()}
+                                </Badge>
+                                <Badge variant={program.isActive ? "default" : "destructive"}>
+                                  {program.isActive ? "Active" : "Inactive"}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {program.description && (
+                          <p className="text-sm text-gray-600 mt-2">{program.description}</p>
+                        )}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <Label className="text-xs text-gray-500">Start Date</Label>
+                            <p>{new Date(program.startDate).toLocaleDateString()}</p>
+                          </div>
+                          {program.endDate && (
+                            <div>
+                              <Label className="text-xs text-gray-500">End Date</Label>
+                              <p>{new Date(program.endDate).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {program.applicationDeadline && (
+                            <div>
+                              <Label className="text-xs text-gray-500">Application Deadline</Label>
+                              <p>{new Date(program.applicationDeadline).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                          {program.externalId && (
+                            <div>
+                              <Label className="text-xs text-gray-500">External ID</Label>
+                              <p>{program.externalId}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="mt-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <Label className="text-sm font-medium">Subsidy Rates</Label>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <Plus className="mr-1 h-3 w-3" />
+                                  Add Rate
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Add Subsidy Rate</DialogTitle>
+                                  <DialogDescription>
+                                    Configure rate structure for {program.name}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Child Type</Label>
+                                      <Select>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="baseline">Baseline</SelectItem>
+                                          <SelectItem value="special_education">Special Education</SelectItem>
+                                          <SelectItem value="low_income">Low Income</SelectItem>
+                                          <SelectItem value="at_risk">At Risk</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <Label>Rate Amount ($)</Label>
+                                      <Input type="number" step="0.01" placeholder="0.00" />
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Effective Date</Label>
+                                      <Input type="date" />
+                                    </div>
+                                    <div>
+                                      <Label>Expiration Date (Optional)</Label>
+                                      <Input type="date" />
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Min Age (months)</Label>
+                                      <Input type="number" placeholder="0" />
+                                    </div>
+                                    <div>
+                                      <Label>Max Age (months)</Label>
+                                      <Input type="number" placeholder="72" />
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Income Min ($)</Label>
+                                      <Input type="number" placeholder="0" />
+                                    </div>
+                                    <div>
+                                      <Label>Income Max ($)</Label>
+                                      <Input type="number" placeholder="50000" />
+                                    </div>
+                                  </div>
+
+                                  <div className="flex justify-end space-x-2">
+                                    <Button variant="outline">Cancel</Button>
+                                    <Button>Add Rate</Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                          
+                          <div className="border rounded-lg p-3 bg-gray-50">
+                            <p className="text-sm text-gray-600">
+                              No rates configured yet. Add rates to define eligibility and amounts.
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {publicSubsidies.length === 0 && (
+                    <div className="text-center py-12">
+                      <School className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Public Subsidies</h3>
+                      <p className="text-gray-600 mb-6">
+                        Get started by adding your first public subsidy program
+                      </p>
+                      <Button onClick={() => setAddingSubsidy(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add First Subsidy Program
                       </Button>
                     </div>
                   )}

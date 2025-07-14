@@ -42,6 +42,10 @@ Preferred communication style: Simple, everyday language.
 ### Core Domain Models
 - **Users & Roles**: Flexible role assignment with school/entity context
 - **Schools & Classrooms**: Multi-school support with classroom management
+  - **Education Levels**: Authentic Wildflower age ranges from original application
+    - Infant (0-18 months), Toddler (18 months - 3 years), Primary (3-6 years)
+    - Lower Elementary (6-9 years), Upper Elementary (9-12 years)
+    - Junior High (12-15 years), High School (15-18 years)
 - **Families & Children**: Family-centric enrollment and management
 - **Tasks & Messages**: Communication and workflow management
 - **Billing & Finance**: Tuition management and payment processing

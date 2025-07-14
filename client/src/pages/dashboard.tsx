@@ -59,10 +59,10 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
-      <div className="flex pt-16">
+      <div className="flex pt-16 min-h-screen">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden overflow-y-auto lg:ml-64">
           {/* Dashboard Header */}
           <div className="mb-8">
             <div className="md:flex md:items-center md:justify-between">

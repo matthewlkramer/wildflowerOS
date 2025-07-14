@@ -93,7 +93,18 @@ export interface IStorage {
   
   // Role definitions
   getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]>;
+  getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]>;
+  getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]>;
   createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition>;
+  updateRoleDefinition(id: string, role: Partial<InsertRoleDefinition>): Promise<RoleDefinition>;
+  deleteRoleDefinition(id: string): Promise<void>;
+  
+  // Staff and role assignments at school level
+  getStaffBySchool(schoolId: string): Promise<any[]>;
+  getStaffRoleAssignments(schoolId: string): Promise<any[]>;
+  assignUserRole(assignment: InsertUserRole): Promise<UserRole>;
+  updateUserRoleAssignment(id: string, assignment: Partial<InsertUserRole>): Promise<UserRole>;
+  bulkUpdateRoleAssignments(schoolId: string, assignments: any[]): Promise<void>;
   
   // Schools
   getSchools(): Promise<School[]>;
@@ -391,12 +402,183 @@ export class DatabaseStorage implements IStorage {
       );
   }
 
+  async getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]> {
+    const whereClause = schoolId 
+      ? and(
+          eq(roleDefinitions.active, true),
+          or(
+            eq(roleDefinitions.schoolId, schoolId),
+            and(
+              isNull(roleDefinitions.schoolId),
+              eq(roleDefinitions.networkDefault, true)
+            )
+          )
+        )
+      : and(
+          eq(roleDefinitions.active, true),
+          or(
+            isNull(roleDefinitions.schoolId),
+            eq(roleDefinitions.networkDefault, true)
+          )
+        );
+
+    return await db
+      .select()
+      .from(roleDefinitions)
+      .where(whereClause)
+      .orderBy(roleDefinitions.category, roleDefinitions.subCategory, roleDefinitions.sortOrder);
+  }
+
+  async getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]> {
+    const whereClause = schoolId 
+      ? and(
+          eq(roleDefinitions.active, true),
+          eq(roleDefinitions.category, category),
+          or(
+            eq(roleDefinitions.schoolId, schoolId),
+            and(
+              isNull(roleDefinitions.schoolId),
+              eq(roleDefinitions.networkDefault, true)
+            )
+          )
+        )
+      : and(
+          eq(roleDefinitions.active, true),
+          eq(roleDefinitions.category, category),
+          or(
+            isNull(roleDefinitions.schoolId),
+            eq(roleDefinitions.networkDefault, true)
+          )
+        );
+
+    return await db
+      .select()
+      .from(roleDefinitions)
+      .where(whereClause)
+      .orderBy(roleDefinitions.subCategory, roleDefinitions.sortOrder);
+  }
+
   async createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition> {
     const [newRole] = await db
       .insert(roleDefinitions)
       .values(role)
       .returning();
     return newRole;
+  }
+
+  async updateRoleDefinition(id: string, role: Partial<InsertRoleDefinition>): Promise<RoleDefinition> {
+    const [updatedRole] = await db
+      .update(roleDefinitions)
+      .set(role)
+      .where(eq(roleDefinitions.id, id))
+      .returning();
+    return updatedRole;
+  }
+
+  async deleteRoleDefinition(id: string): Promise<void> {
+    await db
+      .update(roleDefinitions)
+      .set({ active: false })
+      .where(eq(roleDefinitions.id, id));
+  }
+
+  // Staff and role assignments at school level
+  async getStaffBySchool(schoolId: string): Promise<any[]> {
+    return await db
+      .select({
+        id: users.id,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        profileImageUrl: users.profileImageUrl,
+      })
+      .from(users)
+      .innerJoin(userRoles, eq(userRoles.userId, users.id))
+      .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoles.roleId))
+      .where(and(
+        eq(userRoles.schoolId, schoolId),
+        eq(userRoles.active, true),
+        eq(roleDefinitions.category, "educator")
+      ))
+      .groupBy(users.id, users.firstName, users.lastName, users.email, users.profileImageUrl);
+  }
+
+  async getStaffRoleAssignments(schoolId: string): Promise<any[]> {
+    return await db
+      .select({
+        assignmentId: userRoles.id,
+        userId: userRoles.userId,
+        roleId: userRoles.roleId,
+        schoolId: userRoles.schoolId,
+        classroomId: userRoles.classroomId,
+        active: userRoles.active,
+        startDate: userRoles.startDate,
+        endDate: userRoles.endDate,
+        roleName: roleDefinitions.name,
+        roleDisplayName: roleDefinitions.displayName,
+        roleCategory: roleDefinitions.category,
+        roleSubCategory: roleDefinitions.subCategory,
+        roleType: roleDefinitions.roleType,
+        parentRoleId: roleDefinitions.parentRoleId,
+        sortOrder: roleDefinitions.sortOrder,
+        userFirstName: users.firstName,
+        userLastName: users.lastName,
+        userEmail: users.email,
+      })
+      .from(userRoles)
+      .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoles.roleId))
+      .innerJoin(users, eq(users.id, userRoles.userId))
+      .where(and(
+        eq(userRoles.schoolId, schoolId),
+        eq(roleDefinitions.category, "educator"),
+        eq(userRoles.active, true)
+      ))
+      .orderBy(users.lastName, users.firstName, roleDefinitions.sortOrder);
+  }
+
+  async assignUserRole(assignment: InsertUserRole): Promise<UserRole> {
+    const [newAssignment] = await db
+      .insert(userRoles)
+      .values(assignment)
+      .returning();
+    return newAssignment;
+  }
+
+  async updateUserRoleAssignment(id: string, assignment: Partial<InsertUserRole>): Promise<UserRole> {
+    const [updatedAssignment] = await db
+      .update(userRoles)
+      .set(assignment)
+      .where(eq(userRoles.id, id))
+      .returning();
+    return updatedAssignment;
+  }
+
+  async bulkUpdateRoleAssignments(schoolId: string, assignments: any[]): Promise<void> {
+    await db.transaction(async (tx) => {
+      // First, end all current educator role assignments for this school
+      await tx
+        .update(userRoles)
+        .set({ 
+          active: false, 
+          endDate: new Date() 
+        })
+        .where(and(
+          eq(userRoles.schoolId, schoolId),
+          eq(userRoles.active, true)
+        ));
+
+      // Then create new assignments
+      if (assignments.length > 0) {
+        await tx
+          .insert(userRoles)
+          .values(assignments.map(assignment => ({
+            ...assignment,
+            schoolId,
+            active: true,
+            startDate: new Date()
+          })));
+      }
+    });
   }
 
   // Schools

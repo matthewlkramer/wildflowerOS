@@ -1177,6 +1177,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== HIERARCHICAL ROLE MANAGEMENT ========================
+
+  app.get('/api/schools/:schoolId/roles/hierarchical', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const roles = await storage.getHierarchicalRoles(schoolId);
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching hierarchical roles:", error);
+      res.status(500).json({ message: "Failed to fetch hierarchical roles" });
+    }
+  });
+
+  app.get('/api/schools/:schoolId/roles/category/:category', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId, category } = req.params;
+      const roles = await storage.getRolesByCategory(category, schoolId);
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching roles by category:", error);
+      res.status(500).json({ message: "Failed to fetch roles by category" });
+    }
+  });
+
+  app.get('/api/schools/:schoolId/staff', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const staff = await storage.getStaffBySchool(schoolId);
+      res.json(staff);
+    } catch (error) {
+      console.error("Error fetching school staff:", error);
+      res.status(500).json({ message: "Failed to fetch school staff" });
+    }
+  });
+
+  app.get('/api/schools/:schoolId/staff/role-assignments', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const assignments = await storage.getStaffRoleAssignments(schoolId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching staff role assignments:", error);
+      res.status(500).json({ message: "Failed to fetch staff role assignments" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/staff/role-assignments/bulk', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const { assignments } = req.body;
+      
+      await storage.bulkUpdateRoleAssignments(schoolId, assignments);
+      res.json({ message: "Role assignments updated successfully" });
+    } catch (error) {
+      console.error("Error updating role assignments:", error);
+      res.status(500).json({ message: "Failed to update role assignments" });
+    }
+  });
+
+  app.post('/api/role-definitions', isAuthenticated, async (req: any, res) => {
+    try {
+      const role = await storage.createRoleDefinition(req.body);
+      res.status(201).json(role);
+    } catch (error) {
+      console.error("Error creating role definition:", error);
+      res.status(500).json({ message: "Failed to create role definition" });
+    }
+  });
+
+  app.patch('/api/role-definitions/:roleId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { roleId } = req.params;
+      const role = await storage.updateRoleDefinition(roleId, req.body);
+      res.json(role);
+    } catch (error) {
+      console.error("Error updating role definition:", error);
+      res.status(500).json({ message: "Failed to update role definition" });
+    }
+  });
+
+  app.delete('/api/role-definitions/:roleId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { roleId } = req.params;
+      await storage.deleteRoleDefinition(roleId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting role definition:", error);
+      res.status(500).json({ message: "Failed to delete role definition" });
+    }
+  });
+
   // Families
   app.get('/api/schools/:schoolId/families', isAuthenticated, async (req: any, res) => {
     try {

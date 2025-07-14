@@ -9,25 +9,45 @@ import { UserRole } from "@shared/schema";
 import { Users, GraduationCap, Heart, Building2, Shield, Star } from "lucide-react";
 
 const roleIcons = {
-  teacher_leader: GraduationCap,
-  teacher: GraduationCap,
-  assistant: Users,
-  aide: Users,
+  // Main roles
   parent: Heart,
-  board_member: Building2,
-  central_staff: Shield,
-  network_admin: Star,
+  educator: GraduationCap,
+  board_director: Building2,
+  systems_administrator: Star,
+  
+  // Sub-roles
+  billing_contact: Heart,
+  custodian: Heart,
+  school_admin: GraduationCap,
+  classroom_guide: GraduationCap,
+  classroom_assistant: Users,
+  classroom_aide: Users,
+  before_after_care_supervisor: Users,
+  chair: Building2,
+  treasury: Building2,
+  secretary: Building2,
+  member: Building2,
 };
 
 const roleLabels = {
-  teacher_leader: "Teacher Leader",
-  teacher: "Teacher",
-  assistant: "Assistant",
-  aide: "Aide",
+  // Main roles
   parent: "Parent",
-  board_member: "Board Member",
-  central_staff: "Central Staff",
-  network_admin: "Network Admin",
+  educator: "Educator", 
+  board_director: "Board Director",
+  systems_administrator: "Systems Administrator",
+  
+  // Sub-roles
+  billing_contact: "Billing Contact",
+  custodian: "Custodian",
+  school_admin: "School Admin",
+  classroom_guide: "Classroom Guide", 
+  classroom_assistant: "Classroom Assistant",
+  classroom_aide: "Classroom Aide",
+  before_after_care_supervisor: "Before/After Care Supervisor",
+  chair: "Chair",
+  treasury: "Treasury",
+  secretary: "Secretary",
+  member: "Member",
 };
 
 export default function RoleSelector() {
@@ -164,16 +184,26 @@ export default function RoleSelector() {
             </div>
             <div className="flex items-center gap-2 mt-1">
               {(() => {
-                const Icon = roleIcons[currentRole.role];
+                const Icon = roleIcons[currentRole.mainRole];
                 return <Icon className="h-4 w-4 text-blue-600" />;
               })()}
               <span className="text-blue-900 dark:text-blue-100">
-                {roleLabels[currentRole.role]}
+                {roleLabels[currentRole.mainRole]}
               </span>
               <Badge variant="secondary" size="sm">
                 Active
               </Badge>
             </div>
+            {/* Show sub-roles if available */}
+            {currentRole.subRoles && currentRole.subRoles.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {currentRole.subRoles.map((subRole, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {roleLabels[subRole.subRole]}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -187,12 +217,18 @@ export default function RoleSelector() {
               {userRoles
                 .filter(role => role.active)
                 .map((role) => {
-                  const Icon = roleIcons[role.role];
+                  const Icon = roleIcons[role.mainRole];
+                  const subRoleLabels = role.subRoles?.map(sr => roleLabels[sr.subRole]).join(", ");
                   return (
                     <SelectItem key={role.id} value={role.id}>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 w-full">
                         <Icon className="h-4 w-4" />
-                        <span>{roleLabels[role.role]}</span>
+                        <div className="flex flex-col flex-1">
+                          <span className="font-medium">{roleLabels[role.mainRole]}</span>
+                          {subRoleLabels && (
+                            <span className="text-xs text-muted-foreground">{subRoleLabels}</span>
+                          )}
+                        </div>
                         {role.schoolId && (
                           <Badge variant="outline" className="ml-auto text-xs">
                             School

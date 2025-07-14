@@ -39,7 +39,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const userRoles = await storage.getUserRoles(userId);
-      res.json(userRoles);
+      
+      // For each role, get its sub-roles
+      const rolesWithSubRoles = await Promise.all(
+        userRoles.map(async (role) => {
+          const subRoles = await storage.getUserSubRoles(role.id);
+          return {
+            ...role,
+            subRoles
+          };
+        })
+      );
+      
+      res.json(rolesWithSubRoles);
     } catch (error) {
       console.error("Error fetching user roles:", error);
       res.status(500).json({ message: "Failed to fetch user roles" });

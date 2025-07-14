@@ -1,6 +1,7 @@
 import {
   users,
   userRoles,
+  userSubRoles,
   schools,
   schoolYears,
   budgets,
@@ -19,6 +20,8 @@ import {
   type UpsertUser,
   type UserRole,
   type InsertUserRole,
+  type UserSubRole,
+  type InsertUserSubRole,
   type School,
   type Classroom,
   type Family,
@@ -43,6 +46,12 @@ export interface IStorage {
   getUserRoles(userId: string): Promise<UserRole[]>;
   createUserRole(role: InsertUserRole): Promise<UserRole>;
   updateUserRole(id: string, role: Partial<InsertUserRole>): Promise<UserRole>;
+  
+  // User sub-roles
+  getUserSubRoles(userRoleId: string): Promise<UserSubRole[]>;
+  createUserSubRole(subRole: InsertUserSubRole): Promise<UserSubRole>;
+  updateUserSubRole(id: string, subRole: Partial<InsertUserSubRole>): Promise<UserSubRole>;
+  deleteUserSubRole(id: string): Promise<void>;
   
   // Schools
   getSchools(): Promise<School[]>;
@@ -157,6 +166,38 @@ export class DatabaseStorage implements IStorage {
     return userRole;
   }
 
+  // User sub-roles
+  async getUserSubRoles(userRoleId: string): Promise<UserSubRole[]> {
+    return await db
+      .select()
+      .from(userSubRoles)
+      .where(and(eq(userSubRoles.userRoleId, userRoleId), eq(userSubRoles.active, true)));
+  }
+
+  async createUserSubRole(subRole: InsertUserSubRole): Promise<UserSubRole> {
+    const [newSubRole] = await db
+      .insert(userSubRoles)
+      .values(subRole)
+      .returning();
+    return newSubRole;
+  }
+
+  async updateUserSubRole(id: string, subRole: Partial<InsertUserSubRole>): Promise<UserSubRole> {
+    const [updatedSubRole] = await db
+      .update(userSubRoles)
+      .set(subRole)
+      .where(eq(userSubRoles.id, id))
+      .returning();
+    return updatedSubRole;
+  }
+
+  async deleteUserSubRole(id: string): Promise<void> {
+    await db
+      .update(userSubRoles)
+      .set({ active: false })
+      .where(eq(userSubRoles.id, id));
+  }
+
   // Schools
   async getSchools(): Promise<School[]> {
     return await db.select().from(schools).where(eq(schools.status, "active"));
@@ -234,16 +275,14 @@ export class DatabaseStorage implements IStorage {
       .select({
         id: userRoles.id,
         userId: userRoles.userId,
-        role: userRoles.role,
+        mainRole: userRoles.mainRole,
         startDate: userRoles.startDate,
         active: userRoles.active,
         schoolId: userRoles.schoolId,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        email: users.email,
+        legalEntityId: userRoles.legalEntityId,
+        endDate: userRoles.endDate,
       })
       .from(userRoles)
-      .leftJoin(users, eq(userRoles.userId, users.id))
       .where(and(
         eq(userRoles.schoolId, schoolId),
         eq(userRoles.active, true)
@@ -597,7 +636,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(invoices)
       .where(eq(invoices.familyId, familyId))
-      .orderBy(desc(invoices.issueDate));
+      .orderBy(desc(invoices.dueDate));
   }
 
   async createInvoice(invoiceData: any): Promise<any> {
@@ -609,7 +648,8 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(payments)
-      .where(eq(payments.familyId, familyId))
+      .innerJoin(invoices, eq(payments.invoiceId, invoices.id))
+      .where(eq(invoices.familyId, familyId))
       .orderBy(desc(payments.paymentDate));
   }
 

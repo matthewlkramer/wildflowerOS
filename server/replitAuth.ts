@@ -95,7 +95,9 @@ export async function setupAuth(app: Express) {
   ) => {
     const user = {};
     updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
+    const dbUser = await upsertUser(tokens.claims());
+    // Store the database user ID instead of Replit's ID
+    (user as any).dbUserId = dbUser.id;
     verified(null, user);
   };
 

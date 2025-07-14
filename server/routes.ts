@@ -13,15 +13,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      // If user not found by ID, try to find by email (fallback for old sessions)
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Get user roles and schools
-      const roles = await storage.getUserRoles(userId);
-      const schools = await storage.getSchoolsByUser(userId);
+      // Get user roles and schools using the actual user ID
+      const roles = await storage.getUserRoles(user.id);
+      const schools = await storage.getSchoolsByUser(user.id);
       
       res.json({
         ...user,
@@ -37,8 +42,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User role management routes
   app.get('/api/user/roles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const userRoles = await storage.getUserRoles(userId);
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      // If user not found by ID, try to find by email
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const userRoles = await storage.getUserRoles(user.id);
       
       // Get role definitions once (more efficient)
       const roleDefinitions = await storage.getRoleDefinitions();

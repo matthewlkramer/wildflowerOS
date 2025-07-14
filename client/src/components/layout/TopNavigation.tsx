@@ -94,10 +94,18 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
 
 
   const handleRoleSwitch = (category: string) => {
+    console.log("Switching to category:", category);
+    console.log("Available roles:", userRoles);
+    
     // Find the first role in the selected category
     const rolesInCategory = userRoles.filter(role => role.roleCategory === category && role.active);
+    console.log("Roles in category:", rolesInCategory);
+    
     if (rolesInCategory.length > 0) {
+      console.log("Switching to role:", rolesInCategory[0]);
       switchRoleMutation.mutate(rolesInCategory[0].id);
+    } else {
+      console.error("No roles found in category:", category);
     }
   };
 
@@ -111,14 +119,14 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.roleCategory || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-24 border-gray-300">
+                <SelectTrigger className="w-20 border-gray-300 text-sm">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
-                      <span className="truncate">{getContextDisplayName()}</span>
+                      <span className="truncate text-xs">{getContextDisplayName()}</span>
                     )}
                     {!currentUserRole && <SelectValue placeholder="Role" />}
                   </div>

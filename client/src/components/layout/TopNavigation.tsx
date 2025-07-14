@@ -43,9 +43,9 @@ const roleLabels = {
   assistant: "Assistant",
   aide: "Aide",
   parent: "Parent",
-  board_member: "Board Member",
-  central_staff: "Central Staff",
-  network_admin: "Network Admin",
+  board_member: "Board",
+  central_staff: "Partner",
+  network_admin: "Admin",
 };
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {

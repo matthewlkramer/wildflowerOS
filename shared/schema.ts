@@ -143,10 +143,13 @@ export const academicCalendars = pgTable("academic_calendars", {
 
 export const calendarClosures = pgTable("calendar_closures", {
   id: uuid("id").primaryKey().defaultRandom(),
-  academicCalendarId: uuid("academic_calendar_id").notNull().references(() => academicCalendars.id, { onDelete: "cascade" }),
+  academicCalendarId: uuid("academic_calendar_id").references(() => academicCalendars.id, { onDelete: "cascade" }),
+  schoolId: uuid("school_id").references(() => schools.id, { onDelete: "cascade" }),
   date: timestamp("date").notNull(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
+  networkDefault: boolean("network_default").notNull().default(false),
+  active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1392,6 +1395,8 @@ export type AcademicCalendar = typeof academicCalendars.$inferSelect;
 export type InsertAcademicCalendar = typeof academicCalendars.$inferInsert;
 export type CalendarClosure = typeof calendarClosures.$inferSelect;
 export type InsertCalendarClosure = typeof calendarClosures.$inferInsert;
+
+
 
 // Classroom Schedule and Program Offering types
 export type ClassroomSchedule = typeof classroomSchedules.$inferSelect;

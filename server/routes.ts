@@ -1737,5 +1737,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // System holidays endpoints
+  app.get("/api/system-holidays", isAuthenticated, async (req, res) => {
+    try {
+      const holidays = await storage.getSystemHolidays();
+      res.json(holidays);
+    } catch (error) {
+      console.error("Error fetching system holidays:", error);
+      res.status(500).json({ error: "Failed to fetch system holidays" });
+    }
+  });
+
+  app.post("/api/system-holidays", isAuthenticated, async (req, res) => {
+    try {
+      const holiday = await storage.createSystemHoliday(req.body);
+      res.json(holiday);
+    } catch (error) {
+      console.error("Error creating system holiday:", error);
+      res.status(500).json({ error: "Failed to create system holiday" });
+    }
+  });
+
+  app.put("/api/system-holidays/:id", isAuthenticated, async (req, res) => {
+    try {
+      const holiday = await storage.updateSystemHoliday(req.params.id, req.body);
+      res.json(holiday);
+    } catch (error) {
+      console.error("Error updating system holiday:", error);
+      res.status(500).json({ error: "Failed to update system holiday" });
+    }
+  });
+
+  app.delete("/api/system-holidays/:id", isAuthenticated, async (req, res) => {
+    try {
+      await storage.deleteSystemHoliday(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting system holiday:", error);
+      res.status(500).json({ error: "Failed to delete system holiday" });
+    }
+  });
+
   return httpServer;
 }

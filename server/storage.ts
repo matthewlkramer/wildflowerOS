@@ -27,6 +27,7 @@ import {
   invoices,
   payments,
   emailAddresses,
+
   type User,
   type UpsertUser,
   type UserRole,
@@ -68,6 +69,7 @@ import {
   type InsertChannel,
   type EmailAddress,
   type InsertEmailAddress,
+
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, count, sql, isNull, isNotNull, or, lte, gte, gt, like } from "drizzle-orm";
@@ -2173,6 +2175,65 @@ export class DatabaseStorage implements IStorage {
   }
 
 
+  // System holidays methods (using calendar_closures with network_default=true)
+  async getSystemHolidays(): Promise<CalendarClosure[]> {
+    const holidays = await db.select().from(calendarClosures).where(
+      and(
+        eq(calendarClosures.networkDefault, true),
+        eq(calendarClosures.active, true)
+      )
+    );
+    
+    // Sort chronologically starting from September 1st (school year order)
+    return holidays.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      
+      // Convert to school year order (September = month 0, August = month 11)
+      const getSchoolYearMonth = (date: Date) => {
+        const month = date.getMonth();
+        return month >= 8 ? month - 8 : month + 4; // Sep=0, Oct=1...Aug=11
+      };
+      
+      const schoolMonthA = getSchoolYearMonth(dateA);
+      const schoolMonthB = getSchoolYearMonth(dateB);
+      
+      if (schoolMonthA !== schoolMonthB) {
+        return schoolMonthA - schoolMonthB;
+      }
+      
+      // If same month, sort by day
+      return dateA.getDate() - dateB.getDate();
+    });
+  }
+
+  async createSystemHoliday(holiday: InsertCalendarClosure): Promise<CalendarClosure> {
+    const [newHoliday] = await db
+      .insert(calendarClosures)
+      .values({
+        ...holiday,
+        networkDefault: true,
+        academicCalendarId: null, // Network defaults don't belong to specific calendar
+      })
+      .returning();
+    return newHoliday;
+  }
+
+  async updateSystemHoliday(id: string, updates: Partial<InsertCalendarClosure>): Promise<CalendarClosure> {
+    const [updatedHoliday] = await db
+      .update(calendarClosures)
+      .set(updates)
+      .where(eq(calendarClosures.id, id))
+      .returning();
+    return updatedHoliday;
+  }
+
+  async deleteSystemHoliday(id: string): Promise<void> {
+    await db
+      .update(calendarClosures)
+      .set({ active: false })
+      .where(eq(calendarClosures.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();

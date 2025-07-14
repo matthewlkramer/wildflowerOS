@@ -265,67 +265,129 @@ function SystemHolidaysOverview() {
   
   const [holidayForm, setHolidayForm] = useState({
     name: "",
-    rule: "",
     description: "",
+    date: "",
   });
 
-  // Default system holidays data
-  const defaultHolidays = [
-    { id: "1", name: "Labor Day", rule: "First Monday in September", description: "Federal holiday" },
-    { id: "2", name: "Thanksgiving", rule: "Fourth Thursday in November", description: "Federal holiday + Friday" },
-    { id: "3", name: "Winter Break", rule: "Last 2 weeks of December", description: "Standard school break" },
-    { id: "4", name: "Presidents Day", rule: "Third Monday in February", description: "Federal holiday" },
-    { id: "5", name: "Spring Break", rule: "Week before Easter", description: "Standard school break" },
-    { id: "6", name: "Memorial Day", rule: "Last Monday in May", description: "Federal holiday" },
-  ];
+  // Fetch system holidays from API
+  const { data: systemHolidays = [], isLoading } = useQuery({
+    queryKey: ["/api/system-holidays"],
+    enabled: true,
+  });
 
-  const handleAddHoliday = () => {
-    if (!holidayForm.name || !holidayForm.rule) {
+  const createHolidayMutation = useMutation({
+    mutationFn: (holidayData: any) => apiRequest("/api/system-holidays", {
+      method: "POST",
+      body: JSON.stringify(holidayData),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/system-holidays"] });
+      toast({
+        title: "Holiday added",
+        description: `${holidayForm.name} has been added to system holidays.`
+      });
+      setHolidayForm({ name: "", description: "", date: "" });
+      setAddingHoliday(false);
+    },
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Please fill in name and rule fields.",
+        description: "Failed to add holiday. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const updateHolidayMutation = useMutation({
+    mutationFn: ({ id, ...data }: any) => apiRequest(`/api/system-holidays/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/system-holidays"] });
+      toast({
+        title: "Holiday updated",
+        description: `${holidayForm.name} has been updated.`
+      });
+      setHolidayForm({ name: "", description: "", date: "" });
+      setEditingHoliday(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to update holiday. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const deleteHolidayMutation = useMutation({
+    mutationFn: (id: string) => apiRequest(`/api/system-holidays/${id}`, {
+      method: "DELETE",
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/system-holidays"] });
+      toast({
+        title: "Holiday removed",
+        description: `Holiday has been removed from system holidays.`
+      });
+      setDeletingHoliday(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error", 
+        description: "Failed to delete holiday. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const handleAddHoliday = () => {
+    if (!holidayForm.name || !holidayForm.date) {
+      toast({
+        title: "Error",
+        description: "Please fill in name and date fields.",
         variant: "destructive"
       });
       return;
     }
 
-    // TODO: Implement API call to save system holiday
-    toast({
-      title: "Holiday added",
-      description: `${holidayForm.name} has been added to system holidays.`
+    createHolidayMutation.mutate({
+      name: holidayForm.name,
+      description: holidayForm.description,
+      date: new Date(holidayForm.date).toISOString(),
     });
-    
-    setHolidayForm({ name: "", rule: "", description: "" });
-    setAddingHoliday(false);
   };
 
   const handleEditHoliday = (holiday: any) => {
     setHolidayForm({
       name: holiday.name,
-      rule: holiday.rule,
       description: holiday.description || "",
+      date: holiday.date ? new Date(holiday.date).toISOString().split('T')[0] : "",
     });
     setEditingHoliday(holiday);
   };
 
   const handleUpdateHoliday = () => {
-    // TODO: Implement API call to update system holiday
-    toast({
-      title: "Holiday updated",
-      description: `${holidayForm.name} has been updated.`
+    if (!holidayForm.name || !holidayForm.date) {
+      toast({
+        title: "Error",
+        description: "Please fill in name and date fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    updateHolidayMutation.mutate({
+      id: editingHoliday.id,
+      name: holidayForm.name,
+      description: holidayForm.description,
+      date: new Date(holidayForm.date).toISOString(),
     });
-    
-    setHolidayForm({ name: "", rule: "", description: "" });
-    setEditingHoliday(null);
   };
 
   const handleDeleteHoliday = (holiday: any) => {
-    // TODO: Implement API call to delete system holiday
-    toast({
-      title: "Holiday removed",
-      description: `${holiday.name} has been removed from system holidays.`
-    });
-    setDeletingHoliday(null);
+    deleteHolidayMutation.mutate(holiday.id);
   };
 
   return (
@@ -349,17 +411,32 @@ function SystemHolidaysOverview() {
               <thead className="bg-gray-50 sticky top-0">
                 <tr className="border-b">
                   <th className="text-left p-3 font-medium">Holiday Name</th>
-                  <th className="text-left p-3 font-medium">Rule</th>
+                  <th className="text-left p-3 font-medium">Date</th>
                   <th className="text-left p-3 font-medium">Description</th>
                   <th className="text-left p-3 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {defaultHolidays.map((holiday) => (
-                  <tr key={holiday.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">{holiday.name}</td>
-                    <td className="p-3 text-sm text-gray-600">{holiday.rule}</td>
-                    <td className="p-3 text-sm text-gray-600">{holiday.description}</td>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-gray-500">
+                      Loading holidays...
+                    </td>
+                  </tr>
+                ) : systemHolidays.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-gray-500">
+                      No system holidays found. Add some holidays to get started.
+                    </td>
+                  </tr>
+                ) : (
+                  systemHolidays.map((holiday: any) => (
+                    <tr key={holiday.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3 font-medium">{holiday.name}</td>
+                      <td className="p-3 text-sm text-gray-600">
+                        {holiday.date ? new Date(holiday.date).toLocaleDateString() : 'No date set'}
+                      </td>
+                      <td className="p-3 text-sm text-gray-600">{holiday.description}</td>
                     <td className="p-3">
                       <div className="flex space-x-2">
                         <Button 
@@ -379,7 +456,8 @@ function SystemHolidaysOverview() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -404,11 +482,11 @@ function SystemHolidaysOverview() {
                 />
               </div>
               <div>
-                <Label>Rule</Label>
+                <Label>Date</Label>
                 <Input
-                  value={holidayForm.rule}
-                  onChange={(e) => setHolidayForm(prev => ({ ...prev, rule: e.target.value }))}
-                  placeholder="e.g., First Monday in September"
+                  type="date"
+                  value={holidayForm.date}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, date: e.target.value }))}
                 />
               </div>
               <div>
@@ -449,10 +527,11 @@ function SystemHolidaysOverview() {
                 />
               </div>
               <div>
-                <Label>Rule</Label>
+                <Label>Date</Label>
                 <Input
-                  value={holidayForm.rule}
-                  onChange={(e) => setHolidayForm(prev => ({ ...prev, rule: e.target.value }))}
+                  type="date"
+                  value={holidayForm.date}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, date: e.target.value }))}
                 />
               </div>
               <div>
@@ -1512,11 +1591,11 @@ export default function SchoolSettingsPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex pt-16 min-h-screen">
+      <div className="flex pt-16 h-screen">
         <Sidebar currentRole={currentRole} />
         
         <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden overflow-y-auto lg:ml-64">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto pb-20">
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (
               // System Administrator View

@@ -375,7 +375,16 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
       {/* Calendar Settings */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Academic Calendar Settings</CardTitle>
+          <CardTitle className="text-lg">Academic Calendar Settings - {schoolYear?.name}</CardTitle>
+          {academicCalendar ? (
+            <p className="text-sm text-gray-600">
+              Editing existing calendar (created {new Date(academicCalendar.createdAt).toLocaleDateString()})
+            </p>
+          ) : (
+            <p className="text-sm text-gray-600">
+              No calendar exists yet - create one below
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-4 items-end">
@@ -385,7 +394,11 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
                 type="date"
                 value={calendarForm.firstDayOfSchool}
                 onChange={(e) => setCalendarForm(prev => ({ ...prev, firstDayOfSchool: e.target.value }))}
+                placeholder="Select first day"
               />
+              {!calendarForm.firstDayOfSchool && (
+                <p className="text-xs text-gray-500 mt-1">No date set</p>
+              )}
             </div>
             <div>
               <Label>Last Day of School</Label>
@@ -393,7 +406,11 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
                 type="date"
                 value={calendarForm.lastDayOfSchool}
                 onChange={(e) => setCalendarForm(prev => ({ ...prev, lastDayOfSchool: e.target.value }))}
+                placeholder="Select last day"
               />
+              {!calendarForm.lastDayOfSchool && (
+                <p className="text-xs text-gray-500 mt-1">No date set</p>
+              )}
             </div>
             <div>
               <Button onClick={handleSaveCalendar}>
@@ -418,6 +435,9 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
         <CardContent>
           {calendarClosures && calendarClosures.length > 0 ? (
             <div className="space-y-2">
+              <p className="text-sm text-gray-600 mb-3">
+                Showing {calendarClosures.length} holiday{calendarClosures.length !== 1 ? 's' : ''} for {schoolYear?.name}
+              </p>
               {calendarClosures.map((closure: any) => (
                 <div key={closure.id} className="flex justify-between items-center p-3 border rounded-lg">
                   <div>

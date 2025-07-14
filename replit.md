@@ -72,6 +72,12 @@ Preferred communication style: Simple, everyday language.
     - **Full CSV mapping** from startup worksheet and ongoing operations spreadsheet
     - Tasks span from high-level (fundraising efforts) to specific (purchase printer/scanner/copier)
     - Complete coverage of Wildflower school operational requirements
+- **Migrated all ID fields from varchar to UUID for consistency**
+  - Updated users table ID from varchar to UUID with proper defaultRandom()
+  - Updated all user_id foreign key references across all tables to UUID
+  - Preserved user data and role assignments during migration
+  - All ID fields now consistently use UUID format across the entire schema
+  - Recreated foreign key constraints with proper UUID references
 - **Completed functional role switching system with compact navigation**
   - Fixed apiRequest function call format to properly handle POST requests for role switching
   - Role switching now works seamlessly between all categories (Parent, Educator, Board Director, Systems Administrator)

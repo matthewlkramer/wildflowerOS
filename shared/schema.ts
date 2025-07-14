@@ -31,7 +31,7 @@ export const sessions = pgTable(
 // ======================== USER & ROLE MODELS ========================
 
 export const users = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
+  id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 255 }).unique(), // This remains as the login email
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
@@ -42,7 +42,7 @@ export const users = pgTable("users", {
 
 export const emailAddresses = pgTable("email_addresses", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),
   type: varchar("type", { 
     enum: ["personal", "work_twf", "work_wf_school", "work_non_wf"] 
@@ -72,7 +72,7 @@ export const roleDefinitions = pgTable("role_definitions", {
 // User role assignments
 export const userRoles = pgTable("user_roles", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: uuid("user_id").notNull().references(() => users.id),
   roleId: uuid("role_id").notNull().references(() => roleDefinitions.id),
   schoolId: uuid("school_id"), // Scope: which school this role applies to
   classroomId: uuid("classroom_id"), // Scope: which classroom this role applies to  

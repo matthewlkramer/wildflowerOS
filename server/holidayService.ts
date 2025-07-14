@@ -81,7 +81,8 @@ export class HolidayService {
       // Map Google Calendar holiday names to our system names with more comprehensive matching
       if (summary.includes('labor day')) {
         holidays.set('Labor Day', { name: 'Labor Day', startDate, endDate, duration });
-      } else if (summary.includes('indigenous peoples') || summary.includes('columbus day')) {
+      } else if (summary.includes('columbus day')) {
+        // Use Columbus Day from Google Calendar but rename to Indigenous Peoples Day
         holidays.set('Indigenous Peoples Day', { name: 'Indigenous Peoples Day', startDate, endDate, duration });
       } else if (summary.includes('veterans day')) {
         holidays.set('Veterans Day', { name: 'Veterans Day', startDate, endDate, duration });
@@ -89,10 +90,18 @@ export class HolidayService {
         holidays.set('Thanksgiving', { name: 'Thanksgiving', startDate, endDate, duration });
       } else if (summary.includes('martin luther king') || summary.includes('mlk')) {
         holidays.set('MLK Day', { name: 'MLK Day', startDate, endDate, duration });
-      } else if (summary.includes('presidents') && summary.includes('day')) {
+      } else if (summary.includes('presidents')) {
         holidays.set('Presidents Day', { name: 'Presidents Day', startDate, endDate, duration });
-      } else if (summary.includes('good friday')) {
-        holidays.set('Good Friday', { name: 'Good Friday', startDate, endDate, duration });
+      } else if (summary.includes('easter') && (summary.includes('sunday') || summary.includes('monday'))) {
+        // Calculate Good Friday from Easter Sunday (2 days before)
+        const goodFridayDate = new Date(startDate);
+        goodFridayDate.setDate(goodFridayDate.getDate() - 2);
+        holidays.set('Good Friday', { 
+          name: 'Good Friday', 
+          startDate: goodFridayDate, 
+          endDate: goodFridayDate, 
+          duration: 1 
+        });
       } else if (summary.includes('memorial day')) {
         holidays.set('Memorial Day', { name: 'Memorial Day', startDate, endDate, duration });
       } else if (summary.includes('juneteenth')) {
@@ -106,16 +115,73 @@ export class HolidayService {
       }
     }
     
-    // Add Winter Break manually since it's not a single holiday in Google Calendar
-    // Winter Break: December 23 to December 31 (9 days)
-    const winterBreakStart = new Date(year, 11, 23); // December 23
-    const winterBreakEnd = new Date(year, 11, 31);   // December 31
+    // Add missing holidays that aren't well-represented in US federal calendar
+    // Winter Break: December 24 to January 1 (9 days)
+    const winterBreakStart = new Date(year, 11, 24); // December 24
+    const winterBreakEnd = new Date(year + 1, 0, 1); // January 1 next year
     holidays.set('Winter Break', { 
       name: 'Winter Break', 
       startDate: winterBreakStart, 
       endDate: winterBreakEnd, 
       duration: 9 
     });
+
+    // Add religious holidays that may not be in the US federal calendar
+    if (!holidays.has('Rosh Hashanah')) {
+      // Rosh Hashanah 2024: Sept 15-17, 2025: Sept 5-7, 2026: Sept 25-27, 2027: Sept 13-15
+      const roshDates = {
+        2024: new Date(2024, 8, 15), // Sept 15
+        2025: new Date(2025, 8, 5),  // Sept 5  
+        2026: new Date(2026, 8, 25), // Sept 25
+        2027: new Date(2027, 8, 13)  // Sept 13
+      };
+      if (roshDates[year]) {
+        const roshEnd = new Date(roshDates[year]);
+        roshEnd.setDate(roshEnd.getDate() + 1); // 2-day holiday
+        holidays.set('Rosh Hashanah', {
+          name: 'Rosh Hashanah',
+          startDate: roshDates[year],
+          endDate: roshEnd,
+          duration: 2
+        });
+      }
+    }
+
+    if (!holidays.has('Yom Kippur')) {
+      // Yom Kippur is 10 days after Rosh Hashanah
+      const yomKippurDates = {
+        2024: new Date(2024, 8, 24), // Sept 24
+        2025: new Date(2025, 8, 14), // Sept 14
+        2026: new Date(2026, 9, 4),  // Oct 4
+        2027: new Date(2027, 8, 22)  // Sept 22
+      };
+      if (yomKippurDates[year]) {
+        holidays.set('Yom Kippur', {
+          name: 'Yom Kippur',
+          startDate: yomKippurDates[year],
+          endDate: yomKippurDates[year],
+          duration: 1
+        });
+      }
+    }
+
+    if (!holidays.has('Eid')) {
+      // Eid al-Fitr approximate dates (lunar calendar varies)
+      const eidDates = {
+        2024: new Date(2024, 3, 10), // April 10
+        2025: new Date(2025, 2, 30), // March 30
+        2026: new Date(2026, 2, 20), // March 20
+        2027: new Date(2027, 2, 9)   // March 9
+      };
+      if (eidDates[year]) {
+        holidays.set('Eid', {
+          name: 'Eid',
+          startDate: eidDates[year],
+          endDate: eidDates[year],
+          duration: 1
+        });
+      }
+    }
 
     console.log(`Parsed ${holidays.size} holidays for year ${year}`);
     return holidays;

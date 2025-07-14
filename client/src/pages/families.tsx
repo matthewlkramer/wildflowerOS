@@ -139,7 +139,7 @@ export default function FamiliesPage() {
       <div className="flex pt-16 min-h-screen">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64" style={{ height: 'calc(100vh - 64px)', overflowY: 'auto' }}>
+        <main className="flex-1 p-4 lg:p-6 lg:ml-64">
           <div className="max-w-6xl mx-auto">
             {/* Page Header */}
             <div className="mb-8">

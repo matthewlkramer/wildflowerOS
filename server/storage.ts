@@ -950,7 +950,7 @@ export class DatabaseStorage implements IStorage {
     const startDate = new Date(schoolYear.startDate!);
     const year = startDate.getFullYear();
     
-    // Create network default holidays for this specific year
+    // Create network default holidays for this specific year (without academic calendar - those will be created when schools adopt the year)
     const holidayPromises = systemHolidays.map(async (holiday) => {
       let holidayDate = null;
       
@@ -994,7 +994,7 @@ export class DatabaseStorage implements IStorage {
           date: holidayDate,
           networkDefault: true,
           schoolId: null, // Network defaults
-          academicCalendarId: null,
+          academicCalendarId: null, // Will be set when schools adopt this year
           active: true
         });
       }

@@ -535,14 +535,14 @@ export default function SchoolSettingsPage() {
     enabled: !!schoolId,
   });
 
-  // Fetch staff
+  // Fetch staff - use fallback if schoolId is null
   const { data: staff = [], isLoading: staffLoading, error: staffError } = useQuery({
-    queryKey: ["/api/schools", schoolId, "staff"],
+    queryKey: ["/api/schools", schoolId || "default", "staff"],
     enabled: !!schoolId,
   });
 
-  // Debug logging
-  console.log('Staff data:', { staff, staffLoading, staffError, schoolId });
+  // Debug logging for staff data
+  console.log('Staff data:', { staff, staffLoading, staffError, schoolId, currentRole });
 
   // Fetch classrooms
   const { data: classrooms = [] } = useQuery({

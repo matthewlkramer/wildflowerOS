@@ -13,11 +13,12 @@ Preferred communication style: Simple, everyday language.
 ### July 14, 2025
 - **✅ COMPLETED: Comprehensive network school year and holiday management system**
   - **Network school years automatically generate holidays** when created based on system holiday rules
-  - **Holiday pills display** on each school year card showing associated holidays with overflow count
+  - **Holiday pills display all holidays** on each school year card (removed overflow limit)
   - **Enhanced edit dialog** for network school years with comprehensive holiday management interface
   - **Inline holiday editing** with name, date, description fields and delete capabilities
   - **Proper system holiday filtering** - system holidays show only networkDefault=true with null schoolYearId/schoolId
   - **Cascade deletion** automatically removes all associated holidays when school years are deleted
+  - **Fixed duplicate holiday issue** - removed 99 duplicate entries that were causing incorrect filtering
   - **Simplified calendar structure** by removing academic_calendars table - calendar_closures now link directly to school_years
   - Fixed auto-population regex to support both "2024-25" and "2024-2025" formats with proper year conversion
   - All holiday dates are calculated correctly based on academic year (Labor Day = first Monday in September, etc.)

@@ -233,16 +233,11 @@ function SchoolYearHolidaysPills({ schoolYearId }: { schoolYearId: string }) {
 
   return (
     <div className="flex flex-wrap gap-1 mt-2">
-      {holidays.slice(0, 5).map((holiday: any) => (
+      {holidays.map((holiday: any) => (
         <Badge key={holiday.id} variant="secondary" className="text-xs">
           {holiday.name}
         </Badge>
       ))}
-      {holidays.length > 5 && (
-        <Badge variant="outline" className="text-xs">
-          +{holidays.length - 5} more
-        </Badge>
-      )}
     </div>
   );
 }

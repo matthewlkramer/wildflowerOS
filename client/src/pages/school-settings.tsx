@@ -156,7 +156,36 @@ function NetworkSchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
         <div className="space-y-2">
           {holidays
             .sort((a: any, b: any) => {
-              // Sort by start_date if available, otherwise by date
+              // Academic year order starting with Labor Day (September)
+              const academicYearOrder = [
+                'Labor Day',
+                'Rosh Hashanah', 
+                'Indigenous Peoples Day',
+                'Yom Kippur',
+                'Veterans Day',
+                'Thanksgiving',
+                'Winter Break',
+                'MLK Day',
+                'Presidents Day',
+                'Good Friday',
+                'Eid',
+                'Memorial Day',
+                'Juneteenth'
+              ];
+              
+              const indexA = academicYearOrder.indexOf(a.name);
+              const indexB = academicYearOrder.indexOf(b.name);
+              
+              // If both are in the predefined order, sort by that order
+              if (indexA !== -1 && indexB !== -1) {
+                return indexA - indexB;
+              }
+              
+              // If only one is in the predefined order, it comes first
+              if (indexA !== -1) return -1;
+              if (indexB !== -1) return 1;
+              
+              // Otherwise sort by date
               const dateA = new Date(a.start_date || a.date);
               const dateB = new Date(b.start_date || b.date);
               return dateA.getTime() - dateB.getTime();

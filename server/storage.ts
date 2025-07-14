@@ -1078,7 +1078,7 @@ export class DatabaseStorage implements IStorage {
 
   // Calendar closures
   async getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]> {
-    return await db
+    const holidays = await db
       .select()
       .from(calendarClosures)
       .where(
@@ -1087,8 +1087,43 @@ export class DatabaseStorage implements IStorage {
           eq(calendarClosures.networkDefault, true),
           isNull(calendarClosures.schoolId) // Only network defaults, not school-specific
         )
-      )
-      .orderBy(asc(calendarClosures.startDate));
+      );
+    
+    // Sort in academic year order starting with Labor Day (September)
+    const academicYearOrder = [
+      'Labor Day',
+      'Rosh Hashanah',
+      'Indigenous Peoples Day', 
+      'Yom Kippur',
+      'Veterans Day',
+      'Thanksgiving',
+      'Winter Break',
+      'MLK Day',
+      'Presidents Day',
+      'Good Friday',
+      'Eid',
+      'Memorial Day',
+      'Juneteenth'
+    ];
+    
+    return holidays.sort((a, b) => {
+      const indexA = academicYearOrder.indexOf(a.name);
+      const indexB = academicYearOrder.indexOf(b.name);
+      
+      // If both are in the predefined order, sort by that order
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      
+      // If only one is in the predefined order, it comes first
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      
+      // Otherwise sort by date
+      const dateA = new Date(a.startDate || a.date || '');
+      const dateB = new Date(b.startDate || b.date || '');
+      return dateA.getTime() - dateB.getTime();
+    });
   }
 
   async createCalendarClosure(closureData: InsertCalendarClosure): Promise<CalendarClosure> {
@@ -2325,9 +2360,9 @@ export class DatabaseStorage implements IStorage {
       'MLK Day',
       'Presidents Day',
       'Good Friday',
+      'Eid',
       'Memorial Day',
-      'Juneteenth',
-      'Eid'
+      'Juneteenth'
     ];
     
     return holidays.sort((a, b) => {

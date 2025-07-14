@@ -63,9 +63,17 @@ export default function SchoolSettingsPage() {
     name: "",
     level: "primary",
     capacity: "",
-    ageRange: "",
+    ageRange: "3-6",
     description: ""
   });
+
+  const levelAgeRanges = {
+    toddler: "1.5-3",
+    primary: "3-6", 
+    elementary: "6-12",
+    junior_high: "12-15",
+    high_school: "15-18"
+  };
 
   const [tuitionForm, setTuitionForm] = useState({
     name: "",
@@ -146,7 +154,7 @@ export default function SchoolSettingsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "classrooms"] });
       setAddingClassroom(false);
-      setClassroomForm({ name: "", level: "primary", capacity: "", ageRange: "", description: "" });
+      setClassroomForm({ name: "", level: "primary", capacity: "", ageRange: "3-6", description: "" });
       toast({
         title: "Classroom added",
         description: "New classroom has been created successfully.",
@@ -239,6 +247,14 @@ export default function SchoolSettingsPage() {
     });
   };
 
+  const handleLevelChange = (level: string) => {
+    setClassroomForm(prev => ({
+      ...prev,
+      level,
+      ageRange: levelAgeRanges[level as keyof typeof levelAgeRanges] || ""
+    }));
+  };
+
   const handleAddTuitionPlan = () => {
     addTuitionPlanMutation.mutate({
       ...tuitionForm,
@@ -268,8 +284,9 @@ export default function SchoolSettingsPage() {
     switch (level) {
       case "toddler": return "bg-green-100 text-green-800";
       case "primary": return "bg-blue-100 text-blue-800";
-      case "lower_elem": return "bg-purple-100 text-purple-800";
-      case "upper_elem": return "bg-orange-100 text-orange-800";
+      case "elementary": return "bg-purple-100 text-purple-800";
+      case "junior_high": return "bg-orange-100 text-orange-800";
+      case "high_school": return "bg-red-100 text-red-800";
       default: return "bg-gray-100 text-gray-800";
     }
   };
@@ -282,8 +299,9 @@ export default function SchoolSettingsPage() {
     const levelMap: { [key: string]: string } = {
       toddler: "Toddler",
       primary: "Primary",
-      lower_elem: "Lower Elementary",
-      upper_elem: "Upper Elementary"
+      elementary: "Elementary",
+      junior_high: "Junior High",
+      high_school: "High School"
     };
     return levelMap[level] || level;
   };
@@ -480,15 +498,16 @@ export default function SchoolSettingsPage() {
                         </div>
                         <div>
                           <Label>Level</Label>
-                          <Select onValueChange={(value) => setClassroomForm(prev => ({ ...prev, level: value }))}>
+                          <Select onValueChange={handleLevelChange}>
                             <SelectTrigger>
                               <SelectValue placeholder="Select level" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
-                              <SelectItem value="primary">Primary (3 - 6 years)</SelectItem>
-                              <SelectItem value="lower_elem">Lower Elementary (6 - 9 years)</SelectItem>
-                              <SelectItem value="upper_elem">Upper Elementary (9 - 12 years)</SelectItem>
+                              <SelectItem value="toddler">Toddler (1.5-3 years)</SelectItem>
+                              <SelectItem value="primary">Primary (3-6 years)</SelectItem>
+                              <SelectItem value="elementary">Elementary (6-12 years)</SelectItem>
+                              <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
+                              <SelectItem value="high_school">High School (15-18 years)</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -909,8 +928,9 @@ export default function SchoolSettingsPage() {
                             <SelectContent>
                               <SelectItem value="toddler">Toddler</SelectItem>
                               <SelectItem value="primary">Primary</SelectItem>
-                              <SelectItem value="lower_elem">Lower Elementary</SelectItem>
-                              <SelectItem value="upper_elem">Upper Elementary</SelectItem>
+                              <SelectItem value="elementary">Elementary</SelectItem>
+                              <SelectItem value="junior_high">Junior High</SelectItem>
+                              <SelectItem value="high_school">High School</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>

@@ -265,6 +265,14 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
     lastDayOfSchool: "",
   });
 
+  const [addingClosure, setAddingClosure] = useState(false);
+  const [closureForm, setClosureForm] = useState({
+    name: "",
+    date: "",
+    description: "",
+    type: "holiday",
+  });
+
   // Fetch academic calendar for this school year
   const { data: academicCalendar, isLoading } = useQuery({
     queryKey: ["/api/school-years", schoolYear?.id, "calendar"],
@@ -318,6 +326,42 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
     } else {
       createCalendarMutation.mutate(calendarForm);
     }
+  };
+
+  const createClosureMutation = useMutation({
+    mutationFn: async (closureData: any) => {
+      return apiRequest('POST', `/api/academic-calendars/${academicCalendar.id}/closures`, closureData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/academic-calendars", academicCalendar.id, "closures"] });
+      setAddingClosure(false);
+      setClosureForm({ name: "", date: "", description: "", type: "holiday" });
+      toast({
+        title: "Holiday added",
+        description: "Holiday has been added to the calendar successfully.",
+      });
+    },
+  });
+
+  const deleteClosureMutation = useMutation({
+    mutationFn: async (closureId: string) => {
+      return apiRequest('DELETE', `/api/calendar-closures/${closureId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/academic-calendars", academicCalendar.id, "closures"] });
+      toast({
+        title: "Holiday deleted",
+        description: "Holiday has been removed from the calendar successfully.",
+      });
+    },
+  });
+
+  const handleAddClosure = () => {
+    createClosureMutation.mutate(closureForm);
+  };
+
+  const handleDeleteClosure = (closureId: string) => {
+    deleteClosureMutation.mutate(closureId);
   };
 
   if (isLoading) {
@@ -405,7 +449,7 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-lg">Holidays & Closures</CardTitle>
-            <Button size="sm">
+            <Button size="sm" onClick={() => setAddingClosure(true)} disabled={!academicCalendar}>
               <Plus className="mr-2 h-4 w-4" />
               Add Holiday
             </Button>
@@ -429,7 +473,11 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleDeleteClosure(closure.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -445,6 +493,72 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Holiday Dialog */}
+      <Dialog open={addingClosure} onOpenChange={setAddingClosure}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Holiday/Closure</DialogTitle>
+            <DialogDescription>
+              Add a holiday, break, or school closure date to the academic calendar.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Holiday Name</Label>
+              <Input
+                value={closureForm.name}
+                onChange={(e) => setClosureForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., Winter Break, Thanksgiving"
+              />
+            </div>
+            <div>
+              <Label>Date</Label>
+              <Input
+                type="date"
+                value={closureForm.date}
+                onChange={(e) => setClosureForm(prev => ({ ...prev, date: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Type</Label>
+              <Select 
+                value={closureForm.type} 
+                onValueChange={(value) => setClosureForm(prev => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="holiday">Holiday</SelectItem>
+                  <SelectItem value="break">Break</SelectItem>
+                  <SelectItem value="closure">School Closure</SelectItem>
+                  <SelectItem value="professional_development">Professional Development</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Description (Optional)</Label>
+              <Textarea
+                value={closureForm.description}
+                onChange={(e) => setClosureForm(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Additional details about this holiday or closure"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setAddingClosure(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddClosure}
+                disabled={!closureForm.name || !closureForm.date || createClosureMutation.isPending}
+              >
+                {createClosureMutation.isPending ? "Adding..." : "Add Holiday"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

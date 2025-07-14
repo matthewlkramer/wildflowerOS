@@ -8,6 +8,17 @@ This is a unified digital platform for the Wildflower Schools Network - a decent
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### July 14, 2025
+- **Fixed JSX syntax error** in family-details.tsx causing app startup failure
+  - Added missing `</main>` and container closing tags
+  - Corrected component structure and indentation
+- **Fixed routing 404 flash issue** for School Settings navigation
+  - Updated Sidebar component to use Wouter `Link` components instead of HTML `<a>` tags
+  - Added proper client-side routing with active state detection
+  - Eliminated brief 404 page flash when navigating to settings
+
 ## System Architecture
 
 ### Frontend Architecture

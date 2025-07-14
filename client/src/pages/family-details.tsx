@@ -291,50 +291,50 @@ export default function FamilyDetailsPage() {
         
         <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
           <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/families">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Families
-                </Button>
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <Users className="mr-3 h-8 w-8 text-primary" />
-                  {family.name || "Unnamed Family"}
-                </h1>
-                <p className="mt-2 text-gray-600">
-                  {children.length} {children.length === 1 ? "child" : "children"}
-                </p>
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <Link href="/families">
+                    <Button variant="ghost" size="sm">
+                      <ArrowLeft className="mr-2 h-4 w-4" />
+                      Back to Families
+                    </Button>
+                  </Link>
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <Users className="mr-3 h-8 w-8 text-primary" />
+                      {family.name || "Unnamed Family"}
+                    </h1>
+                    <p className="mt-2 text-gray-600">
+                      {children.length} {children.length === 1 ? "child" : "children"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex space-x-2">
+                  <Button variant="outline" onClick={handleFamilyEdit}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Family
+                  </Button>
+                  <Button>
+                    <MessageCircle className="mr-2 h-4 w-4" />
+                    Send Message
+                  </Button>
+                </div>
               </div>
             </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleFamilyEdit}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Family
-              </Button>
-              <Button>
-                <MessageCircle className="mr-2 h-4 w-4" />
-                Send Message
-              </Button>
-            </div>
-          </div>
-        </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="enrollment">Enrollment</TabsTrigger>
-            <TabsTrigger value="billing">Billing</TabsTrigger>
-            <TabsTrigger value="communication">Communication</TabsTrigger>
-          </TabsList>
+            <Tabs defaultValue="overview" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="enrollment">Enrollment</TabsTrigger>
+                <TabsTrigger value="billing">Billing</TabsTrigger>
+                <TabsTrigger value="communication">Communication</TabsTrigger>
+              </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Family Information */}
               <Card>
                 <CardHeader>
@@ -536,12 +536,12 @@ export default function FamilyDetailsPage() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
+                </div>
+              </TabsContent>
 
-          {/* Enrollment Tab */}
-          <TabsContent value="enrollment" className="space-y-6">
-            <Card>
+              {/* Enrollment Tab */}
+              <TabsContent value="enrollment" className="space-y-6">
+                <Card>
               <CardHeader>
                 <CardTitle>Enrollment Management</CardTitle>
               </CardHeader>
@@ -638,10 +638,10 @@ export default function FamilyDetailsPage() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+              </TabsContent>
 
-          {/* Billing Tab */}
-          <TabsContent value="billing" className="space-y-6">
+              {/* Billing Tab */}
+              <TabsContent value="billing" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Billing Setup */}
               <Card>
@@ -730,10 +730,10 @@ export default function FamilyDetailsPage() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+              </TabsContent>
 
-          {/* Communication Tab */}
-          <TabsContent value="communication" className="space-y-6">
+              {/* Communication Tab */}
+              <TabsContent value="communication" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -752,8 +752,8 @@ export default function FamilyDetailsPage() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+              </TabsContent>
+            </Tabs>
 
         {/* Edit Family Dialog */}
         <Dialog open={editingFamily} onOpenChange={setEditingFamily}>
@@ -816,7 +816,7 @@ export default function FamilyDetailsPage() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
+          </div>
         </main>
       </div>
       

@@ -534,7 +534,7 @@ export default function SchoolSettingsPage() {
   const effectiveSchoolId = selectedSchoolId || schoolId;
 
   // Check if we need to show school selector - trigger immediately when conditions are met
-  React.useEffect(() => {
+  useEffect(() => {
     console.log('School selector check:', { 
       currentRole: currentRole?.roleName, 
       schoolId: currentRole?.schoolId,

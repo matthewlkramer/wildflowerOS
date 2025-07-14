@@ -60,9 +60,9 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 function RoleTree() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-  // Fetch only educator role definitions from the database
+  // Fetch only educator admin role definitions from the database
   const { data: roles = [] } = useQuery({
-    queryKey: ["/api/roles/educator"],
+    queryKey: ["/api/roles/educator_admin"],
     enabled: true,
   });
 
@@ -78,26 +78,26 @@ function RoleTree() {
     });
   };
 
-  // Build hierarchical structure starting from level 2 (educator subcategories)
+  // Build hierarchical structure starting from level 3 (startup, ongoing)
   const buildHierarchy = (roles: any[]) => {
     const hierarchy: any = {};
     
     roles.forEach(role => {
       const parts = role.name.split('_');
       
-      // Skip if not educator role or if it's just "educator"
-      if (parts[0] !== 'educator' || parts.length < 2) {
+      // Skip if not educator_admin role or if it has less than 3 parts
+      if (parts[0] !== 'educator' || parts[1] !== 'admin' || parts.length < 3) {
         return;
       }
       
-      // Start from level 2 - skip the "educator" prefix
-      const relevantParts = parts.slice(1);
+      // Start from level 3 - skip the "educator_admin" prefix
+      const relevantParts = parts.slice(2);
       let current = hierarchy;
       
-      // Build the nested structure starting from level 2
+      // Build the nested structure starting from level 3
       for (let i = 0; i < relevantParts.length; i++) {
         const part = relevantParts[i];
-        const fullPath = parts.slice(0, i + 2).join('_'); // Include "educator" in the full path
+        const fullPath = parts.slice(0, i + 3).join('_'); // Include "educator_admin" in the full path
         
         if (!current[part]) {
           current[part] = {
@@ -135,11 +135,11 @@ function RoleTree() {
 
   const roleHierarchy = roles.length > 0 ? convertToArray(buildHierarchy(roles)) : [];
 
-  // Add colors for educator subcategories
+  // Add colors for admin subcategories
   const getColorForCategory = (name: string) => {
     switch (name) {
-      case 'admin': return 'bg-blue-100 text-blue-800';
-      case 'classroom': return 'bg-green-100 text-green-800';
+      case 'startup': return 'bg-blue-100 text-blue-800';
+      case 'ongoing': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };

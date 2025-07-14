@@ -455,41 +455,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { schoolId } = req.params;
       const staffData = req.body;
       
-      // First, create or get the user record
-      const user = await storage.upsertUser({
-        id: staffData.email, // Use email as user ID for now
-        email: staffData.email,
+      // Use the new createStaffMember method
+      const result = await storage.createStaffMember({
         firstName: staffData.firstName,
         lastName: staffData.lastName,
-      });
-      
-      // Find the appropriate role definition based on the old role names
-      const roleDefinitions = await storage.getRoleDefinitions();
-      const roleMapping = {
-        'teacher_leader': 'school_admin',
-        'head_of_school': 'school_admin',
-        'teacher': 'classroom_guide',
-        'assistant': 'classroom_guide',
-        'aide': 'classroom_guide'
-      };
-      
-      const roleName = roleMapping[staffData.role as keyof typeof roleMapping] || 'classroom_guide';
-      const roleDefinition = roleDefinitions.find(rd => rd.name === roleName);
-      
-      if (!roleDefinition) {
-        return res.status(400).json({ message: "Invalid role specified" });
-      }
-      
-      // Then create user role for the new staff member
-      const userRole = await storage.createUserRole({
-        userId: user.id,
-        roleId: roleDefinition.id,
+        email: staffData.email,
+        coreRole: staffData.coreRole,
         schoolId,
-        active: true,
         startDate: staffData.startDate ? new Date(staffData.startDate) : new Date()
       });
       
-      res.status(201).json(userRole);
+      res.status(201).json(result);
     } catch (error) {
       console.error("Error adding staff:", error);
       res.status(500).json({ message: "Failed to add staff member" });

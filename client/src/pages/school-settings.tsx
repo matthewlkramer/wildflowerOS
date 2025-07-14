@@ -53,6 +53,169 @@ import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
+
+// Role Tree Component
+function RoleTree() {
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+
+  const toggleNode = (nodeId: string) => {
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+  };
+
+  const roleHierarchy = [
+    {
+      id: "educator",
+      name: "Educator",
+      count: 12,
+      color: "bg-blue-100 text-blue-800",
+      children: [
+        {
+          id: "educator_admin",
+          name: "Admin",
+          description: "Administrative roles within education",
+          count: 5,
+          children: [
+            {
+              id: "educator_admin_startup",
+              name: "Startup",
+              description: "Roles for new school setup",
+              count: 2,
+              children: [
+                { id: "educator_admin_startup_marketing", name: "Marketing", count: 1, active: true },
+                { id: "educator_admin_startup_finances", name: "Finances", count: 1, active: true }
+              ]
+            },
+            {
+              id: "educator_admin_ongoing",
+              name: "Ongoing",
+              description: "Ongoing operational roles",
+              count: 3,
+              children: [
+                { id: "educator_admin_ongoing_finance", name: "Finance", count: 1, active: true },
+                { id: "educator_admin_ongoing_admissions", name: "Admissions", count: 1, active: true },
+                { id: "educator_admin_ongoing_board", name: "Board", count: 1, active: true }
+              ]
+            }
+          ]
+        },
+        {
+          id: "educator_classroom",
+          name: "Classroom",
+          description: "Direct classroom teaching roles",
+          count: 7,
+          children: [
+            { id: "educator_classroom_lead", name: "Lead", count: 3, active: true },
+            { id: "educator_classroom_assistant", name: "Assistant", count: 3, active: true },
+            { id: "educator_classroom_aide", name: "Aide", count: 1, active: true }
+          ]
+        }
+      ]
+    },
+    {
+      id: "parent",
+      name: "Parent",
+      count: 3,
+      color: "bg-green-100 text-green-800",
+      children: [
+        { id: "parent_billing", name: "Billing", description: "Financial contact roles", count: 1, active: true },
+        { id: "parent_custodian", name: "Custodian", description: "Primary guardian roles", count: 2, active: true }
+      ]
+    },
+    {
+      id: "board",
+      name: "Board",
+      count: 5,
+      color: "bg-purple-100 text-purple-800",
+      children: [
+        { id: "board_chair", name: "Chair", description: "Board leadership role", count: 1, active: true },
+        { id: "board_treasurer", name: "Treasurer", description: "Financial oversight", count: 1, active: true },
+        { id: "board_secretary", name: "Secretary", description: "Record keeping", count: 1, active: false },
+        { id: "board_member", name: "Member", description: "General board member roles", count: 2, active: true }
+      ]
+    },
+    {
+      id: "sysadmin",
+      name: "Systems Admin",
+      count: 1,
+      color: "bg-orange-100 text-orange-800",
+      children: [
+        { id: "sysadmin_administrator", name: "Administrator", description: "System administration", count: 1, active: true }
+      ]
+    }
+  ];
+
+  const renderNode = (node: any, level: number = 0) => {
+    const isExpanded = expandedNodes.has(node.id);
+    const hasChildren = node.children && node.children.length > 0;
+    const paddingLeft = level * 24;
+
+    return (
+      <div key={node.id} className="space-y-1">
+        <div 
+          className={`flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer`}
+          style={{ paddingLeft: paddingLeft + 8 }}
+          onClick={() => hasChildren && toggleNode(node.id)}
+        >
+          <div className="flex items-center space-x-2">
+            {hasChildren && (
+              <div className="w-4 h-4 flex items-center justify-center">
+                {isExpanded ? (
+                  <ChevronDown className="h-3 w-3" />
+                ) : (
+                  <ChevronRight className="h-3 w-3" />
+                )}
+              </div>
+            )}
+            {!hasChildren && <div className="w-4 h-4"></div>}
+            <div className={`w-2 h-2 rounded-full ${node.active === false ? 'bg-gray-400' : 'bg-green-500'}`}></div>
+            <div className="flex-1">
+              <div className="font-medium">{node.name}</div>
+              {node.description && (
+                <div className="text-sm text-gray-600">{node.description}</div>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {level === 0 && node.color && (
+              <Badge className={node.color}>{node.count}</Badge>
+            )}
+            {level > 0 && (
+              <Badge variant="outline">{node.count} {node.count === 1 ? 'role' : 'roles'}</Badge>
+            )}
+            {node.active !== undefined && (
+              <Badge variant={node.active ? "default" : "secondary"}>
+                {node.active ? "Active" : "Inactive"}
+              </Badge>
+            )}
+            <Button variant="outline" size="sm">
+              <Edit className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+        {hasChildren && isExpanded && (
+          <div className="space-y-1">
+            {node.children.map((child: any) => renderNode(child, level + 1))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-2">
+      {roleHierarchy.map((node) => renderNode(node))}
+    </div>
+  );
+}
+
 // Academic Calendar Component
 function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
   const { toast } = useToast();
@@ -595,7 +758,12 @@ export default function SchoolSettingsPage() {
   });
 
   const handleAddStaff = () => {
-    addStaffMutation.mutate(staffForm);
+    addStaffMutation.mutate({
+      ...staffForm,
+      schoolId,
+      startDate: new Date(staffForm.startDate),
+      coreRole: staffForm.role
+    });
   };
 
   const handleAddClassroom = () => {
@@ -844,10 +1012,10 @@ export default function SchoolSettingsPage() {
                           />
                         </div>
                         <div>
-                          <Label>Role</Label>
+                          <Label>Core Role</Label>
                           <Select onValueChange={(value) => setStaffForm(prev => ({ ...prev, role: value }))}>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select role" />
+                              <SelectValue placeholder="Select core role" />
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="teacher_leader">Teacher Leader</SelectItem>
@@ -976,90 +1144,7 @@ export default function SchoolSettingsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {/* Role Categories */}
-                  <div className="space-y-6">
-                    {/* Level 1 - Main Categories */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Main Categories</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {[
-                          { name: "Educator", count: 12, color: "bg-blue-100 text-blue-800" },
-                          { name: "Parent", count: 3, color: "bg-green-100 text-green-800" },
-                          { name: "Board", count: 5, color: "bg-purple-100 text-purple-800" },
-                          { name: "Systems Admin", count: 1, color: "bg-orange-100 text-orange-800" }
-                        ].map((category) => (
-                          <div key={category.name} className="border rounded-lg p-3">
-                            <div className="flex items-center justify-between">
-                              <div className="font-medium">{category.name}</div>
-                              <Badge className={category.color}>{category.count}</Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Level 2 - Sub Categories */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Sub Categories</h3>
-                      <div className="space-y-3">
-                        {[
-                          { name: "Educator → Admin", description: "Administrative roles within education", count: 5 },
-                          { name: "Educator → Classroom", description: "Direct classroom teaching roles", count: 7 },
-                          { name: "Parent → Billing", description: "Financial contact roles", count: 1 },
-                          { name: "Parent → Custodian", description: "Primary guardian roles", count: 2 },
-                          { name: "Board → Chair", description: "Board leadership role", count: 1 },
-                          { name: "Board → Member", description: "General board member roles", count: 4 }
-                        ].map((subcat) => (
-                          <div key={subcat.name} className="border rounded-lg p-3">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium">{subcat.name}</div>
-                                <div className="text-sm text-gray-600">{subcat.description}</div>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Badge variant="outline">{subcat.count} roles</Badge>
-                                <Button variant="outline" size="sm">
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Level 3-5 - Specific Roles */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Specific Roles</h3>
-                      <div className="space-y-2">
-                        {[
-                          { name: "Educator Admin → Startup → Marketing → Logo Design", level: 5, active: true },
-                          { name: "Educator Admin → Ongoing → Finance → Budget", level: 5, active: true },
-                          { name: "Educator Classroom → Lead", level: 3, active: true },
-                          { name: "Educator Classroom → Assistant", level: 3, active: true },
-                          { name: "Board Chair", level: 2, active: true },
-                          { name: "Board Secretary", level: 2, active: false }
-                        ].map((role) => (
-                          <div key={role.name} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-2 h-2 rounded-full ${role.active ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                              <div>
-                                <div className="font-medium">{role.name}</div>
-                                <div className="text-sm text-gray-600">Level {role.level}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Badge variant={role.active ? "default" : "secondary"}>
-                                {role.active ? "Active" : "Inactive"}
-                              </Badge>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                  <RoleTree />
                 </div>
               </CardContent>
             </Card>

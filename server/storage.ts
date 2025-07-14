@@ -122,6 +122,14 @@ export interface IStorage {
   
   // Staff management
   getStaffBySchool(schoolId: string): Promise<UserRole[]>;
+  createStaffMember(staffData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    coreRole: string;
+    schoolId: string;
+    startDate: Date;
+  }): Promise<{ user: User; roles: UserRole[] }>;
   
   // Tuition plans
   getTuitionPlansByProgramOffering(programOfferingId: string): Promise<TuitionPlan[]>;
@@ -729,6 +737,59 @@ export class DatabaseStorage implements IStorage {
     }
 
     return finalRoles;
+  }
+
+  async createStaffMember(staffData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    coreRole: string;
+    schoolId: string;
+    startDate: Date;
+  }): Promise<{ user: User; roles: UserRole[] }> {
+    // Check if user already exists
+    let user = await this.getUserByEmail(staffData.email);
+    
+    if (!user) {
+      // Create new user
+      user = await this.upsertUser({
+        firstName: staffData.firstName,
+        lastName: staffData.lastName,
+        email: staffData.email,
+        profileImageUrl: `https://api.dicebear.com/7.x/initials/svg?seed=${staffData.firstName} ${staffData.lastName}`,
+      });
+    }
+
+    // Define role mappings based on core role
+    const roleMapping: Record<string, string[]> = {
+      'teacher_leader': ['educator_admin', 'educator_classroom_guide'],
+      'teacher': ['educator_classroom_guide'],
+      'assistant': ['educator_classroom_assistant'],
+      'aide': ['educator_assistant_aide']
+    };
+
+    const rolesToAssign = roleMapping[staffData.coreRole] || [];
+    const createdRoles: UserRole[] = [];
+
+    // Create role assignments
+    for (const roleName of rolesToAssign) {
+      // Find the role definition
+      const roleDefinitions = await this.getRolesByNamePrefix(roleName, staffData.schoolId);
+      const roleDefinition = roleDefinitions.find(r => r.name === roleName);
+      
+      if (roleDefinition) {
+        const userRole = await this.createUserRole({
+          userId: user.id,
+          roleId: roleDefinition.id,
+          schoolId: staffData.schoolId,
+          startDate: staffData.startDate,
+          active: true
+        });
+        createdRoles.push(userRole);
+      }
+    }
+
+    return { user, roles: createdRoles };
   }
 
 

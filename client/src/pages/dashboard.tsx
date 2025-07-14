@@ -56,7 +56,7 @@ export default function Dashboard() {
   const currentSchool = user.schools?.[0];
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
       <div className="flex-1 flex pt-16">

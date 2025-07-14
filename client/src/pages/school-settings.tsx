@@ -1546,13 +1546,13 @@ export default function SchoolSettingsPage() {
   const currentSchoolForNav = school;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
       <div className="flex-1 flex pt-16">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 bg-gray-50">
           <div className="p-4 lg:p-6 pb-20">
       
       {/* School Selector Dialog for Educators without School ID */}

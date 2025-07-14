@@ -172,7 +172,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               {/* User Profile */}
               <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="p-1">
+                <Button variant="ghost" className="p-1 flex items-center space-x-1">
                   {user.profileImageUrl ? (
                     <img 
                       className="h-8 w-8 rounded-full object-cover" 
@@ -186,6 +186,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                       </span>
                     </div>
                   )}
+                  <ChevronDown className="h-3 w-3 text-gray-500" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

@@ -63,6 +63,7 @@ Preferred communication style: Simple, everyday language.
   - Increased role selector width from 80px to 128px for better readability
   - Improved text sizing and icon spacing throughout top navigation bar
   - Added more spacing between notification icons and user profile section
+  - Added chevron icon to user avatar dropdown for better visual indication across all device sizes
 
 ## System Architecture
 

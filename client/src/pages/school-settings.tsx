@@ -1593,10 +1593,10 @@ export default function SchoolSettingsPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex pt-16">
+      <div className="flex pt-16 min-h-screen">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden overflow-y-auto lg:ml-64">
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64" style={{ height: 'calc(100vh - 64px)', overflowY: 'auto' }}>
           <div className="max-w-6xl mx-auto pb-20">
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (

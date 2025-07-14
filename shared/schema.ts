@@ -683,6 +683,57 @@ export const fundraisingAnalytics = pgTable("fundraising_analytics", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ======================== ROLE SURVEY & ASSIGNMENTS ========================
+
+// Role survey responses for formal role assignment discussions
+export const roleSurveyResponses = pgTable("role_survey_responses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  roleId: uuid("role_id").notNull().references(() => roleDefinitions.id),
+  schoolId: uuid("school_id").notNull().references(() => schools.id),
+  
+  // Survey questions (1-10 scale)
+  skillExperienceRating: integer("skill_experience_rating").notNull(), // 1-10: skill/experience for this role
+  enthusiasmRating: integer("enthusiasm_rating").notNull(), // 1-10: enthusiasm for taking on role
+  growthInterest: boolean("growth_interest").notNull(), // yes/no: area they'd like to grow in
+  
+  // Metadata
+  surveyDate: timestamp("survey_date").defaultNow(),
+  schoolYear: varchar("school_year", { length: 20 }), // e.g., "2024-25"
+  notes: text("notes"), // Optional additional comments
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  // Ensure one response per user per role per school per year
+  uniqueResponse: unique().on(table.userId, table.roleId, table.schoolId, table.schoolYear),
+}));
+
+// Final role assignments after discussion process
+export const finalRoleAssignments = pgTable("final_role_assignments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  roleId: uuid("role_id").notNull().references(() => roleDefinitions.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  schoolId: uuid("school_id").notNull().references(() => schools.id),
+  
+  // Assignment details
+  assignedDate: timestamp("assigned_date").defaultNow(),
+  schoolYear: varchar("school_year", { length: 20 }).notNull(),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  
+  // Assignment context
+  classroomId: uuid("classroom_id").references(() => classrooms.id), // For classroom-specific roles
+  assignmentNotes: text("assignment_notes"),
+  
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  // Ensure one assignment per role per school per year (roles can only be assigned to one person)
+  uniqueAssignment: unique().on(table.roleId, table.schoolId, table.schoolYear),
+}));
+
 // ======================== RELATIONS ========================
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -1383,6 +1434,12 @@ export type SubsidyRate = typeof subsidyRates.$inferSelect;
 export type InsertSubsidyRate = typeof subsidyRates.$inferInsert;
 export type ChildSubsidyAssignment = typeof childSubsidyAssignments.$inferSelect;
 export type InsertChildSubsidyAssignment = typeof childSubsidyAssignments.$inferInsert;
+
+// Role Survey and Assignment types
+export type RoleSurveyResponse = typeof roleSurveyResponses.$inferSelect;
+export type InsertRoleSurveyResponse = typeof roleSurveyResponses.$inferInsert;
+export type FinalRoleAssignment = typeof finalRoleAssignments.$inferSelect;
+export type InsertFinalRoleAssignment = typeof finalRoleAssignments.$inferInsert;
 
 // ======================== ZOD SCHEMAS ========================
 

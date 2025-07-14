@@ -19,9 +19,11 @@ export default function Sidebar({ currentRole }: SidebarProps) {
     { icon: "fas fa-book", label: "Knowledge Base", href: "/knowledge" },
   ];
 
-  const showSchoolSettings = currentRole?.roleCategory === "educator" || 
-                            currentRole?.roleCategory === "systems_administrator" || 
-                            currentRole?.roleDefinition?.name === "school_admin";
+  const showSchoolSettings = currentRole?.category === "educator" || 
+                            currentRole?.category === "systems_administrator" || 
+                            currentRole?.name === "school_admin" ||
+                            currentRole?.name === "teacher_leader" ||
+                            currentRole?.name === "operations_manager";
 
   return (
     <aside className="w-64 bg-white shadow-sm h-screen fixed top-16 left-0 overflow-y-auto hidden lg:block">

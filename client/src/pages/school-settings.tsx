@@ -953,306 +953,306 @@ export default function SchoolSettingsPage() {
 
           {/* Roles Tab */}
           <TabsContent value="roles" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Role Structure Overview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Educator Role Structure</CardTitle>
-                  <p className="text-sm text-gray-600">
-                    Hierarchical role definitions based on network defaults. Schools can customize roles as needed.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* School-Wide Administration */}
-                    <div className="border rounded-lg p-4">
-                      <h4 className="font-semibold text-lg mb-3 flex items-center">
-                        <Users className="mr-2 h-5 w-5 text-blue-600" />
-                        School-Wide Administration
-                      </h4>
-                      <div className="space-y-3 ml-6">
-                        <div className="border-l-2 border-blue-200 pl-4">
-                          <h5 className="font-medium text-base mb-2">Leadership & Operations</h5>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Teacher Leader</Badge>
-                              <span className="text-gray-600">Overall school leadership</span>
-                            </div>
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Operations Manager</Badge>
-                              <span className="text-gray-600">Day-to-day operations</span>
-                            </div>
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Enrollment Manager</Badge>
-                              <span className="text-gray-600">Student enrollment & admissions</span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="border-l-2 border-green-200 pl-4">
-                          <h5 className="font-medium text-base mb-2">Learning & Development</h5>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Curriculum Coordinator</Badge>
-                              <span className="text-gray-600">Curriculum development</span>
-                            </div>
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">PD Coordinator</Badge>
-                              <span className="text-gray-600">Professional development</span>
-                            </div>
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Social Emotional Learning Lead</Badge>
-                              <span className="text-gray-600">SEL programs</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="border-l-2 border-purple-200 pl-4">
-                          <h5 className="font-medium text-base mb-2">Support & Community</h5>
-                          <div className="space-y-1 text-sm">
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Family Engagement Coordinator</Badge>
-                              <span className="text-gray-600">Family partnerships</span>
-                            </div>
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Learning Support Coordinator</Badge>
-                              <span className="text-gray-600">Special needs support</span>
-                            </div>
-                            <div className="flex items-center py-1">
-                              <Badge variant="outline" className="mr-2">Facilities Coordinator</Badge>
-                              <span className="text-gray-600">Facility management</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Classroom Roles */}
-                    <div className="border rounded-lg p-4">
-                      <h4 className="font-semibold text-lg mb-3 flex items-center">
-                        <Home className="mr-2 h-5 w-5 text-green-600" />
-                        Classroom Roles
-                      </h4>
-                      <div className="space-y-2 ml-6">
-                        <div className="flex items-center py-1">
-                          <Badge className="mr-2 bg-green-100 text-green-800">Guide</Badge>
-                          <span className="text-gray-600">Lead teacher responsible for classroom</span>
-                        </div>
-                        <div className="flex items-center py-1">
-                          <Badge className="mr-2 bg-blue-100 text-blue-800">Assistant</Badge>
-                          <span className="text-gray-600">Supporting guide role</span>
-                        </div>
-                        <div className="flex items-center py-1">
-                          <Badge className="mr-2 bg-gray-100 text-gray-800">Aide</Badge>
-                          <span className="text-gray-600">General classroom support</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Staff Role Assignments */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Staff Role Assignments</CardTitle>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Drag and drop staff into roles. Multiple roles per person supported.
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Staff
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    {/* Current Staff Pool */}
-                    <div>
-                      <h5 className="font-medium mb-3 flex items-center">
-                        <Users className="mr-2 h-4 w-4" />
-                        Current Staff
-                      </h5>
-                      <div className="grid grid-cols-1 gap-2 p-3 bg-gray-50 rounded-lg min-h-[120px]">
-                        {[
-                          { id: 1, name: "Sarah Johnson", roles: ["Teacher Leader"] },
-                          { id: 2, name: "Michael Chen", roles: ["Guide - Primary A"] },
-                          { id: 3, name: "Emily Rodriguez", roles: ["Operations Manager"] },
-                          { id: 4, name: "David Kim", roles: ["Assistant - Toddler"] },
-                          { id: 5, name: "Lisa Thompson", roles: [] }
-                        ].map((person) => (
-                          <div
-                            key={person.id}
-                            className="flex items-center justify-between p-2 bg-white border rounded cursor-move hover:shadow-sm transition-shadow"
-                            draggable
-                          >
-                            <div className="flex items-center">
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                <span className="text-sm font-medium text-blue-600">
-                                  {person.name.split(' ').map(n => n[0]).join('')}
-                                </span>
-                              </div>
-                              <div>
-                                <div className="font-medium text-sm">{person.name}</div>
-                                {person.roles.length > 0 && (
-                                  <div className="flex flex-wrap gap-1 mt-1">
-                                    {person.roles.map((role, idx) => (
-                                      <Badge key={idx} variant="secondary" className="text-xs">
-                                        {role}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-1">
-                              <Button variant="ghost" size="sm">
-                                <Settings className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Role Assignment Areas */}
-                    <div className="space-y-4">
-                      <h5 className="font-medium flex items-center">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Role Assignments
-                      </h5>
-                      
-                      {/* School-Wide Admin Roles */}
-                      <div className="border rounded-lg p-3">
-                        <h6 className="font-medium text-sm mb-2 text-blue-600">School Administration</h6>
-                        <div className="grid grid-cols-1 gap-2">
-                          {[
-                            "Teacher Leader",
-                            "Operations Manager", 
-                            "Enrollment Manager",
-                            "Curriculum Coordinator",
-                            "Family Engagement Coordinator"
-                          ].map((role) => (
-                            <div
-                              key={role}
-                              className="min-h-[40px] p-2 border-2 border-dashed border-gray-200 rounded bg-blue-50/30 flex items-center justify-between"
-                            >
-                              <span className="text-sm font-medium">{role}</span>
-                              <div className="flex items-center space-x-1">
-                                <Badge variant="outline" className="text-xs">
-                                  0 assigned
-                                </Badge>
-                                <Button variant="ghost" size="sm">
-                                  <Plus className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Classroom Roles */}
-                      <div className="border rounded-lg p-3">
-                        <h6 className="font-medium text-sm mb-2 text-green-600">Classroom Assignments</h6>
-                        <div className="space-y-3">
-                          {[
-                            { name: "Primary A", roles: ["Guide", "Assistant"] },
-                            { name: "Toddler Room", roles: ["Guide", "Assistant", "Aide"] },
-                            { name: "Infant Room", roles: ["Guide", "Aide"] }
-                          ].map((classroom) => (
-                            <div key={classroom.name} className="border rounded p-2">
-                              <div className="font-medium text-sm mb-2">{classroom.name}</div>
-                              <div className="grid grid-cols-1 gap-1">
-                                {classroom.roles.map((role) => (
-                                  <div
-                                    key={`${classroom.name}-${role}`}
-                                    className="min-h-[32px] p-2 border border-dashed border-gray-200 rounded bg-green-50/30 flex items-center justify-between text-sm"
-                                  >
-                                    <span>{role}</span>
-                                    <Badge variant="outline" className="text-xs">
-                                      {role === "Guide" && classroom.name === "Primary A" ? "1" : "0"} assigned
-                                    </Badge>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex justify-end space-x-2 pt-4 border-t">
-                      <Button variant="outline">
-                        Reset to Network Defaults
-                      </Button>
-                      <Button>
-                        Save Role Assignments
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Role History & Time Tracking */}
+            {/* Role Survey Section */}
             <Card>
               <CardHeader>
-                <CardTitle>Role Assignment History</CardTitle>
+                <CardTitle>Role Interest Survey</CardTitle>
                 <p className="text-sm text-gray-600">
-                  Track role changes over time with start and end dates for audit purposes.
+                  Staff complete surveys rating their skill/experience, enthusiasm, and growth interest for each role. This helps guide formal discussions about role assignments.
                 </p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm font-medium text-gray-600 border-b pb-2">
-                    <div>Staff Member</div>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                      Survey for school year: <strong>2024-25</strong>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Participant
+                    </Button>
+                  </div>
+                  
+                  {/* Survey Grid */}
+                  <div className="border rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Role
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Skill/Experience<br />
+                              <span className="text-gray-400 normal-case">(1-10)</span>
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Enthusiasm<br />
+                              <span className="text-gray-400 normal-case">(1-10)</span>
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Growth Interest<br />
+                              <span className="text-gray-400 normal-case">(Yes/No)</span>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {[
+                            "Teacher Leader",
+                            "Operations Manager",
+                            "Enrollment Manager", 
+                            "Curriculum Coordinator",
+                            "Family Engagement Coordinator",
+                            "Learning Support Coordinator",
+                            "Primary Guide",
+                            "Toddler Guide",
+                            "Assistant - Primary",
+                            "Assistant - Toddler"
+                          ].map((role, index) => (
+                            <tr key={role} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r">
+                                {role}
+                              </td>
+                              <td className="px-3 py-3 text-center border-r">
+                                <select className="w-16 px-2 py-1 text-sm border border-gray-300 rounded">
+                                  <option value="">-</option>
+                                  {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                    <option key={num} value={num}>{num}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-3 py-3 text-center border-r">
+                                <select className="w-16 px-2 py-1 text-sm border border-gray-300 rounded">
+                                  <option value="">-</option>
+                                  {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                                    <option key={num} value={num}>{num}</option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td className="px-3 py-3 text-center">
+                                <select className="w-16 px-2 py-1 text-sm border border-gray-300 rounded">
+                                  <option value="">-</option>
+                                  <option value="yes">Yes</option>
+                                  <option value="no">No</option>
+                                </select>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline">Save Draft</Button>
+                    <Button>Submit Survey</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Role Assignment Matrix */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Role Assignment Matrix</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Review survey responses and assign roles. Each role can only be assigned to one person.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                      Assignment for school year: <strong>2024-25</strong>
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 bg-red-100 border border-red-300 rounded mr-2"></div>
+                        <span>Unassigned</span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-4 h-4 bg-green-100 border border-green-300 rounded mr-2"></div>
+                        <span>Assigned</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Assignment Grid */}
+                  <div className="border rounded-lg overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Role
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Sarah Johnson
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Michael Chen
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                              Emily Rodriguez
+                            </th>
+                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              David Kim
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {[
+                            { 
+                              name: "Teacher Leader", 
+                              assigned: "Sarah Johnson",
+                              responses: {
+                                "Sarah Johnson": { skill: 9, enthusiasm: 10, growth: "Yes" },
+                                "Michael Chen": { skill: 6, enthusiasm: 7, growth: "No" },
+                                "Emily Rodriguez": { skill: 7, enthusiasm: 8, growth: "Yes" },
+                                "David Kim": { skill: 4, enthusiasm: 5, growth: "Yes" }
+                              }
+                            },
+                            { 
+                              name: "Operations Manager", 
+                              assigned: "Emily Rodriguez",
+                              responses: {
+                                "Sarah Johnson": { skill: 6, enthusiasm: 5, growth: "No" },
+                                "Michael Chen": { skill: 7, enthusiasm: 6, growth: "Yes" },
+                                "Emily Rodriguez": { skill: 9, enthusiasm: 9, growth: "Yes" },
+                                "David Kim": { skill: 5, enthusiasm: 6, growth: "Yes" }
+                              }
+                            },
+                            { 
+                              name: "Primary Guide", 
+                              assigned: "Michael Chen",
+                              responses: {
+                                "Sarah Johnson": { skill: 8, enthusiasm: 7, growth: "No" },
+                                "Michael Chen": { skill: 10, enthusiasm: 10, growth: "Yes" },
+                                "Emily Rodriguez": { skill: 6, enthusiasm: 4, growth: "No" },
+                                "David Kim": { skill: 7, enthusiasm: 8, growth: "Yes" }
+                              }
+                            },
+                            { 
+                              name: "Toddler Guide", 
+                              assigned: null,
+                              responses: {
+                                "Sarah Johnson": { skill: 7, enthusiasm: 6, growth: "Yes" },
+                                "Michael Chen": { skill: 5, enthusiasm: 4, growth: "No" },
+                                "Emily Rodriguez": { skill: 4, enthusiasm: 3, growth: "No" },
+                                "David Kim": { skill: 8, enthusiasm: 9, growth: "Yes" }
+                              }
+                            },
+                            { 
+                              name: "Assistant - Primary", 
+                              assigned: null,
+                              responses: {
+                                "Sarah Johnson": { skill: 6, enthusiasm: 5, growth: "No" },
+                                "Michael Chen": { skill: 7, enthusiasm: 6, growth: "Yes" },
+                                "Emily Rodriguez": { skill: 5, enthusiasm: 4, growth: "No" },
+                                "David Kim": { skill: 9, enthusiasm: 8, growth: "Yes" }
+                              }
+                            }
+                          ].map((role, index) => (
+                            <tr key={role.name} className={`${role.assigned ? 'bg-green-50' : 'bg-red-50'} ${index % 2 === 0 ? '' : 'bg-opacity-50'}`}>
+                              <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r">
+                                <div className="flex items-center">
+                                  <div className={`w-3 h-3 rounded-full mr-2 ${role.assigned ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                                  {role.name}
+                                </div>
+                              </td>
+                              {["Sarah Johnson", "Michael Chen", "Emily Rodriguez", "David Kim"].map((staff) => (
+                                <td key={staff} className="px-3 py-3 text-center border-r last:border-r-0">
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-center">
+                                      <input 
+                                        type="radio" 
+                                        name={`role-${role.name}`}
+                                        checked={role.assigned === staff}
+                                        className="mr-2"
+                                      />
+                                    </div>
+                                    <div className="text-xs text-gray-600">
+                                      <div>Skill: <strong>{role.responses[staff]?.skill || '-'}</strong></div>
+                                      <div>Enthusiasm: <strong>{role.responses[staff]?.enthusiasm || '-'}</strong></div>
+                                      <div>Growth: <strong>{role.responses[staff]?.growth || '-'}</strong></div>
+                                    </div>
+                                  </div>
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-gray-600">
+                      <strong>3 of 5</strong> roles assigned
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline">Save Draft</Button>
+                      <Button>Finalize Assignments</Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Assignment History */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Assignment History</CardTitle>
+                <p className="text-sm text-gray-600">
+                  Historical record of role assignments and changes over time.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-5 gap-4 text-sm font-medium text-gray-600 border-b pb-2">
                     <div>Role</div>
-                    <div>Period</div>
+                    <div>Staff Member</div>
+                    <div>School Year</div>
+                    <div>Date Assigned</div>
                     <div>Status</div>
                   </div>
                   
                   {[
                     {
-                      name: "Sarah Johnson",
                       role: "Teacher Leader",
-                      startDate: "2024-08-15",
-                      endDate: null,
+                      staff: "Sarah Johnson",
+                      schoolYear: "2024-25",
+                      dateAssigned: "2024-08-15",
                       status: "Active"
                     },
                     {
-                      name: "Michael Chen", 
-                      role: "Guide - Primary A",
-                      startDate: "2024-08-20",
-                      endDate: null,
-                      status: "Active"
-                    },
-                    {
-                      name: "Emily Rodriguez",
                       role: "Operations Manager", 
-                      startDate: "2024-09-01",
-                      endDate: null,
+                      staff: "Emily Rodriguez",
+                      schoolYear: "2024-25",
+                      dateAssigned: "2024-08-20",
                       status: "Active"
                     },
                     {
-                      name: "Former Staff",
-                      role: "Assistant - Toddler",
-                      startDate: "2024-08-15",
-                      endDate: "2024-10-31",
+                      role: "Primary Guide",
+                      staff: "Michael Chen",
+                      schoolYear: "2024-25", 
+                      dateAssigned: "2024-08-25",
+                      status: "Active"
+                    },
+                    {
+                      role: "Teacher Leader",
+                      staff: "Former Staff",
+                      schoolYear: "2023-24",
+                      dateAssigned: "2023-08-15",
                       status: "Ended"
                     }
                   ].map((assignment, index) => (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-4 gap-4 py-2 border-b border-gray-100 last:border-b-0">
-                      <div className="font-medium">{assignment.name}</div>
-                      <div>
-                        <Badge variant="outline">{assignment.role}</Badge>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {new Date(assignment.startDate).toLocaleDateString()}
-                        {assignment.endDate ? ` - ${new Date(assignment.endDate).toLocaleDateString()}` : ' - Present'}
+                    <div key={index} className="grid grid-cols-5 gap-4 py-2 border-b border-gray-100 last:border-b-0 text-sm">
+                      <div className="font-medium">{assignment.role}</div>
+                      <div>{assignment.staff}</div>
+                      <div>{assignment.schoolYear}</div>
+                      <div className="text-gray-600">
+                        {new Date(assignment.dateAssigned).toLocaleDateString()}
                       </div>
                       <div>
                         <Badge className={assignment.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>

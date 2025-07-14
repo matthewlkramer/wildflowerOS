@@ -426,7 +426,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(roleDefinitions)
       .where(whereClause)
-      .orderBy(roleDefinitions.category, roleDefinitions.subCategory, roleDefinitions.sortOrder);
+      .orderBy(roleDefinitions.category, roleDefinitions.sortOrder);
   }
 
   async getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]> {
@@ -455,7 +455,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(roleDefinitions)
       .where(whereClause)
-      .orderBy(roleDefinitions.subCategory, roleDefinitions.sortOrder);
+      .orderBy(roleDefinitions.sortOrder);
   }
 
   async createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition> {

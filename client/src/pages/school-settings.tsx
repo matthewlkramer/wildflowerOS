@@ -2018,6 +2018,131 @@ export default function SchoolSettingsPage() {
                     </Tabs>
                   </TabsContent>
                 </Tabs>
+
+                {/* Add Network School Year Dialog */}
+                <Dialog open={addingSchoolYear} onOpenChange={setAddingSchoolYear}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add New Network School Year</DialogTitle>
+                      <DialogDescription>
+                        Create a new school year with dates for outer boundaries that all schools can inherit.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Year Name</Label>
+                        <Input
+                          value={schoolYearForm.name}
+                          onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="e.g., 2024-2025"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Start Date</Label>
+                          <Input
+                            type="date"
+                            value={schoolYearForm.startDate}
+                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>End Date</Label>
+                          <Input
+                            type="date"
+                            value={schoolYearForm.endDate}
+                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setAddingSchoolYear(false)}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleAddSchoolYear}
+                          disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
+                        >
+                          Add Network School Year
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Edit Network School Year Dialog */}
+                <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Network School Year</DialogTitle>
+                      <DialogDescription>
+                        Update the network default school year information and dates.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <Label>Year Name</Label>
+                        <Input
+                          value={schoolYearForm.name}
+                          onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="e.g., 2024-2025"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Start Date</Label>
+                          <Input
+                            type="date"
+                            value={schoolYearForm.startDate}
+                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                          />
+                        </div>
+                        <div>
+                          <Label>End Date</Label>
+                          <Input
+                            type="date"
+                            value={schoolYearForm.endDate}
+                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" onClick={() => setEditingSchoolYear(null)}>
+                          Cancel
+                        </Button>
+                        <Button 
+                          onClick={handleUpdateSchoolYear}
+                          disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
+                        >
+                          Update Network School Year
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
+                {/* Delete Network School Year Confirmation Dialog */}
+                <AlertDialog open={deletingSchoolYear !== null} onOpenChange={(open) => !open && setDeletingSchoolYear(null)}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Network School Year</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete "{deletingSchoolYear?.name}"? This will remove the network default school year and cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setDeletingSchoolYear(null)}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={confirmDeleteSchoolYear}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete Network School Year
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             ) : currentRole?.roleName?.startsWith('parent') ? (
               // Parent View

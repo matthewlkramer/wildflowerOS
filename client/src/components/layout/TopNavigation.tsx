@@ -99,6 +99,13 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     return "Select Role";
   };
 
+  // Debug logging
+  console.log("TopNavigation Debug:", {
+    userRoles,
+    currentUserRole,
+    userRolesCount: userRoles.length
+  });
+
   const handleRoleSwitch = (roleId: string) => {
     switchRoleMutation.mutate(roleId);
   };
@@ -113,19 +120,20 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
             
             {/* Role Switcher */}
-            <div className="hidden md:block">
+            <div className="flex items-center bg-blue-50 border border-blue-200 rounded-md p-2">
+              <span className="text-sm text-gray-600 mr-2">Role:</span>
               <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-64">
-                  <div className="flex items-center space-x-2">
+                <SelectTrigger className="w-48 min-w-0 border-0 bg-transparent">
+                  <div className="flex items-center space-x-2 truncate">
                     {currentUserRole && (
                       <>
                         {(() => {
                           const IconComponent = roleIcons[currentUserRole.role as keyof typeof roleIcons];
-                          return IconComponent ? <IconComponent className="w-4 h-4" /> : null;
+                          return IconComponent ? <IconComponent className="w-4 h-4 flex-shrink-0" /> : null;
                         })()}
-                        <span>{getContextDisplayName()}</span>
+                        <span className="truncate font-medium">{getContextDisplayName()}</span>
                         {currentUserRole.active && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="secondary" className="text-xs flex-shrink-0">
                             Active
                           </Badge>
                         )}
@@ -135,23 +143,29 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                   </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {userRoles.map((role) => {
-                    const IconComponent = roleIcons[role.role as keyof typeof roleIcons];
-                    const roleDisplay = roleLabels[role.role as keyof typeof roleLabels] || role.role;
-                    return (
-                      <SelectItem key={role.id} value={role.id}>
-                        <div className="flex items-center space-x-2">
-                          {IconComponent && <IconComponent className="w-4 h-4" />}
-                          <span>{roleDisplay}</span>
-                          {role.active && (
-                            <Badge variant="secondary" className="text-xs">
-                              Active
-                            </Badge>
-                          )}
-                        </div>
-                      </SelectItem>
-                    );
-                  })}
+                  {userRoles.length > 0 ? (
+                    userRoles.map((role) => {
+                      const IconComponent = roleIcons[role.role as keyof typeof roleIcons];
+                      const roleDisplay = roleLabels[role.role as keyof typeof roleLabels] || role.role;
+                      return (
+                        <SelectItem key={role.id} value={role.id}>
+                          <div className="flex items-center space-x-2">
+                            {IconComponent && <IconComponent className="w-4 h-4" />}
+                            <span>{roleDisplay}</span>
+                            {role.active && (
+                              <Badge variant="secondary" className="text-xs ml-auto">
+                                Active
+                              </Badge>
+                            )}
+                          </div>
+                        </SelectItem>
+                      );
+                    })
+                  ) : (
+                    <SelectItem value="no-roles" disabled>
+                      No roles available
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>

@@ -19,15 +19,9 @@ export default function Sidebar({ currentRole }: SidebarProps) {
     { icon: "fas fa-book", label: "Knowledge Base", href: "/knowledge" },
   ];
 
-  const managementItems = [
-    { icon: "fas fa-cog", label: "School Settings", href: "/settings" },
-    { icon: "fas fa-users-cog", label: "Staff Management", href: "/settings" },
-    { icon: "fas fa-chart-bar", label: "Analytics", href: "/analytics" },
-  ];
-
-  const showManagement = currentRole?.roleCategory === "educator" || 
-                        currentRole?.roleCategory === "systems_administrator" || 
-                        currentRole?.roleDefinition?.name === "school_admin";
+  const showSchoolSettings = currentRole?.roleCategory === "educator" || 
+                            currentRole?.roleCategory === "systems_administrator" || 
+                            currentRole?.roleDefinition?.name === "school_admin";
 
   return (
     <aside className="w-64 bg-white shadow-sm h-screen fixed top-16 left-0 overflow-y-auto hidden lg:block">
@@ -49,27 +43,18 @@ export default function Sidebar({ currentRole }: SidebarProps) {
           );
         })}
         
-        {showManagement && (
+        {showSchoolSettings && (
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <h3 className="px-6 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-              School Management
-            </h3>
-            {managementItems.map((item, index) => {
-              const isActive = location === item.href || (location.startsWith(item.href) && item.href !== '/');
-              return (
-                <Link
-                  key={index}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 mt-2",
-                    isActive && "text-gray-700 bg-blue-50 border-r-2 border-primary"
-                  )}
-                >
-                  <i className={`${item.icon} mr-3`}></i>
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+            <Link
+              href="/settings"
+              className={cn(
+                "flex items-center px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                (location === "/settings" || location.startsWith("/settings")) && "text-gray-700 bg-blue-50 border-r-2 border-primary"
+              )}
+            >
+              <i className="fas fa-cog mr-3"></i>
+              <span>School Settings</span>
+            </Link>
           </div>
         )}
       </nav>

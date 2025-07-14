@@ -55,6 +55,14 @@ Preferred communication style: Simple, everyday language.
   - Added comprehensive API endpoints for email CRUD operations
   - Login email automatically copied to email_addresses table as primary personal email
   - Storage layer methods handle email creation, update, deletion, and primary assignment
+- **Simplified left navigation structure**
+  - Removed "School Management" category and sub-items (Staff Management, Analytics)
+  - Kept only "School Settings" as standalone navigation item for role-based access
+  - Cleaner navigation hierarchy with direct access to essential school configuration
+- **Enhanced top navigation spacing and usability**
+  - Increased role selector width from 80px to 128px for better readability
+  - Improved text sizing and icon spacing throughout top navigation bar
+  - Added more spacing between notification icons and user profile section
 
 ## System Architecture
 

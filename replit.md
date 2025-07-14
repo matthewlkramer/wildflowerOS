@@ -17,13 +17,13 @@ Preferred communication style: Simple, everyday language.
   - Corrected indentation issues throughout both components for proper JSX structure
   - Application now starts successfully and runs on port 5000
   - **CONFIRMED WORKING** - All JSX syntax errors resolved and app is operational
-- **Simplified layout architecture to fix scrolling issues**
-  - Removed all height constraints (100%, 100vh) that were preventing natural document flow
-  - Changed TopNavigation from fixed positioning to static positioning
-  - Removed compensating pt-16 padding that was used for fixed navigation
-  - Eliminated overflow-y-auto constraints to allow natural scrolling
-  - Simplified layout structure removing unnecessary flex containers
-  - **IN PROGRESS** - Testing scrolling functionality across all pages
+- **✅ RESOLVED: Fixed scrolling issues on system admin school years page**
+  - Identified and removed max-h-80 constraint on SystemHolidaysOverview table that was limiting content
+  - Restored flexbox layout structure matching dashboard page (min-h-screen flex flex-col)
+  - Added overflow-y-auto back to main element to enable scrollable content area
+  - Maintained flex-1 on containers to properly distribute available space
+  - Removed sticky table headers that could interfere with scrolling
+  - **CONFIRMED WORKING** - User can now scroll to see full school years content including template box
 - **Enhanced calendar closures system with rule-based network defaults**
   - Added rule field to calendar_closures table for descriptive holiday rules
   - Made date field nullable for network default holidays that use rules instead of specific dates

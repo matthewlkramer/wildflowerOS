@@ -1814,11 +1814,6 @@ export default function SchoolSettingsPage() {
                     </Tabs>
                   </TabsContent>
                 </Tabs>
-                
-                {/* Debug element to test scrolling */}
-                <div className="h-96 bg-red-100 mt-8 p-4">
-                  <p>Debug: This is a test element to force scrolling</p>
-                </div>
               </div>
             ) : currentRole?.roleName?.startsWith('parent') ? (
               // Parent View

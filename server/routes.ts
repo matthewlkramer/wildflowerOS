@@ -55,7 +55,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
       
-      console.log("API /api/user/roles response:", JSON.stringify(rolesWithDefinitions, null, 2));
       res.json(rolesWithDefinitions);
     } catch (error) {
       console.error("Error fetching user roles:", error);

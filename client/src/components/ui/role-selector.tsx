@@ -66,12 +66,7 @@ export default function RoleSelector() {
     queryKey: ["/api/user/roles"],
   });
 
-  // Debug logging
-  console.log("Role selector - isLoading:", isLoading);
-  console.log("Role selector - userRoles:", userRoles);
-  console.log("Role selector - userRoles length:", userRoles?.length);
-  console.log("Role selector - error:", error);
-  console.log("Role selector - first role:", userRoles?.[0]);
+
 
 
 

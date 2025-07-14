@@ -310,11 +310,21 @@ export class DatabaseStorage implements IStorage {
         active: userRoles.active,
         startDate: userRoles.startDate,
         endDate: userRoles.endDate,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        role: roleDefinitions.name, // Add role name for compatibility
+        roleName: roleDefinitions.name,
+        roleDisplayName: roleDefinitions.displayName,
+        roleCategory: roleDefinitions.category,
       })
       .from(userRoles)
+      .innerJoin(users, eq(userRoles.userId, users.id))
+      .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
       .where(and(
         eq(userRoles.schoolId, schoolId),
-        eq(userRoles.active, true)
+        eq(userRoles.active, true),
+        eq(roleDefinitions.category, 'educator') // Only show educator roles as staff
       ));
   }
 

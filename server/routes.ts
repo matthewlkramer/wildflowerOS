@@ -336,13 +336,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: staffData.lastName,
       });
       
+      // Find the appropriate role definition based on the old role names
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const roleMapping = {
+        'teacher_leader': 'school_admin',
+        'teacher': 'classroom_guide',
+        'assistant': 'classroom_guide',
+        'aide': 'classroom_guide'
+      };
+      
+      const roleName = roleMapping[staffData.role as keyof typeof roleMapping] || 'classroom_guide';
+      const roleDefinition = roleDefinitions.find(rd => rd.name === roleName);
+      
+      if (!roleDefinition) {
+        return res.status(400).json({ message: "Invalid role specified" });
+      }
+      
       // Then create user role for the new staff member
       const userRole = await storage.createUserRole({
         userId: user.id,
+        roleId: roleDefinition.id,
         schoolId,
-        role: staffData.role,
         active: true,
-        startDate: staffData.startDate
+        startDate: staffData.startDate ? new Date(staffData.startDate) : new Date()
       });
       
       res.status(201).json(userRole);

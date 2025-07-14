@@ -600,7 +600,7 @@ export default function FamilyBillingPage() {
         </main>
       </div>
       
-      <MobileBottomNav />
+      <MobileBottomNav currentRole={currentRole} />
     </div>
   );
 }

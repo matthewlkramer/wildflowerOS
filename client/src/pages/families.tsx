@@ -323,7 +323,7 @@ export default function FamiliesPage() {
         </main>
       </div>
 
-      <MobileBottomNav />
+      <MobileBottomNav currentRole={currentRole} />
     </div>
   );
 }

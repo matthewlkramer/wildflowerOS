@@ -111,7 +111,7 @@ export default function Dashboard() {
         </main>
       </div>
 
-      <MobileBottomNav />
+      <MobileBottomNav currentRole={currentRole} />
     </div>
   );
 }

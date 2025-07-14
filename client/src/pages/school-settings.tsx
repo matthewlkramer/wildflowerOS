@@ -1281,7 +1281,7 @@ export default function SchoolSettingsPage() {
         </main>
       </div>
 
-      <MobileBottomNav />
+      <MobileBottomNav currentRole={currentRole} />
     </div>
   );
 }

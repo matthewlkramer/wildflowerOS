@@ -27,25 +27,17 @@ interface TopNavigationProps {
 }
 
 const roleIcons = {
-  teacher_leader: GraduationCap,
-  teacher: GraduationCap,
-  assistant: Users,
-  aide: Users,
   parent: Heart,
-  board_member: Building2,
-  central_staff: Shield,
-  network_admin: Star,
+  educator: GraduationCap,
+  board_director: Building2,
+  systems_administrator: Shield,
 };
 
 const roleLabels = {
-  teacher_leader: "TL",
-  teacher: "Teacher",
-  assistant: "Assistant",
-  aide: "Aide",
   parent: "Parent",
-  board_member: "Board",
-  central_staff: "Partner",
-  network_admin: "Admin",
+  educator: "Educator", 
+  board_director: "Board Director",
+  systems_administrator: "Systems Administrator",
 };
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
@@ -93,7 +85,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
 
   const getContextDisplayName = () => {
     if (currentUserRole) {
-      const roleDisplay = roleLabels[currentUserRole.role as keyof typeof roleLabels] || currentUserRole.role;
+      const roleDisplay = roleLabels[currentUserRole.roleCategory as keyof typeof roleLabels] || currentUserRole.roleCategory;
       return roleDisplay;
     }
     return "Select Role";
@@ -101,8 +93,12 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
 
 
 
-  const handleRoleSwitch = (roleId: string) => {
-    switchRoleMutation.mutate(roleId);
+  const handleRoleSwitch = (category: string) => {
+    // Find the first role in the selected category
+    const rolesInCategory = userRoles.filter(role => role.roleCategory === category && role.active);
+    if (rolesInCategory.length > 0) {
+      switchRoleMutation.mutate(rolesInCategory[0].id);
+    }
   };
 
   return (
@@ -118,8 +114,8 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
           <div className="flex items-center space-x-3">
             {/* Role Switcher */}
             <div className="flex items-center">
-              <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-20 border-gray-300">
+              <Select value={currentUserRole?.roleCategory || ""} onValueChange={handleRoleSwitch}>
+                <SelectTrigger className="w-40 border-gray-300">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
                       <span className="truncate">{getContextDisplayName()}</span>
@@ -129,11 +125,14 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 </SelectTrigger>
                 <SelectContent>
                   {userRoles.length > 0 ? (
-                    userRoles.map((role) => {
-                      const roleDisplay = roleLabels[role.role as keyof typeof roleLabels] || role.role;
+                    Array.from(new Set(userRoles.filter(role => role.active).map(role => role.roleCategory))).map((category) => {
+                      const Icon = roleIcons[category as keyof typeof roleIcons];
                       return (
-                        <SelectItem key={role.id} value={role.id}>
-                          {roleDisplay}
+                        <SelectItem key={category} value={category}>
+                          <div className="flex items-center gap-2">
+                            {Icon && <Icon className="h-4 w-4" />}
+                            <span>{roleLabels[category as keyof typeof roleLabels] || category}</span>
+                          </div>
                         </SelectItem>
                       );
                     })

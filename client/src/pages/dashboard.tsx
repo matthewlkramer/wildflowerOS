@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { Header } from "@/components/ui/header";
+import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import StatsCards from "@/components/dashboard/StatsCards";
@@ -57,7 +57,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
       <div className="flex pt-16">
         <Sidebar currentRole={currentRole} />

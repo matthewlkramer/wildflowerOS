@@ -2,6 +2,8 @@ import {
   users,
   userRoles,
   schools,
+  schoolYears,
+  budgets,
   classrooms,
   families,
   children,
@@ -50,6 +52,19 @@ export interface IStorage {
   // Classrooms
   getClassroomsBySchool(schoolId: string): Promise<Classroom[]>;
   getClassroomById(id: string): Promise<Classroom | undefined>;
+  createClassroom(classroom: any): Promise<Classroom>;
+  
+  // Staff management
+  getStaffBySchool(schoolId: string): Promise<UserRole[]>;
+  
+  // Tuition plans
+  getTuitionPlansBySchool(schoolId: string): Promise<any[]>;
+  createTuitionPlan(tuitionPlan: any): Promise<any>;
+  
+  // School years
+  getSchoolYearsBySchool(schoolId: string): Promise<any[]>;
+  createSchoolYear(schoolYear: any): Promise<any>;
+  setActiveSchoolYear(yearId: string): Promise<any>;
   
   // Families
   getFamiliesBySchool(schoolId: string): Promise<Family[]>;
@@ -188,6 +203,122 @@ export class DatabaseStorage implements IStorage {
   async getClassroomById(id: string): Promise<Classroom | undefined> {
     const [classroom] = await db.select().from(classrooms).where(eq(classrooms.id, id));
     return classroom;
+  }
+
+  async createClassroom(classroomData: any): Promise<Classroom> {
+    const [classroom] = await db.insert(classrooms).values(classroomData).returning();
+    return classroom;
+  }
+
+  // Staff management
+  async getStaffBySchool(schoolId: string): Promise<UserRole[]> {
+    return await db
+      .select({
+        id: userRoles.id,
+        userId: userRoles.userId,
+        role: userRoles.role,
+        startDate: userRoles.startDate,
+        active: userRoles.active,
+        schoolId: userRoles.schoolId,
+        firstName: sql<string>`split_part(${userRoles.userId}, '@', 1)`.as('firstName'),
+        lastName: sql<string>`''`.as('lastName'),
+        email: userRoles.userId,
+      })
+      .from(userRoles)
+      .where(and(
+        eq(userRoles.schoolId, schoolId),
+        eq(userRoles.active, true)
+      ));
+  }
+
+  // Tuition plans (using budgets table as a placeholder)
+  async getTuitionPlansBySchool(schoolId: string): Promise<any[]> {
+    // Get the active school year for this school
+    const [schoolYear] = await db
+      .select()
+      .from(schoolYears)
+      .where(eq(schoolYears.isActive, true))
+      .limit(1);
+
+    if (!schoolYear) {
+      return [];
+    }
+
+    return await db
+      .select()
+      .from(budgets)
+      .where(and(
+        eq(budgets.schoolId, schoolId),
+        eq(budgets.schoolYearId, schoolYear.id)
+      ));
+  }
+
+  async createTuitionPlan(tuitionData: any): Promise<any> {
+    // Get the active school year for this school  
+    const [schoolYear] = await db
+      .select()
+      .from(schoolYears)
+      .where(eq(schoolYears.isActive, true))
+      .limit(1);
+
+    if (!schoolYear) {
+      // Create a default school year if none exists
+      const currentYear = new Date().getFullYear();
+      const [newSchoolYear] = await db
+        .insert(schoolYears)
+        .values({
+          name: `${currentYear}-${currentYear + 1}`,
+          startDate: new Date(`${currentYear}-08-01`),
+          endDate: new Date(`${currentYear + 1}-06-30`),
+          isActive: true,
+        })
+        .returning();
+      
+      const budgetData = {
+        schoolId: tuitionData.schoolId,
+        schoolYearId: newSchoolYear.id,
+        totalBudget: tuitionData.amount,
+        budgetNotes: `${tuitionData.name} - ${tuitionData.description}`,
+      };
+      const [budget] = await db.insert(budgets).values(budgetData).returning();
+      return { ...budget, name: tuitionData.name, level: tuitionData.level, schedule: tuitionData.schedule };
+    }
+
+    const budgetData = {
+      schoolId: tuitionData.schoolId,
+      schoolYearId: schoolYear.id,
+      totalBudget: tuitionData.amount,
+      budgetNotes: `${tuitionData.name} - ${tuitionData.description}`,
+    };
+    const [budget] = await db.insert(budgets).values(budgetData).returning();
+    return { ...budget, name: tuitionData.name, level: tuitionData.level, schedule: tuitionData.schedule };
+  }
+
+  // School years
+  async getSchoolYearsBySchool(schoolId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(schoolYears)
+      .orderBy(desc(schoolYears.startDate));
+  }
+
+  async createSchoolYear(schoolYearData: any): Promise<any> {
+    const [schoolYear] = await db.insert(schoolYears).values(schoolYearData).returning();
+    return schoolYear;
+  }
+
+  async setActiveSchoolYear(yearId: string): Promise<any> {
+    // First, set all school years to inactive
+    await db.update(schoolYears).set({ isActive: false });
+    
+    // Then set the selected year to active
+    const [schoolYear] = await db
+      .update(schoolYears)
+      .set({ isActive: true })
+      .where(eq(schoolYears.id, yearId))
+      .returning();
+    
+    return schoolYear;
   }
 
   // Families

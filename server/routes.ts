@@ -174,6 +174,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/schools/:schoolId/classrooms', isAuthenticated, async (req: any, res) => {
+    try {
+      const classroom = await storage.createClassroom(req.body);
+      res.status(201).json(classroom);
+    } catch (error) {
+      console.error("Error creating classroom:", error);
+      res.status(500).json({ message: "Failed to create classroom" });
+    }
+  });
+
+  // Staff management
+  app.get('/api/schools/:schoolId/staff', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const staff = await storage.getStaffBySchool(schoolId);
+      res.json(staff);
+    } catch (error) {
+      console.error("Error fetching staff:", error);
+      res.status(500).json({ message: "Failed to fetch staff" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/staff', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const staffData = req.body;
+      
+      // Create user role for the new staff member
+      const userRole = await storage.createUserRole({
+        userId: staffData.email, // This would normally be resolved from user lookup
+        schoolId,
+        role: staffData.role,
+        active: true,
+        startDate: staffData.startDate
+      });
+      
+      res.status(201).json(userRole);
+    } catch (error) {
+      console.error("Error adding staff:", error);
+      res.status(500).json({ message: "Failed to add staff member" });
+    }
+  });
+
+  // Tuition plans
+  app.get('/api/schools/:schoolId/tuition-plans', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const tuitionPlans = await storage.getTuitionPlansBySchool(schoolId);
+      res.json(tuitionPlans);
+    } catch (error) {
+      console.error("Error fetching tuition plans:", error);
+      res.status(500).json({ message: "Failed to fetch tuition plans" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/tuition-plans', isAuthenticated, async (req: any, res) => {
+    try {
+      const tuitionPlan = await storage.createTuitionPlan(req.body);
+      res.status(201).json(tuitionPlan);
+    } catch (error) {
+      console.error("Error creating tuition plan:", error);
+      res.status(500).json({ message: "Failed to create tuition plan" });
+    }
+  });
+
+  // School years
+  app.get('/api/schools/:schoolId/school-years', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const schoolYears = await storage.getSchoolYearsBySchool(schoolId);
+      res.json(schoolYears);
+    } catch (error) {
+      console.error("Error fetching school years:", error);
+      res.status(500).json({ message: "Failed to fetch school years" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/school-years', isAuthenticated, async (req: any, res) => {
+    try {
+      const schoolYear = await storage.createSchoolYear(req.body);
+      res.status(201).json(schoolYear);
+    } catch (error) {
+      console.error("Error creating school year:", error);
+      res.status(500).json({ message: "Failed to create school year" });
+    }
+  });
+
+  app.patch('/api/school-years/:yearId/set-active', isAuthenticated, async (req: any, res) => {
+    try {
+      const { yearId } = req.params;
+      const schoolYear = await storage.setActiveSchoolYear(yearId);
+      res.json(schoolYear);
+    } catch (error) {
+      console.error("Error setting active school year:", error);
+      res.status(500).json({ message: "Failed to set active school year" });
+    }
+  });
+
   // Families
   app.get('/api/schools/:schoolId/families', isAuthenticated, async (req: any, res) => {
     try {

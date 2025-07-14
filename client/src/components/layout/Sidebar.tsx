@@ -17,9 +17,9 @@ export default function Sidebar({ currentRole }: SidebarProps) {
   ];
 
   const managementItems = [
-    { icon: "fas fa-school", label: "School Settings", href: "/school/settings" },
-    { icon: "fas fa-users-cog", label: "Staff Management", href: "/school/staff" },
-    { icon: "fas fa-chart-bar", label: "Analytics", href: "/school/analytics" },
+    { icon: "fas fa-cog", label: "School Settings", href: "/settings" },
+    { icon: "fas fa-users-cog", label: "Staff Management", href: "/settings" },
+    { icon: "fas fa-chart-bar", label: "Analytics", href: "/analytics" },
   ];
 
   const showManagement = currentRole?.role === "teacher_leader" || currentRole?.role === "central_staff" || currentRole?.role === "network_admin";

@@ -11,6 +11,18 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 14, 2025
+- **Fixed global scrolling issues across all pages**
+  - Updated layout structure with proper height constraints using h-screen and overflow management
+  - Applied overflow-y-auto to main content areas for consistent scrollable regions
+  - Added height: 100% to html/body elements for proper viewport height inheritance
+  - Fixed layout structure across dashboard, families, family-details, and school-settings pages
+- **Enhanced calendar closures system with rule-based network defaults**
+  - Added rule field to calendar_closures table for descriptive holiday rules
+  - Made date field nullable for network default holidays that use rules instead of specific dates
+  - Updated 10 network default holidays to use descriptive rules (e.g., "First Monday in September")
+  - Modified frontend interface to show rules instead of dates for system holidays
+  - Updated sorting logic to use predefined school year order instead of date-based sorting
+  - System holidays now display flexible rules like "First Monday in September" instead of hardcoded dates
 - **Fixed JSX syntax error** in family-details.tsx causing app startup failure
   - Added missing `</main>` and container closing tags
   - Corrected component structure and indentation

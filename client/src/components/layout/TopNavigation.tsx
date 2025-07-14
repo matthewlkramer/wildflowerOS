@@ -109,11 +109,13 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-primary">WildflowerOS</h1>
+              <h1 className="text-2xl font-bold text-primary">WildflowerOS</h1>
             </div>
-            
+          </div>
+          
+          <div className="flex items-center space-x-3">
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
@@ -143,9 +145,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="flex items-center space-x-2 mr-6">
+
             {/* Notifications */}
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-4 w-4" />

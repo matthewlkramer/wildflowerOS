@@ -182,7 +182,9 @@ Preferred communication style: Simple, everyday language.
 - **Implemented comprehensive role-based settings interface**
   - Updated navigation label from "School Settings" to "Settings" for universal access
   - **System Administrator View:** Three-tab interface with Non-School Users, Schools, and Sensible Defaults
-    - Sensible Defaults tab contains default templates for School Years, Schedules, Tuition Plans, and Public Subsidies
+    - Sensible Defaults tab contains default templates for Roles, Role Assignments, School Years, Schedules, Tuition Plans, and Public Subsidies
+    - Includes role definitions and assignment process templates that new schools will inherit
+    - Default role assignment survey questions and workflow steps configurable at network level
     - Excludes staff and classroom tabs as they are not applicable for network-wide defaults
     - Default settings will be inherited by new schools upon creation
   - **Parent View:** Family-focused settings with Family Info, Enrollment, Billing, and Communication tabs

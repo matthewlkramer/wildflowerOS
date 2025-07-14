@@ -1110,8 +1110,16 @@ export default function SchoolSettingsPage() {
                     </div>
                     
                     {/* Default Settings Tabs (excluding staff and classrooms) */}
-                    <Tabs defaultValue="school-years" className="w-full">
-                      <TabsList className="grid w-full grid-cols-4">
+                    <Tabs defaultValue="roles" className="w-full">
+                      <TabsList className="grid w-full grid-cols-6">
+                        <TabsTrigger value="roles" className="flex items-center">
+                          <Users className="mr-2 h-4 w-4" />
+                          Roles
+                        </TabsTrigger>
+                        <TabsTrigger value="role-assignments" className="flex items-center">
+                          <Settings className="mr-2 h-4 w-4" />
+                          Role Assignments
+                        </TabsTrigger>
                         <TabsTrigger value="school-years" className="flex items-center">
                           <Calendar className="mr-2 h-4 w-4" />
                           School Years
@@ -1129,6 +1137,138 @@ export default function SchoolSettingsPage() {
                           Public Subsidies
                         </TabsTrigger>
                       </TabsList>
+
+                      {/* Default Roles */}
+                      <TabsContent value="roles" className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Default Role Definitions</CardTitle>
+                            <p className="text-sm text-gray-600">Configure default roles that will be available in all new schools.</p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              <div className="text-sm text-gray-600 mb-4">
+                                These role definitions will be automatically available in every new school that joins the network.
+                              </div>
+                              
+                              {/* Role categories */}
+                              <div className="grid gap-4">
+                                <div className="border rounded-lg p-4">
+                                  <h4 className="font-medium text-gray-900 mb-2">Educator Roles</h4>
+                                  <div className="text-sm text-gray-500 mb-3">
+                                    Core teaching and administrative roles for school operations
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    <Badge variant="outline">Educator Admin</Badge>
+                                    <Badge variant="outline">Classroom Lead</Badge>
+                                    <Badge variant="outline">Classroom Assistant</Badge>
+                                    <Badge variant="outline">Classroom Aide</Badge>
+                                  </div>
+                                </div>
+
+                                <div className="border rounded-lg p-4">
+                                  <h4 className="font-medium text-gray-900 mb-2">Parent Roles</h4>
+                                  <div className="text-sm text-gray-500 mb-3">
+                                    Family engagement and support roles
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    <Badge variant="outline">Parent Billing</Badge>
+                                    <Badge variant="outline">Parent Custodian</Badge>
+                                  </div>
+                                </div>
+
+                                <div className="border rounded-lg p-4">
+                                  <h4 className="font-medium text-gray-900 mb-2">Board Roles</h4>
+                                  <div className="text-sm text-gray-500 mb-3">
+                                    Governance and oversight roles
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    <Badge variant="outline">Board Chair</Badge>
+                                    <Badge variant="outline">Board Treasurer</Badge>
+                                    <Badge variant="outline">Board Secretary</Badge>
+                                    <Badge variant="outline">Board Member</Badge>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-6 pt-4 border-t">
+                                <Button>
+                                  <Plus className="mr-2 h-4 w-4" />
+                                  Add Custom Default Role
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+
+                      {/* Default Role Assignments */}
+                      <TabsContent value="role-assignments" className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Default Role Assignment Process</CardTitle>
+                            <p className="text-sm text-gray-600">Configure the default process new schools will use for role assignments.</p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-6">
+                              <div className="grid gap-4">
+                                <div className="border rounded-lg p-4">
+                                  <h4 className="font-medium text-gray-900 mb-2">Assignment Survey Questions</h4>
+                                  <div className="text-sm text-gray-500 mb-3">
+                                    Default questions that will be used in role assignment surveys
+                                  </div>
+                                  <div className="space-y-3">
+                                    <div className="bg-gray-50 p-3 rounded">
+                                      <div className="font-medium text-sm">1. Skill/Experience Level</div>
+                                      <div className="text-sm text-gray-600">Rate your skill and experience for this role (1-10 scale)</div>
+                                    </div>
+                                    <div className="bg-gray-50 p-3 rounded">
+                                      <div className="font-medium text-sm">2. Enthusiasm Level</div>
+                                      <div className="text-sm text-gray-600">Rate your enthusiasm for taking on this role (1-10 scale)</div>
+                                    </div>
+                                    <div className="bg-gray-50 p-3 rounded">
+                                      <div className="font-medium text-sm">3. Growth Interest</div>
+                                      <div className="text-sm text-gray-600">Are you interested in growing into this role? (Yes/No)</div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="border rounded-lg p-4">
+                                  <h4 className="font-medium text-gray-900 mb-2">Assignment Process Flow</h4>
+                                  <div className="text-sm text-gray-500 mb-3">
+                                    The default workflow new schools will follow
+                                  </div>
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</div>
+                                      <span className="text-sm">Staff complete role assignment surveys</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</div>
+                                      <span className="text-sm">Leadership reviews survey responses</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">3</div>
+                                      <span className="text-sm">Formal discussion and final assignments</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">4</div>
+                                      <span className="text-sm">Roles activated for school year</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="mt-6 pt-4 border-t">
+                                <Button>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Customize Assignment Process
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
 
                       {/* Default School Years */}
                       <TabsContent value="school-years" className="space-y-6">

@@ -115,6 +115,17 @@ Preferred communication style: Simple, everyday language.
   - Comprehensive API routes for tuition plan and sliding scale policy CRUD operations
   - Storage layer handles date conversions and policy activation/deactivation logic
   - System supports version control for sliding scale policies with proper audit trails
+- **Implemented survey-based role assignment system for formal staff discussions**
+  - Replaced drag-and-drop role assignment with formal survey and discussion process
+  - Created role_survey_responses table with 3-question format per role: skill/experience (1-10), enthusiasm (1-10), growth interest (yes/no)
+  - Built role assignment matrix showing survey responses with staff across top, roles down left side
+  - Added radio button selection for final role assignments with color-coded assigned vs unassigned roles
+  - Created final_role_assignments table for tracking official role assignments by school year
+  - Survey grid interface allows staff to rate themselves for each role systematically
+  - Assignment matrix displays all survey responses to guide formal discussion process
+  - System ensures only one person can be assigned per role using unique constraints
+  - Added assignment history tracking with school year context and audit trail
+  - Fixed user ID references to use varchar instead of UUID for proper schema consistency
 
 ## System Architecture
 

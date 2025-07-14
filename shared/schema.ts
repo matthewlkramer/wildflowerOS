@@ -688,7 +688,7 @@ export const fundraisingAnalytics = pgTable("fundraising_analytics", {
 // Role survey responses for formal role assignment discussions
 export const roleSurveyResponses = pgTable("role_survey_responses", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
   roleId: uuid("role_id").notNull().references(() => roleDefinitions.id),
   schoolId: uuid("school_id").notNull().references(() => schools.id),
   
@@ -713,7 +713,7 @@ export const roleSurveyResponses = pgTable("role_survey_responses", {
 export const finalRoleAssignments = pgTable("final_role_assignments", {
   id: uuid("id").primaryKey().defaultRandom(),
   roleId: uuid("role_id").notNull().references(() => roleDefinitions.id),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id", { length: 255 }).notNull().references(() => users.id),
   schoolId: uuid("school_id").notNull().references(() => schools.id),
   
   // Assignment details
@@ -1475,3 +1475,5 @@ export const insertSlidingScaleRuleSchema = createInsertSchema(slidingScaleRules
 export const insertPublicSubsidyProgramSchema = createInsertSchema(publicSubsidyPrograms);
 export const insertSubsidyRateSchema = createInsertSchema(subsidyRates);
 export const insertChildSubsidyAssignmentSchema = createInsertSchema(childSubsidyAssignments);
+export const insertRoleSurveyResponseSchema = createInsertSchema(roleSurveyResponses);
+export const insertFinalRoleAssignmentSchema = createInsertSchema(finalRoleAssignments);

@@ -129,13 +129,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Enrich with role definition
       const roleDefinition = roleDefinitions.find(rd => rd.id === currentRole.roleId);
-      const enrichedRole = {
+      let enrichedRole = {
         ...currentRole,
         roleName: roleDefinition?.name,
         roleDisplayName: roleDefinition?.displayName,
         roleCategory: roleDefinition?.category,
         roleDescription: roleDefinition?.description
       };
+
+      // If educator role without school ID, check for emulated school context
+      if (roleDefinition?.name?.startsWith('educator') && !enrichedRole.schoolId && req.session.emulatedSchoolId) {
+        console.log('Using emulated school ID:', req.session.emulatedSchoolId);
+        enrichedRole.schoolId = req.session.emulatedSchoolId;
+      }
 
       res.json(enrichedRole);
     } catch (error) {
@@ -205,6 +211,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching educator admins:", error);
       res.status(500).json({ message: "Failed to fetch educator admins" });
+    }
+  });
+
+  // Set school context for emulation
+  app.post('/api/user/set-school-context', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.body;
+      console.log('Setting school context to:', schoolId);
+      req.session.emulatedSchoolId = schoolId;
+      
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Error saving session:", err);
+          return res.status(500).json({ message: "Failed to save session" });
+        }
+        res.json({ success: true, schoolId });
+      });
+    } catch (error) {
+      console.error("Error setting school context:", error);
+      res.status(500).json({ message: "Failed to set school context" });
     }
   });
 

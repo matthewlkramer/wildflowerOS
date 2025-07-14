@@ -101,14 +101,16 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     console.log('TopNav school selector check:', { 
       currentUserRole: currentUserRole?.roleName, 
       schoolId: currentUserRole?.schoolId,
+      selectedSchoolId,
       showSchoolSelector
     });
     
-    if (currentUserRole && currentUserRole.roleName?.startsWith('educator') && !currentUserRole.schoolId && !showSchoolSelector) {
+    // Only show popup if educator role, no school ID, no selected school ID, and popup not already showing
+    if (currentUserRole && currentUserRole.roleName?.startsWith('educator') && !currentUserRole.schoolId && !selectedSchoolId && !showSchoolSelector) {
       console.log('Triggering school selector popup from TopNav');
       setShowSchoolSelector(true);
     }
-  }, [currentUserRole?.roleName, currentUserRole?.schoolId]);
+  }, [currentUserRole?.roleName, currentUserRole?.schoolId, selectedSchoolId]);
 
   // Reset school selection when role changes away from educator
   useEffect(() => {
@@ -161,16 +163,27 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                   <div
                     key={`educator-${index}-${educator.userId}`}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                    onClick={() => {
+                    onClick={async () => {
                       console.log('Selected educator:', educator);
-                      setSelectedSchoolId(educator.schoolId);
-                      setShowSchoolSelector(false);
-                      toast({
-                        title: "School context selected",
-                        description: `Now working with ${educator.schoolName} as ${educator.firstName} ${educator.lastName}`,
-                      });
-                      // Reload to apply new context
-                      window.location.reload();
+                      try {
+                        // Set school context in session
+                        await apiRequest('POST', '/api/user/set-school-context', { schoolId: educator.schoolId });
+                        setSelectedSchoolId(educator.schoolId);
+                        setShowSchoolSelector(false);
+                        toast({
+                          title: "School context selected",
+                          description: `Now working with ${educator.schoolName} as ${educator.firstName} ${educator.lastName}`,
+                        });
+                        // Reload to apply new context
+                        window.location.reload();
+                      } catch (error) {
+                        console.error('Failed to set school context:', error);
+                        toast({
+                          title: "Error",
+                          description: "Failed to set school context",
+                          variant: "destructive",
+                        });
+                      }
                     }}
                   >
                     <div>

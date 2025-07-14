@@ -1911,9 +1911,6 @@ export default function SchoolSettingsPage() {
 
                       {/* Default School Years */}
                       <TabsContent value="school-years" className="space-y-6">
-                        {/* System Holidays - Replace Academic Calendar Overview */}
-                        <SystemHolidaysOverview />
-                        
                         {/* Network Default School Years */}
                         <Card>
                           <CardHeader>
@@ -1969,6 +1966,8 @@ export default function SchoolSettingsPage() {
                           </CardContent>
                         </Card>
 
+                        {/* System Holidays - After School Years */}
+                        <SystemHolidaysOverview />
                       </TabsContent>
 
                       {/* Default Schedules */}

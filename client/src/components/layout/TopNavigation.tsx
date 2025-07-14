@@ -99,12 +99,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     return "Select Role";
   };
 
-  // Debug logging
-  console.log("TopNavigation Debug:", {
-    userRoles,
-    currentUserRole,
-    userRolesCount: userRoles.length
-  });
+
 
   const handleRoleSwitch = (roleId: string) => {
     switchRoleMutation.mutate(roleId);
@@ -120,10 +115,9 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
             
             {/* Role Switcher */}
-            <div className="flex items-center bg-blue-50 border border-blue-200 rounded-md p-2">
-              <span className="text-sm text-gray-600 mr-2">Role:</span>
+            <div className="flex items-center">
               <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-48 min-w-0 border-0 bg-transparent">
+                <SelectTrigger className="w-40 border-gray-300">
                   <div className="flex items-center space-x-2 truncate">
                     {currentUserRole && (
                       <>
@@ -131,12 +125,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                           const IconComponent = roleIcons[currentUserRole.role as keyof typeof roleIcons];
                           return IconComponent ? <IconComponent className="w-4 h-4 flex-shrink-0" /> : null;
                         })()}
-                        <span className="truncate font-medium">{getContextDisplayName()}</span>
-                        {currentUserRole.active && (
-                          <Badge variant="secondary" className="text-xs flex-shrink-0">
-                            Active
-                          </Badge>
-                        )}
+                        <span className="truncate">{getContextDisplayName()}</span>
                       </>
                     )}
                     {!currentUserRole && <SelectValue placeholder="Select role" />}
@@ -152,11 +141,6 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                           <div className="flex items-center space-x-2">
                             {IconComponent && <IconComponent className="w-4 h-4" />}
                             <span>{roleDisplay}</span>
-                            {role.active && (
-                              <Badge variant="secondary" className="text-xs ml-auto">
-                                Active
-                              </Badge>
-                            )}
                           </div>
                         </SelectItem>
                       );

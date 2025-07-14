@@ -286,14 +286,12 @@ export default function FamilyDetailsPage() {
   }
 
   return (
-    <div className="bg-gray-50">
+    <>
       <TopNavigation user={user} currentSchool={null} currentRole={currentRole} />
+      <Sidebar currentRole={currentRole} />
       
-      <div className="pt-16">
-        <Sidebar currentRole={currentRole} />
-        
-        <div className="lg:ml-64">
-          <div className="p-4 lg:p-6 pb-20">
+      <main className="pt-16 lg:ml-64 bg-gray-50 min-h-screen">
+        <div className="p-4 lg:p-6 pb-20">
             <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
@@ -758,6 +756,8 @@ export default function FamilyDetailsPage() {
                 </Card>
               </TabsContent>
             </Tabs>
+          </div>
+        </div>
 
             {/* Edit Family Dialog */}
         <Dialog open={editingFamily} onOpenChange={setEditingFamily}>
@@ -820,12 +820,9 @@ export default function FamilyDetailsPage() {
             </div>
           </DialogContent>
         </Dialog>
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
       
       <MobileBottomNav currentRole={currentRole} />
-    </div>
+    </>
   );
 }

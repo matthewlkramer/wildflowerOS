@@ -23,7 +23,7 @@ export default function Sidebar({ currentRole }: SidebarProps) {
   const showSchoolSettings = true;
 
   return (
-    <aside className="w-64 bg-white shadow-sm fixed top-16 left-0 bottom-0 overflow-y-auto hidden lg:block">
+    <aside className="w-64 bg-white shadow-sm fixed top-16 left-0 h-[calc(100vh-4rem)] overflow-y-auto hidden lg:block z-40">
       <nav className="mt-8">
         {menuItems.map((item, index) => {
           const isActive = location === item.href || (location.startsWith(item.href) && item.href !== '/');

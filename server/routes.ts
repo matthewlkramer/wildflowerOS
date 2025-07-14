@@ -34,6 +34,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User role management routes
+  app.get('/api/user/roles', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const userRoles = await storage.getUserRoles(userId);
+      res.json(userRoles);
+    } catch (error) {
+      console.error("Error fetching user roles:", error);
+      res.status(500).json({ message: "Failed to fetch user roles" });
+    }
+  });
+
+  app.get('/api/user/current-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const currentRoleId = req.session.currentRoleId;
+      if (!currentRoleId) {
+        // If no role is set, get the first active role
+        const userId = req.user.claims.sub;
+        const userRoles = await storage.getUserRoles(userId);
+        const activeRoles = userRoles.filter(role => role.active);
+        
+        if (activeRoles.length > 0) {
+          req.session.currentRoleId = activeRoles[0].id;
+          return res.json(activeRoles[0]);
+        }
+        
+        return res.json(null);
+      }
+
+      // Get the current role details
+      const userId = req.user.claims.sub;
+      const userRoles = await storage.getUserRoles(userId);
+      const currentRole = userRoles.find(role => role.id === currentRoleId);
+      
+      if (!currentRole || !currentRole.active) {
+        // Role no longer exists or is inactive, clear it
+        req.session.currentRoleId = null;
+        return res.json(null);
+      }
+
+      res.json(currentRole);
+    } catch (error) {
+      console.error("Error fetching current role:", error);
+      res.status(500).json({ message: "Failed to fetch current role" });
+    }
+  });
+
+  app.post('/api/user/switch-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const { roleId } = req.body;
+      const userId = req.user.claims.sub;
+
+      // Verify the user has this role and it's active
+      const userRoles = await storage.getUserRoles(userId);
+      const targetRole = userRoles.find(role => role.id === roleId && role.active);
+
+      if (!targetRole) {
+        return res.status(400).json({ message: "Invalid role or role not active" });
+      }
+
+      // Set the current role in session
+      req.session.currentRoleId = roleId;
+      
+      // Save session
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Error saving session:", err);
+          return res.status(500).json({ message: "Failed to save session" });
+        }
+        res.json({ success: true, currentRole: targetRole });
+      });
+    } catch (error) {
+      console.error("Error switching role:", error);
+      res.status(500).json({ message: "Failed to switch role" });
+    }
+  });
+
   // Dashboard stats
   app.get('/api/dashboard/stats/:schoolId', isAuthenticated, async (req: any, res) => {
     try {

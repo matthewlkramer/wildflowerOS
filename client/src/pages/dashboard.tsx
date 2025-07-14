@@ -10,6 +10,7 @@ import UpcomingTasks from "@/components/dashboard/UpcomingTasks";
 import QuickActions from "@/components/dashboard/QuickActions";
 import ClassroomOverview from "@/components/dashboard/ClassroomOverview";
 import FamilyManagement from "@/components/families/FamilyManagement";
+import RoleSelector from "@/components/ui/role-selector";
 
 export default function Dashboard() {
   const { toast } = useToast();
@@ -77,6 +78,11 @@ export default function Dashboard() {
                   Export Report
                 </button>
               </div>
+            </div>
+
+            {/* Role Selector */}
+            <div className="mt-6">
+              <RoleSelector />
             </div>
           </div>
 

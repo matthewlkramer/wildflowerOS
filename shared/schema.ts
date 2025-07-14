@@ -67,6 +67,7 @@ export const userSubRoles = pgTable("user_sub_roles", {
       // Systems Administrator has no sub-roles
     ]
   }).notNull(),
+  classroomId: uuid("classroom_id"), // For classroom-specific sub-roles
   active: boolean("active").notNull().default(true),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),

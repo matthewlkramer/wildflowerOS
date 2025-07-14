@@ -25,6 +25,14 @@ Preferred communication style: Simple, everyday language.
   - Connected edit and delete buttons with proper click handlers
   - Added edit classroom dialog with form fields and validation
   - All classroom operations (create, read, update, delete) now fully functional
+- **Enhanced role system with scope-based permissions**
+  - Added classroom_id field to user_sub_roles table for classroom-specific roles
+  - Created complete role structure for Matthew Kramer with proper scoping:
+    - Parent role (billing contact + custodian) scoped to specific school
+    - Educator role (school admin + classroom guide for Primary) scoped to school/classroom
+    - Systems Administrator role scoped network-wide
+  - Updated role selector to show only main role categories with scope badges
+  - Role system now supports network-wide, school-specific, and classroom-specific permissions
 
 ## System Architecture
 

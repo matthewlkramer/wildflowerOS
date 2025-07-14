@@ -218,20 +218,19 @@ export default function RoleSelector() {
                 .filter(role => role.active)
                 .map((role) => {
                   const Icon = roleIcons[role.mainRole];
-                  const subRoleLabels = role.subRoles?.map(sr => roleLabels[sr.subRole]).join(", ");
                   return (
                     <SelectItem key={role.id} value={role.id}>
-                      <div className="flex items-center gap-2 w-full">
+                      <div className="flex items-center gap-2">
                         <Icon className="h-4 w-4" />
-                        <div className="flex flex-col flex-1">
-                          <span className="font-medium">{roleLabels[role.mainRole]}</span>
-                          {subRoleLabels && (
-                            <span className="text-xs text-muted-foreground">{subRoleLabels}</span>
-                          )}
-                        </div>
+                        <span>{roleLabels[role.mainRole]}</span>
                         {role.schoolId && (
                           <Badge variant="outline" className="ml-auto text-xs">
                             School
+                          </Badge>
+                        )}
+                        {!role.schoolId && !role.legalEntityId && (
+                          <Badge variant="outline" className="ml-auto text-xs">
+                            Network
                           </Badge>
                         )}
                       </div>

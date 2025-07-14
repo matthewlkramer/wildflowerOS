@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { UserRole } from "@shared/schema";
+import { Users, GraduationCap, Heart, Building2, Shield, Star } from "lucide-react";
 
 interface TopNavigationProps {
   user: any;
@@ -21,16 +26,81 @@ interface TopNavigationProps {
   currentRole?: any;
 }
 
+const roleIcons = {
+  teacher_leader: GraduationCap,
+  teacher: GraduationCap,
+  assistant: Users,
+  aide: Users,
+  parent: Heart,
+  board_member: Building2,
+  central_staff: Shield,
+  network_admin: Star,
+};
+
+const roleLabels = {
+  teacher_leader: "Teacher Leader",
+  teacher: "Teacher",
+  assistant: "Assistant",
+  aide: "Aide",
+  parent: "Parent",
+  board_member: "Board Member",
+  central_staff: "Central Staff",
+  network_admin: "Network Admin",
+};
+
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
   const [notificationCount] = useState(3);
   const [messageCount] = useState(7);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch user roles
+  const { data: userRoles = [] } = useQuery<UserRole[]>({
+    queryKey: ['/api/user/roles'],
+  });
+
+  // Fetch current role
+  const { data: currentUserRole } = useQuery<UserRole>({
+    queryKey: ['/api/user/current-role'],
+  });
+
+  // Role switching mutation
+  const switchRoleMutation = useMutation({
+    mutationFn: async (roleId: string) => {
+      return apiRequest(`/api/user/switch-role`, {
+        method: 'POST',
+        body: { roleId },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/current-role'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/roles'] });
+      toast({
+        title: "Role switched",
+        description: "Your active role has been updated successfully.",
+      });
+      // Reload the page to refresh the context
+      window.location.reload();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error switching role",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const getContextDisplayName = () => {
-    if (currentRole && currentSchool) {
-      const roleDisplay = currentRole.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-      return `${roleDisplay} - ${currentSchool.name}`;
+    if (currentUserRole) {
+      const roleDisplay = roleLabels[currentUserRole.role as keyof typeof roleLabels] || currentUserRole.role;
+      return roleDisplay;
     }
-    return "Select Context";
+    return "Select Role";
+  };
+
+  const handleRoleSwitch = (roleId: string) => {
+    switchRoleMutation.mutate(roleId);
   };
 
   return (
@@ -42,24 +112,45 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               <h1 className="text-xl font-bold text-primary">Wildflower Schools</h1>
             </div>
             
-            {/* Role/School Context Switcher */}
+            {/* Role Switcher */}
             <div className="hidden md:block">
-              <Select value={getContextDisplayName()}>
+              <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
                 <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select context" />
+                  <div className="flex items-center space-x-2">
+                    {currentUserRole && (
+                      <>
+                        {(() => {
+                          const IconComponent = roleIcons[currentUserRole.role as keyof typeof roleIcons];
+                          return IconComponent ? <IconComponent className="w-4 h-4" /> : null;
+                        })()}
+                        <span>{getContextDisplayName()}</span>
+                        {currentUserRole.active && (
+                          <Badge variant="secondary" className="text-xs">
+                            Active
+                          </Badge>
+                        )}
+                      </>
+                    )}
+                    {!currentUserRole && <SelectValue placeholder="Select role" />}
+                  </div>
                 </SelectTrigger>
                 <SelectContent>
-                  {user.roles?.map((role: any) => {
-                    const school = user.schools?.find((s: any) => s.id === role.schoolId);
-                    if (school) {
-                      const roleDisplay = role.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
-                      return (
-                        <SelectItem key={role.id} value={`${roleDisplay} - ${school.name}`}>
-                          {roleDisplay} - {school.name}
-                        </SelectItem>
-                      );
-                    }
-                    return null;
+                  {userRoles.map((role) => {
+                    const IconComponent = roleIcons[role.role as keyof typeof roleIcons];
+                    const roleDisplay = roleLabels[role.role as keyof typeof roleLabels] || role.role;
+                    return (
+                      <SelectItem key={role.id} value={role.id}>
+                        <div className="flex items-center space-x-2">
+                          {IconComponent && <IconComponent className="w-4 h-4" />}
+                          <span>{roleDisplay}</span>
+                          {role.active && (
+                            <Badge variant="secondary" className="text-xs">
+                              Active
+                            </Badge>
+                          )}
+                        </div>
+                      </SelectItem>
+                    );
                   })}
                 </SelectContent>
               </Select>

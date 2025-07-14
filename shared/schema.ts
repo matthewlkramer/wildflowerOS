@@ -61,7 +61,7 @@ export const userRoles = pgTable("user_roles", {
   classroomId: uuid("classroom_id"), // Scope: which classroom this role applies to  
   legalEntityId: uuid("legal_entity_id"), // Scope: which legal entity this role applies to
   active: boolean("active").notNull().default(true),
-  startDate: timestamp("start_date"),
+  startDate: timestamp("start_date").defaultNow(),
   endDate: timestamp("end_date"),
 });
 

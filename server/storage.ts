@@ -35,7 +35,7 @@ import {
   type InsertChannel,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, count, sql, isNull } from "drizzle-orm";
+import { eq, and, desc, asc, count, sql, isNull, or, lte, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -44,8 +44,10 @@ export interface IStorage {
   
   // User roles
   getUserRoles(userId: string): Promise<UserRole[]>;
+  getAllUserRoles(userId: string): Promise<UserRole[]>; // Get all roles including inactive/expired
   createUserRole(role: InsertUserRole): Promise<UserRole>;
   updateUserRole(id: string, role: Partial<InsertUserRole>): Promise<UserRole>;
+  endUserRole(id: string, endDate?: Date): Promise<UserRole>; // End a role while keeping history
   
   // Role definitions
   getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]>;
@@ -144,14 +146,31 @@ export class DatabaseStorage implements IStorage {
 
   // User roles
   async getUserRoles(userId: string): Promise<UserRole[]> {
+    const now = new Date();
     return await db
       .select()
       .from(userRoles)
-      .where(and(eq(userRoles.userId, userId), eq(userRoles.active, true)));
+      .where(
+        and(
+          eq(userRoles.userId, userId),
+          eq(userRoles.active, true),
+          // Role must have started (or have no start date)
+          or(isNull(userRoles.startDate), lte(userRoles.startDate, now)),
+          // Role must not have ended (or have no end date)
+          or(isNull(userRoles.endDate), gt(userRoles.endDate, now))
+        )
+      );
   }
 
   async createUserRole(role: InsertUserRole): Promise<UserRole> {
-    const [userRole] = await db.insert(userRoles).values(role).returning();
+    // Set default start date to now if not provided
+    const roleData = {
+      ...role,
+      startDate: role.startDate || new Date(),
+      active: role.active ?? true,
+    };
+    
+    const [userRole] = await db.insert(userRoles).values(roleData).returning();
     return userRole;
   }
 
@@ -159,6 +178,28 @@ export class DatabaseStorage implements IStorage {
     const [userRole] = await db
       .update(userRoles)
       .set(role)
+      .where(eq(userRoles.id, id))
+      .returning();
+    return userRole;
+  }
+
+  // Get all user roles including inactive/expired ones for history
+  async getAllUserRoles(userId: string): Promise<UserRole[]> {
+    return await db
+      .select()
+      .from(userRoles)
+      .where(eq(userRoles.userId, userId))
+      .orderBy(desc(userRoles.startDate));
+  }
+
+  // End a user role while keeping history
+  async endUserRole(id: string, endDate?: Date): Promise<UserRole> {
+    const [userRole] = await db
+      .update(userRoles)
+      .set({ 
+        endDate: endDate || new Date(),
+        active: false 
+      })
       .where(eq(userRoles.id, id))
       .returning();
     return userRole;

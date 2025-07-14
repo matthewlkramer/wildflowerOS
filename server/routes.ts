@@ -158,6 +158,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all user roles including history
+  app.get('/api/user/roles/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const allRoles = await storage.getAllUserRoles(userId);
+      
+      // Get role definitions for enrichment
+      const roleDefinitions = await storage.getRoleDefinitions();
+      
+      // Enrich roles with definition details
+      const enrichedRoles = allRoles.map(role => {
+        const roleDefinition = roleDefinitions.find(rd => rd.id === role.roleId);
+        return {
+          ...role,
+          roleName: roleDefinition?.name,
+          roleDisplayName: roleDefinition?.displayName,
+          roleCategory: roleDefinition?.category,
+          roleDescription: roleDefinition?.description
+        };
+      });
+      
+      res.json(enrichedRoles);
+    } catch (error) {
+      console.error("Error fetching user role history:", error);
+      res.status(500).json({ message: "Failed to fetch role history" });
+    }
+  });
+
+  // End a user role (archive it)
+  app.post('/api/user/roles/:id/end', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { endDate } = req.body;
+      const userId = req.user.claims.sub;
+      
+      // Verify the user owns this role
+      const userRoles = await storage.getAllUserRoles(userId);
+      const targetRole = userRoles.find(role => role.id === id);
+      
+      if (!targetRole) {
+        return res.status(404).json({ message: "Role not found" });
+      }
+      
+      // End the role
+      const endedRole = await storage.endUserRole(id, endDate ? new Date(endDate) : undefined);
+      
+      // Clear current role if it was the active one
+      if (req.session.currentRoleId === id) {
+        req.session.currentRoleId = null;
+      }
+      
+      res.json({ success: true, role: endedRole });
+    } catch (error) {
+      console.error("Error ending user role:", error);
+      res.status(500).json({ message: "Failed to end role" });
+    }
+  });
+
   // Dashboard stats
   app.get('/api/dashboard/stats/:schoolId', isAuthenticated, async (req: any, res) => {
     try {

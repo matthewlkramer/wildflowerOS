@@ -40,6 +40,7 @@ import {
   DollarSign,
   Plus, 
   Edit, 
+  Edit2,
   Trash2,
   Save,
   X,
@@ -48,11 +49,204 @@ import {
   ChevronDown,
   ChevronRight
 } from "lucide-react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
+
+// Network School Year Holidays Component
+function NetworkSchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
+  const { toast } = useToast();
+  const [editingHoliday, setEditingHoliday] = useState<any>(null);
+  const [holidayForm, setHolidayForm] = useState({
+    name: "",
+    description: "",
+    date: "",
+    rule: ""
+  });
+
+  // Fetch holidays for this school year
+  const { data: holidays = [], isLoading } = useQuery({
+    queryKey: ["/api/school-years", schoolYearId, "closures"],
+    enabled: !!schoolYearId,
+  });
+
+  // Update holiday mutation
+  const updateHolidayMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('PATCH', `/api/calendar-closures/${data.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYearId, "closures"] });
+      setEditingHoliday(null);
+      setHolidayForm({ name: "", description: "", date: "", rule: "" });
+      toast({
+        title: "Holiday updated",
+        description: "Holiday has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating holiday",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete holiday mutation
+  const deleteHolidayMutation = useMutation({
+    mutationFn: async (holidayId: string) => {
+      return apiRequest('DELETE', `/api/calendar-closures/${holidayId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYearId, "closures"] });
+      toast({
+        title: "Holiday deleted",
+        description: "Holiday has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting holiday",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditHoliday = (holiday: any) => {
+    setEditingHoliday(holiday);
+    setHolidayForm({
+      name: holiday.name || "",
+      description: holiday.description || "",
+      date: holiday.date ? new Date(holiday.date).toISOString().split('T')[0] : "",
+      rule: holiday.rule || ""
+    });
+  };
+
+  const handleUpdateHoliday = () => {
+    updateHolidayMutation.mutate({
+      id: editingHoliday.id,
+      ...holidayForm
+    });
+  };
+
+  const handleDeleteHoliday = (holidayId: string) => {
+    if (confirm("Are you sure you want to delete this holiday? This action cannot be undone.")) {
+      deleteHolidayMutation.mutate(holidayId);
+    }
+  };
+
+  if (!schoolYearId) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium text-gray-900">Associated Holidays</h4>
+        <span className="text-xs text-gray-500">{holidays.length} holidays</span>
+      </div>
+      
+      {isLoading ? (
+        <div className="text-center py-4 text-gray-500">Loading holidays...</div>
+      ) : holidays.length === 0 ? (
+        <div className="text-center py-4 text-gray-500">No holidays found for this school year.</div>
+      ) : (
+        <div className="space-y-2">
+          {holidays.map((holiday: any) => (
+            <div key={holiday.id} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
+              {editingHoliday?.id === holiday.id ? (
+                <div className="flex-1 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      value={holidayForm.name}
+                      onChange={(e) => setHolidayForm(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Holiday name"
+                      className="text-sm"
+                    />
+                    <Input
+                      type="date"
+                      value={holidayForm.date}
+                      onChange={(e) => setHolidayForm(prev => ({ ...prev, date: e.target.value }))}
+                      className="text-sm"
+                    />
+                  </div>
+                  <Input
+                    value={holidayForm.description}
+                    onChange={(e) => setHolidayForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Description"
+                    className="text-sm"
+                  />
+                  <div className="flex space-x-2">
+                    <Button size="sm" onClick={handleUpdateHoliday}>Save</Button>
+                    <Button size="sm" variant="outline" onClick={() => setEditingHoliday(null)}>Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">{holiday.name}</div>
+                    <div className="text-xs text-gray-600">
+                      {holiday.date ? new Date(holiday.date).toLocaleDateString() : holiday.rule}
+                    </div>
+                    {holiday.description && (
+                      <div className="text-xs text-gray-500 mt-1">{holiday.description}</div>
+                    )}
+                  </div>
+                  <div className="flex space-x-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEditHoliday(holiday)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit2 className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteHoliday(holiday.id)}
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// School Year Holidays Pills Component  
+function SchoolYearHolidaysPills({ schoolYearId }: { schoolYearId: string }) {
+  const { data: holidays = [] } = useQuery({
+    queryKey: ["/api/school-years", schoolYearId, "closures"],
+    enabled: !!schoolYearId,
+  });
+
+  if (!holidays.length) return null;
+
+  return (
+    <div className="flex flex-wrap gap-1 mt-2">
+      {holidays.slice(0, 5).map((holiday: any) => (
+        <Badge key={holiday.id} variant="secondary" className="text-xs">
+          {holiday.name}
+        </Badge>
+      ))}
+      {holidays.length > 5 && (
+        <Badge variant="outline" className="text-xs">
+          +{holidays.length - 5} more
+        </Badge>
+      )}
+    </div>
+  );
+}
+
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 
@@ -1931,7 +2125,7 @@ export default function SchoolSettingsPage() {
                               {networkSchoolYears?.map((year) => (
                                 <div key={year.id} className="p-4 border rounded-lg">
                                   <div className="flex items-center justify-between">
-                                    <div>
+                                    <div className="flex-1">
                                       <h4 className="font-medium">{year.name}</h4>
                                       <p className="text-sm text-gray-600">
                                         {year.startDate ? (() => {
@@ -1944,6 +2138,7 @@ export default function SchoolSettingsPage() {
                                           return `${m}/${d}/${y}`;
                                         })() : 'No end date'}
                                       </p>
+                                      <SchoolYearHolidaysPills schoolYearId={year.id} />
                                     </div>
                                     <div className="flex space-x-2">
                                       <Button 
@@ -2101,41 +2296,49 @@ export default function SchoolSettingsPage() {
 
                 {/* Edit Network School Year Dialog */}
                 <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
-                  <DialogContent>
+                  <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Edit Network School Year</DialogTitle>
                       <DialogDescription>
-                        Update the network default school year information and dates.
+                        Update the network default school year information, dates, and associated holidays.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label>Year Name</Label>
-                        <Input
-                          value={schoolYearForm.name}
-                          onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
-                          placeholder="e.g., 2024-2025"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-6">
+                      {/* School Year Basic Info */}
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-medium text-gray-900">School Year Information</h4>
                         <div>
-                          <Label>Start Date</Label>
+                          <Label>Year Name</Label>
                           <Input
-                            type="date"
-                            value={schoolYearForm.startDate}
-                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                            value={schoolYearForm.name}
+                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., 2024-2025"
                           />
                         </div>
-                        <div>
-                          <Label>End Date</Label>
-                          <Input
-                            type="date"
-                            value={schoolYearForm.endDate}
-                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
-                          />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Start Date</Label>
+                            <Input
+                              type="date"
+                              value={schoolYearForm.startDate}
+                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>End Date</Label>
+                            <Input
+                              type="date"
+                              value={schoolYearForm.endDate}
+                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                            />
+                          </div>
                         </div>
                       </div>
-                      <div className="flex justify-end space-x-2">
+
+                      {/* Associated Holidays */}
+                      <NetworkSchoolYearHolidays schoolYearId={editingSchoolYear?.id || ''} />
+
+                      <div className="flex justify-end space-x-2 pt-4 border-t">
                         <Button variant="outline" onClick={() => setEditingSchoolYear(null)}>
                           Cancel
                         </Button>

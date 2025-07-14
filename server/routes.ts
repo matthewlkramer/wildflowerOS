@@ -660,6 +660,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/school-years/:schoolYearId/closures', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolYearId } = req.params;
+      const closures = await storage.getCalendarClosuresBySchoolYear(schoolYearId);
+      res.json(closures);
+    } catch (error) {
+      console.error("Error fetching school year closures:", error);
+      res.status(500).json({ message: "Failed to fetch school year closures" });
+    }
+  });
+
   app.post('/api/school-years/:schoolYearId/closures', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolYearId } = req.params;

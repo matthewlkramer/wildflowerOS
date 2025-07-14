@@ -202,6 +202,7 @@ export interface IStorage {
   
   // Calendar closures
   getCalendarClosuresByCalendar(calendarId: string): Promise<CalendarClosure[]>;
+  getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]>;
   createCalendarClosure(closure: InsertCalendarClosure): Promise<CalendarClosure>;
   updateCalendarClosure(id: string, closure: Partial<InsertCalendarClosure>): Promise<CalendarClosure>;
   deleteCalendarClosure(id: string): Promise<void>;
@@ -1053,6 +1054,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteNetworkSchoolYear(id: string): Promise<void> {
+    // The foreign key constraint with cascade deletion on calendar_closures.school_year_id
+    // will automatically delete all associated holidays when the school year is deleted
     await db.delete(schoolYears).where(and(
       eq(schoolYears.id, id),
       eq(schoolYears.networkDefault, true) // Only delete network defaults

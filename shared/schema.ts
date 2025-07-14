@@ -132,19 +132,10 @@ export const schoolYears = pgTable("school_years", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const academicCalendars = pgTable("academic_calendars", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  schoolYearId: uuid("school_year_id").notNull().references(() => schoolYears.id, { onDelete: "cascade" }),
-  firstDayOfSchool: timestamp("first_day_of_school"),
-  lastDayOfSchool: timestamp("last_day_of_school"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 export const calendarClosures = pgTable("calendar_closures", {
   id: uuid("id").primaryKey().defaultRandom(),
-  academicCalendarId: uuid("academic_calendar_id").references(() => academicCalendars.id, { onDelete: "cascade" }),
   schoolId: uuid("school_id").references(() => schools.id, { onDelete: "cascade" }),
+  schoolYearId: uuid("school_year_id").references(() => schoolYears.id, { onDelete: "cascade" }),
   date: timestamp("date"),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
@@ -1298,21 +1289,17 @@ export const schoolYearsRelations = relations(schoolYears, ({ one, many }) => ({
     fields: [schoolYears.schoolId],
     references: [schools.id],
   }),
-  academicCalendars: many(academicCalendars),
-}));
-
-export const academicCalendarsRelations = relations(academicCalendars, ({ one, many }) => ({
-  schoolYear: one(schoolYears, {
-    fields: [academicCalendars.schoolYearId],
-    references: [schoolYears.id],
-  }),
   closures: many(calendarClosures),
 }));
 
 export const calendarClosuresRelations = relations(calendarClosures, ({ one }) => ({
-  academicCalendar: one(academicCalendars, {
-    fields: [calendarClosures.academicCalendarId],
-    references: [academicCalendars.id],
+  school: one(schools, {
+    fields: [calendarClosures.schoolId],
+    references: [schools.id],
+  }),
+  schoolYear: one(schoolYears, {
+    fields: [calendarClosures.schoolYearId],
+    references: [schoolYears.id],
   }),
 }));
 
@@ -1392,8 +1379,6 @@ export type InsertFundraisingAnalytics = typeof fundraisingAnalytics.$inferInser
 // School Year and Calendar types
 export type SchoolYear = typeof schoolYears.$inferSelect;
 export type InsertSchoolYear = typeof schoolYears.$inferInsert;
-export type AcademicCalendar = typeof academicCalendars.$inferSelect;
-export type InsertAcademicCalendar = typeof academicCalendars.$inferInsert;
 export type CalendarClosure = typeof calendarClosures.$inferSelect;
 export type InsertCalendarClosure = typeof calendarClosures.$inferInsert;
 
@@ -1451,7 +1436,6 @@ export const insertAttendanceRecordSchema = createInsertSchema(attendanceRecords
 export const insertAssessmentSchema = createInsertSchema(assessments);
 export const insertEmailAddressSchema = createInsertSchema(emailAddresses);
 export const insertSchoolYearSchema = createInsertSchema(schoolYears);
-export const insertAcademicCalendarSchema = createInsertSchema(academicCalendars);
 export const insertCalendarClosureSchema = createInsertSchema(calendarClosures);
 export const insertClassroomScheduleSchema = createInsertSchema(classroomSchedules);
 export const insertProgramOfferingSchema = createInsertSchema(programOfferings);

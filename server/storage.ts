@@ -4,7 +4,7 @@ import {
   roleDefinitions,
   schools,
   schoolYears,
-  academicCalendars,
+
   calendarClosures,
   budgets,
   classrooms,
@@ -994,7 +994,7 @@ export class DatabaseStorage implements IStorage {
           date: holidayDate,
           networkDefault: true,
           schoolId: null, // Network defaults
-          academicCalendarId: null, // Will be set when schools adopt this year
+          schoolYearId: schoolYear.id, // Link to the network school year
           active: true
         });
       }
@@ -1102,16 +1102,14 @@ export class DatabaseStorage implements IStorage {
     return calendar;
   }
 
-  async deleteAcademicCalendar(id: string): Promise<void> {
-    await db.delete(academicCalendars).where(eq(academicCalendars.id, id));
-  }
+
 
   // Calendar closures
-  async getCalendarClosuresByCalendar(calendarId: string): Promise<CalendarClosure[]> {
+  async getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]> {
     return await db
       .select()
       .from(calendarClosures)
-      .where(eq(calendarClosures.academicCalendarId, calendarId))
+      .where(eq(calendarClosures.schoolYearId, schoolYearId))
       .orderBy(asc(calendarClosures.date));
   }
 
@@ -2373,7 +2371,7 @@ export class DatabaseStorage implements IStorage {
       .values({
         ...holiday,
         networkDefault: true,
-        academicCalendarId: null, // Network defaults don't belong to specific calendar
+        schoolYearId: null, // System holidays don't belong to specific school years
       })
       .returning();
     return newHoliday;

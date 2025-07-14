@@ -370,6 +370,9 @@ export default function SchoolSettingsPage() {
   const getRoleColor = (role: string) => {
     switch (role) {
       case "teacher_leader": return "bg-purple-100 text-purple-800";
+      case "head_of_school": return "bg-indigo-100 text-indigo-800";
+      case "school_admin": return "bg-indigo-100 text-indigo-800";
+      case "classroom_guide": return "bg-green-100 text-green-800";
       case "teacher": return "bg-blue-100 text-blue-800";
       case "assistant": return "bg-green-100 text-green-800";
       case "aide": return "bg-yellow-100 text-yellow-800";

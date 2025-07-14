@@ -340,6 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const roleDefinitions = await storage.getRoleDefinitions();
       const roleMapping = {
         'teacher_leader': 'school_admin',
+        'head_of_school': 'school_admin',
         'teacher': 'classroom_guide',
         'assistant': 'classroom_guide',
         'aide': 'classroom_guide'

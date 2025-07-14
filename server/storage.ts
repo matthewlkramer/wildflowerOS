@@ -299,7 +299,7 @@ export class DatabaseStorage implements IStorage {
 
   // Staff management
   async getStaffBySchool(schoolId: string): Promise<UserRole[]> {
-    return await db
+    const staffRoles = await db
       .select({
         id: userRoles.id,
         userId: userRoles.userId,
@@ -326,6 +326,50 @@ export class DatabaseStorage implements IStorage {
         eq(userRoles.active, true),
         eq(roleDefinitions.category, 'educator') // Only show educator roles as staff
       ));
+
+    // Process the data to handle role combinations and renaming
+    const processedRoles = staffRoles.map(role => {
+      // Rename School Administrator to Head of School
+      if (role.roleName === 'school_admin') {
+        return {
+          ...role,
+          roleDisplayName: 'Head of School',
+          role: 'head_of_school'
+        };
+      }
+      return role;
+    });
+
+    // Group by user and check for Teacher Leader combination
+    const userGroups = processedRoles.reduce((acc, role) => {
+      if (!acc[role.userId]) {
+        acc[role.userId] = [];
+      }
+      acc[role.userId].push(role);
+      return acc;
+    }, {} as Record<string, any[]>);
+
+    const finalRoles = [];
+    for (const [userId, roles] of Object.entries(userGroups)) {
+      const hasHeadOfSchool = roles.some(r => r.roleName === 'school_admin');
+      const hasClassroomGuide = roles.some(r => r.roleName === 'classroom_guide');
+      
+      if (hasHeadOfSchool && hasClassroomGuide) {
+        // Combine into Teacher Leader role
+        const baseRole = roles[0];
+        finalRoles.push({
+          ...baseRole,
+          roleDisplayName: 'Teacher Leader',
+          role: 'teacher_leader',
+          roleName: 'teacher_leader'
+        });
+      } else {
+        // Keep individual roles
+        finalRoles.push(...roles);
+      }
+    }
+
+    return finalRoles;
   }
 
   // Tuition plans (using budgets table as a placeholder)

@@ -119,21 +119,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/user/switch-role', isAuthenticated, async (req: any, res) => {
     try {
-      console.log("Switch role request received:", req.body);
       const { roleId } = req.body;
       const userId = req.user.claims.sub;
 
-      console.log("Switching role for user:", userId, "to role:", roleId);
-
       // Verify the user has this role and it's active
       const userRoles = await storage.getUserRoles(userId);
-      console.log("User roles:", userRoles.map(r => ({ id: r.id, active: r.active })));
-      
       const targetRole = userRoles.find(role => role.id === roleId && role.active);
-      console.log("Target role found:", targetRole);
 
       if (!targetRole) {
-        console.log("Invalid role or role not active");
         return res.status(400).json({ message: "Invalid role or role not active" });
       }
 
@@ -148,10 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         roleDescription: roleDefinition?.description
       };
 
-      console.log("Enriched role:", enrichedRole);
-
       // Set the current role in session
-      console.log("Setting current role in session:", roleId);
       req.session.currentRoleId = roleId;
       
       // Save session
@@ -160,7 +150,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error saving session:", err);
           return res.status(500).json({ message: "Failed to save session" });
         }
-        console.log("Session saved successfully, current role:", req.session.currentRoleId);
         res.json({ success: true, currentRole: enrichedRole });
       });
     } catch (error) {

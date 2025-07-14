@@ -59,13 +59,10 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   // Role switching mutation
   const switchRoleMutation = useMutation({
     mutationFn: async (roleId: string) => {
-      console.log("Making API request to switch role:", roleId);
       const response = await apiRequest('POST', `/api/user/switch-role`, { roleId });
-      console.log("API response:", response);
       return response;
     },
-    onSuccess: (data) => {
-      console.log("Role switch success:", data);
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/user/current-role'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user/roles'] });
       toast({
@@ -76,7 +73,6 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
       window.location.reload();
     },
     onError: (error: Error) => {
-      console.error("Role switch error:", error);
       toast({
         title: "Error switching role",
         description: error.message,
@@ -96,18 +92,11 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
 
 
   const handleRoleSwitch = (category: string) => {
-    console.log("Switching to category:", category);
-    console.log("Available roles:", userRoles);
-    
     // Find the first role in the selected category
     const rolesInCategory = userRoles.filter(role => role.roleCategory === category && role.active);
-    console.log("Roles in category:", rolesInCategory);
     
     if (rolesInCategory.length > 0) {
-      console.log("Switching to role:", rolesInCategory[0]);
       switchRoleMutation.mutate(rolesInCategory[0].id);
-    } else {
-      console.error("No roles found in category:", category);
     }
   };
 

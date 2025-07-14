@@ -9,7 +9,9 @@ import {
   decimal,
   jsonb,
   index,
+  unique,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -29,13 +31,27 @@ export const sessions = pgTable(
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
-  email: varchar("email", { length: 255 }).unique(),
+  email: varchar("email", { length: 255 }).unique(), // This remains as the login email
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
   profileImageUrl: varchar("profile_image_url", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const emailAddresses = pgTable("email_addresses", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  type: varchar("type", { 
+    enum: ["personal", "work_twf", "work_wf_school", "work_non_wf"] 
+  }).notNull(),
+  isPrimary: boolean("is_primary").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueEmail: unique().on(table.email),
+}));
 
 // Role definitions - can be customized per school or used network-wide
 export const roleDefinitions = pgTable("role_definitions", {
@@ -564,6 +580,14 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdTasks: many(tasks, { relationName: "createdTasks" }),
   knowledgePosts: many(knowledgePosts),
   channelMemberships: many(channelMembers),
+  emailAddresses: many(emailAddresses),
+}));
+
+export const emailAddressesRelations = relations(emailAddresses, ({ one }) => ({
+  user: one(users, {
+    fields: [emailAddresses.userId],
+    references: [users.id],
+  }),
 }));
 
 export const roleDefinitionsRelations = relations(roleDefinitions, ({ one, many }) => ({
@@ -919,6 +943,8 @@ export const fundraisingAnalyticsRelations = relations(fundraisingAnalytics, ({ 
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+export type EmailAddress = typeof emailAddresses.$inferSelect;
+export type InsertEmailAddress = typeof emailAddresses.$inferInsert;
 export type UserRole = typeof userRoles.$inferSelect;
 export type InsertUserRole = typeof userRoles.$inferInsert;
 export type RoleDefinition = typeof roleDefinitions.$inferSelect;
@@ -1006,3 +1032,4 @@ export const insertBoardMeetingSchema = createInsertSchema(boardMeetings);
 export const insertBoardResolutionSchema = createInsertSchema(boardResolutions);
 export const insertAttendanceRecordSchema = createInsertSchema(attendanceRecords);
 export const insertAssessmentSchema = createInsertSchema(assessments);
+export const insertEmailAddressSchema = createInsertSchema(emailAddresses);

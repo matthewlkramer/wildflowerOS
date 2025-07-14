@@ -216,6 +216,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email address management
+  app.get('/api/user/emails', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const emails = await storage.getEmailAddressesByUser(userId);
+      res.json(emails);
+    } catch (error) {
+      console.error("Error fetching user emails:", error);
+      res.status(500).json({ message: "Failed to fetch user emails" });
+    }
+  });
+
+  app.post('/api/user/emails', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const emailData = { ...req.body, userId };
+      const email = await storage.addEmailAddress(emailData);
+      res.status(201).json(email);
+    } catch (error) {
+      console.error("Error adding email:", error);
+      res.status(500).json({ message: "Failed to add email address" });
+    }
+  });
+
+  app.put('/api/user/emails/:emailId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { emailId } = req.params;
+      const email = await storage.updateEmailAddress(emailId, req.body);
+      res.json(email);
+    } catch (error) {
+      console.error("Error updating email:", error);
+      res.status(500).json({ message: "Failed to update email address" });
+    }
+  });
+
+  app.delete('/api/user/emails/:emailId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { emailId } = req.params;
+      await storage.deleteEmailAddress(emailId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting email:", error);
+      res.status(500).json({ message: "Failed to delete email address" });
+    }
+  });
+
+  app.patch('/api/user/emails/:emailId/set-primary', isAuthenticated, async (req: any, res) => {
+    try {
+      const { emailId } = req.params;
+      const userId = req.user.id;
+      await storage.setPrimaryEmailAddress(userId, emailId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error setting primary email:", error);
+      res.status(500).json({ message: "Failed to set primary email" });
+    }
+  });
+
   // Dashboard stats
   app.get('/api/dashboard/stats/:schoolId', isAuthenticated, async (req: any, res) => {
     try {

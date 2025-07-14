@@ -16,6 +16,7 @@ import {
   billingSetups,
   invoices,
   payments,
+  emailAddresses,
   type User,
   type UpsertUser,
   type UserRole,
@@ -33,6 +34,8 @@ import {
   type InsertMessage,
   type Channel,
   type InsertChannel,
+  type EmailAddress,
+  type InsertEmailAddress,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, count, sql, isNull, or, lte, gt } from "drizzle-orm";
@@ -41,6 +44,13 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  
+  // Email address operations
+  getEmailAddressesByUser(userId: string): Promise<EmailAddress[]>;
+  addEmailAddress(emailAddress: InsertEmailAddress): Promise<EmailAddress>;
+  updateEmailAddress(id: string, emailAddress: Partial<InsertEmailAddress>): Promise<EmailAddress>;
+  deleteEmailAddress(id: string): Promise<void>;
+  setPrimaryEmailAddress(userId: string, emailId: string): Promise<void>;
   
   // User roles
   getUserRoles(userId: string): Promise<UserRole[]>;
@@ -141,7 +151,68 @@ export class DatabaseStorage implements IStorage {
         },
       })
       .returning();
+    
+    // Automatically create email address record for the login email if it doesn't exist
+    if (userData.email) {
+      await db
+        .insert(emailAddresses)
+        .values({
+          userId: user.id,
+          email: userData.email,
+          type: 'personal',
+          isPrimary: true,
+        })
+        .onConflictDoNothing();
+    }
+    
     return user;
+  }
+
+  // Email address operations
+  async getEmailAddressesByUser(userId: string): Promise<EmailAddress[]> {
+    return await db
+      .select()
+      .from(emailAddresses)
+      .where(eq(emailAddresses.userId, userId))
+      .orderBy(desc(emailAddresses.isPrimary), emailAddresses.createdAt);
+  }
+
+  async addEmailAddress(emailAddress: InsertEmailAddress): Promise<EmailAddress> {
+    const [newEmailAddress] = await db
+      .insert(emailAddresses)
+      .values(emailAddress)
+      .returning();
+    return newEmailAddress;
+  }
+
+  async updateEmailAddress(id: string, emailAddress: Partial<InsertEmailAddress>): Promise<EmailAddress> {
+    const [updatedEmailAddress] = await db
+      .update(emailAddresses)
+      .set({ ...emailAddress, updatedAt: new Date() })
+      .where(eq(emailAddresses.id, id))
+      .returning();
+    return updatedEmailAddress;
+  }
+
+  async deleteEmailAddress(id: string): Promise<void> {
+    await db.delete(emailAddresses).where(eq(emailAddresses.id, id));
+  }
+
+  async setPrimaryEmailAddress(userId: string, emailId: string): Promise<void> {
+    // First, unset all primary flags for this user
+    await db
+      .update(emailAddresses)
+      .set({ isPrimary: false })
+      .where(eq(emailAddresses.userId, userId));
+    
+    // Then set the specified email as primary
+    await db
+      .update(emailAddresses)
+      .set({ isPrimary: true })
+      .where(and(
+        eq(emailAddresses.id, emailId),
+        eq(emailAddresses.userId, userId)
+      ));
   }
 
   // User roles

@@ -766,7 +766,7 @@ export default function SchoolSettingsPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="staff" className="flex items-center">
               <Users className="mr-2 h-4 w-4" />
               Staff
@@ -774,6 +774,10 @@ export default function SchoolSettingsPage() {
             <TabsTrigger value="roles" className="flex items-center">
               <Settings className="mr-2 h-4 w-4" />
               Roles
+            </TabsTrigger>
+            <TabsTrigger value="assignments" className="flex items-center">
+              <Users className="mr-2 h-4 w-4" />
+              Assignments
             </TabsTrigger>
             <TabsTrigger value="classrooms" className="flex items-center">
               <Home className="mr-2 h-4 w-4" />
@@ -953,246 +957,320 @@ export default function SchoolSettingsPage() {
 
           {/* Roles Tab */}
           <TabsContent value="roles" className="space-y-6">
-            {/* Role Survey Section */}
+            {/* School Roles Management */}
             <Card>
               <CardHeader>
-                <CardTitle>Role Interest Survey</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Staff complete surveys rating their skill/experience, enthusiasm, and growth interest for each role. This helps guide formal discussions about role assignments.
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>School Roles</CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Manage and customize roles available at this school. These roles form the foundation for staff assignments.
+                    </p>
+                  </div>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Custom Role
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      Survey for school year: <strong>2024-25</strong>
+                  {/* Role Categories */}
+                  <div className="space-y-6">
+                    {/* Level 1 - Main Categories */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Main Categories</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { name: "Educator", count: 12, color: "bg-blue-100 text-blue-800" },
+                          { name: "Parent", count: 3, color: "bg-green-100 text-green-800" },
+                          { name: "Board", count: 5, color: "bg-purple-100 text-purple-800" },
+                          { name: "Systems Admin", count: 1, color: "bg-orange-100 text-orange-800" }
+                        ].map((category) => (
+                          <div key={category.name} className="border rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <div className="font-medium">{category.name}</div>
+                              <Badge className={category.color}>{category.count}</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Participant
-                    </Button>
-                  </div>
-                  
-                  {/* Survey Grid */}
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Role
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Skill/Experience<br />
-                              <span className="text-gray-400 normal-case">(1-10)</span>
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Enthusiasm<br />
-                              <span className="text-gray-400 normal-case">(1-10)</span>
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Growth Interest<br />
-                              <span className="text-gray-400 normal-case">(Yes/No)</span>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {[
-                            "Teacher Leader",
-                            "Operations Manager",
-                            "Enrollment Manager", 
-                            "Curriculum Coordinator",
-                            "Family Engagement Coordinator",
-                            "Learning Support Coordinator",
-                            "Primary Guide",
-                            "Toddler Guide",
-                            "Assistant - Primary",
-                            "Assistant - Toddler"
-                          ].map((role, index) => (
-                            <tr key={role} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                              <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r">
-                                {role}
-                              </td>
-                              <td className="px-3 py-3 text-center border-r">
-                                <select className="w-16 px-2 py-1 text-sm border border-gray-300 rounded">
-                                  <option value="">-</option>
-                                  {[1,2,3,4,5,6,7,8,9,10].map(num => (
-                                    <option key={num} value={num}>{num}</option>
-                                  ))}
-                                </select>
-                              </td>
-                              <td className="px-3 py-3 text-center border-r">
-                                <select className="w-16 px-2 py-1 text-sm border border-gray-300 rounded">
-                                  <option value="">-</option>
-                                  {[1,2,3,4,5,6,7,8,9,10].map(num => (
-                                    <option key={num} value={num}>{num}</option>
-                                  ))}
-                                </select>
-                              </td>
-                              <td className="px-3 py-3 text-center">
-                                <select className="w-16 px-2 py-1 text-sm border border-gray-300 rounded">
-                                  <option value="">-</option>
-                                  <option value="yes">Yes</option>
-                                  <option value="no">No</option>
-                                </select>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+
+                    {/* Level 2 - Sub Categories */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Sub Categories</h3>
+                      <div className="space-y-3">
+                        {[
+                          { name: "Educator → Admin", description: "Administrative roles within education", count: 5 },
+                          { name: "Educator → Classroom", description: "Direct classroom teaching roles", count: 7 },
+                          { name: "Parent → Billing", description: "Financial contact roles", count: 1 },
+                          { name: "Parent → Custodian", description: "Primary guardian roles", count: 2 },
+                          { name: "Board → Chair", description: "Board leadership role", count: 1 },
+                          { name: "Board → Member", description: "General board member roles", count: 4 }
+                        ].map((subcat) => (
+                          <div key={subcat.name} className="border rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="font-medium">{subcat.name}</div>
+                                <div className="text-sm text-gray-600">{subcat.description}</div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Badge variant="outline">{subcat.count} roles</Badge>
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Level 3-5 - Specific Roles */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Specific Roles</h3>
+                      <div className="space-y-2">
+                        {[
+                          { name: "Educator Admin → Startup → Marketing → Logo Design", level: 5, active: true },
+                          { name: "Educator Admin → Ongoing → Finance → Budget", level: 5, active: true },
+                          { name: "Educator Classroom → Lead", level: 3, active: true },
+                          { name: "Educator Classroom → Assistant", level: 3, active: true },
+                          { name: "Board Chair", level: 2, active: true },
+                          { name: "Board Secretary", level: 2, active: false }
+                        ].map((role) => (
+                          <div key={role.name} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className={`w-2 h-2 rounded-full ${role.active ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                              <div>
+                                <div className="font-medium">{role.name}</div>
+                                <div className="text-sm text-gray-600">Level {role.level}</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant={role.active ? "default" : "secondary"}>
+                                {role.active ? "Active" : "Inactive"}
+                              </Badge>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline">Save Draft</Button>
-                    <Button>Submit Survey</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Role Assignments Tab */}
+          <TabsContent value="assignments" className="space-y-6">
+            {/* Role Interest Surveys */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Role Interest Surveys</CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Staff complete surveys rating their skill/experience, enthusiasm, and growth interest for each role.
+                    </p>
+                  </div>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Survey
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {/* Survey List */}
+                  <div className="space-y-3">
+                    {[
+                      { name: "Sarah Johnson", date: "2024-10-15", roles: 12, status: "Complete" },
+                      { name: "Michael Chen", date: "2024-10-14", roles: 8, status: "In Progress" },
+                      { name: "Emily Rodriguez", date: "2024-10-13", roles: 15, status: "Complete" },
+                      { name: "David Kim", date: "2024-10-12", roles: 6, status: "Complete" }
+                    ].map((survey) => (
+                      <div key={survey.name} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center space-x-3">
+                          <div className="font-medium">{survey.name}</div>
+                          <div className="text-sm text-gray-600">
+                            {survey.roles} roles • {new Date(survey.date).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Badge variant={survey.status === 'Complete' ? 'default' : 'secondary'}>
+                            {survey.status}
+                          </Badge>
+                          <Button variant="outline" size="sm">
+                            View
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Role Assignment Matrix */}
+            {/* Current Role Assignments */}
             <Card>
               <CardHeader>
-                <CardTitle>Role Assignment Matrix</CardTitle>
-                <p className="text-sm text-gray-600">
-                  Review survey responses and assign roles. Each role can only be assigned to one person.
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Current Role Assignments</CardTitle>
+                    <p className="text-sm text-gray-600">
+                      View and manage current role assignments organized by hierarchy.
+                    </p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <div className="flex items-center space-x-2">
+                      <Label htmlFor="assignment-date" className="text-sm">Assignment as of:</Label>
+                      <Input
+                        id="assignment-date"
+                        type="date"
+                        value="2024-10-15"
+                        className="w-auto"
+                      />
+                    </div>
+                    <Button onClick={() => window.open('/role-assignment-editor', '_blank', 'width=1200,height=800')}>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit Assignments
+                    </Button>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      Assignment for school year: <strong>2024-25</strong>
-                    </div>
-                    <div className="flex items-center space-x-4 text-sm">
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-red-100 border border-red-300 rounded mr-2"></div>
-                        <span>Unassigned</span>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="w-4 h-4 bg-green-100 border border-green-300 rounded mr-2"></div>
-                        <span>Assigned</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Assignment Grid */}
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Role
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Sarah Johnson
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Michael Chen
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
-                              Emily Rodriguez
-                            </th>
-                            <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              David Kim
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {[
-                            { 
-                              name: "Teacher Leader", 
-                              assigned: "Sarah Johnson",
-                              responses: {
-                                "Sarah Johnson": { skill: 9, enthusiasm: 10, growth: "Yes" },
-                                "Michael Chen": { skill: 6, enthusiasm: 7, growth: "No" },
-                                "Emily Rodriguez": { skill: 7, enthusiasm: 8, growth: "Yes" },
-                                "David Kim": { skill: 4, enthusiasm: 5, growth: "Yes" }
-                              }
-                            },
-                            { 
-                              name: "Operations Manager", 
-                              assigned: "Emily Rodriguez",
-                              responses: {
-                                "Sarah Johnson": { skill: 6, enthusiasm: 5, growth: "No" },
-                                "Michael Chen": { skill: 7, enthusiasm: 6, growth: "Yes" },
-                                "Emily Rodriguez": { skill: 9, enthusiasm: 9, growth: "Yes" },
-                                "David Kim": { skill: 5, enthusiasm: 6, growth: "Yes" }
-                              }
-                            },
-                            { 
-                              name: "Primary Guide", 
-                              assigned: "Michael Chen",
-                              responses: {
-                                "Sarah Johnson": { skill: 8, enthusiasm: 7, growth: "No" },
-                                "Michael Chen": { skill: 10, enthusiasm: 10, growth: "Yes" },
-                                "Emily Rodriguez": { skill: 6, enthusiasm: 4, growth: "No" },
-                                "David Kim": { skill: 7, enthusiasm: 8, growth: "Yes" }
-                              }
-                            },
-                            { 
-                              name: "Toddler Guide", 
-                              assigned: null,
-                              responses: {
-                                "Sarah Johnson": { skill: 7, enthusiasm: 6, growth: "Yes" },
-                                "Michael Chen": { skill: 5, enthusiasm: 4, growth: "No" },
-                                "Emily Rodriguez": { skill: 4, enthusiasm: 3, growth: "No" },
-                                "David Kim": { skill: 8, enthusiasm: 9, growth: "Yes" }
-                              }
-                            },
-                            { 
-                              name: "Assistant - Primary", 
-                              assigned: null,
-                              responses: {
-                                "Sarah Johnson": { skill: 6, enthusiasm: 5, growth: "No" },
-                                "Michael Chen": { skill: 7, enthusiasm: 6, growth: "Yes" },
-                                "Emily Rodriguez": { skill: 5, enthusiasm: 4, growth: "No" },
-                                "David Kim": { skill: 9, enthusiasm: 8, growth: "Yes" }
-                              }
-                            }
-                          ].map((role, index) => (
-                            <tr key={role.name} className={`${role.assigned ? 'bg-green-50' : 'bg-red-50'} ${index % 2 === 0 ? '' : 'bg-opacity-50'}`}>
-                              <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r">
-                                <div className="flex items-center">
-                                  <div className={`w-3 h-3 rounded-full mr-2 ${role.assigned ? 'bg-green-400' : 'bg-red-400'}`}></div>
-                                  {role.name}
-                                </div>
-                              </td>
-                              {["Sarah Johnson", "Michael Chen", "Emily Rodriguez", "David Kim"].map((staff) => (
-                                <td key={staff} className="px-3 py-3 text-center border-r last:border-r-0">
-                                  <div className="space-y-1">
-                                    <div className="flex items-center justify-center">
-                                      <input 
-                                        type="radio" 
-                                        name={`role-${role.name}`}
-                                        checked={role.assigned === staff}
-                                        className="mr-2"
-                                      />
-                                    </div>
-                                    <div className="text-xs text-gray-600">
-                                      <div>Skill: <strong>{role.responses[staff]?.skill || '-'}</strong></div>
-                                      <div>Enthusiasm: <strong>{role.responses[staff]?.enthusiasm || '-'}</strong></div>
-                                      <div>Growth: <strong>{role.responses[staff]?.growth || '-'}</strong></div>
-                                    </div>
+                  {/* Assignment Matrix - Grouped by Role Hierarchy */}
+                  <div className="space-y-6">
+                    {/* Level 1 - Educator Roles */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Educator Roles</h3>
+                      <div className="border rounded-lg overflow-hidden">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Role
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Sarah Johnson
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Michael Chen
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Emily Rodriguez
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                David Kim
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {[
+                              { name: "Educator Admin → Ongoing → Finance", assigned: "Sarah Johnson" },
+                              { name: "Educator Admin → Startup → Marketing", assigned: "Emily Rodriguez" },
+                              { name: "Educator Classroom → Lead", assigned: "Michael Chen" },
+                              { name: "Educator Classroom → Assistant", assigned: null }
+                            ].map((role, index) => (
+                              <tr key={role.name} className={`${role.assigned ? 'bg-green-50' : 'bg-red-50'} ${index % 2 === 0 ? '' : 'bg-opacity-50'}`}>
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r">
+                                  <div className="flex items-center">
+                                    <div className={`w-3 h-3 rounded-full mr-2 ${role.assigned ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                                    {role.name}
                                   </div>
                                 </td>
-                              ))}
+                                {["Sarah Johnson", "Michael Chen", "Emily Rodriguez", "David Kim"].map((staff) => (
+                                  <td key={staff} className="px-3 py-3 text-center border-r last:border-r-0">
+                                    <input 
+                                      type="radio" 
+                                      name={`role-${role.name}`}
+                                      value={staff}
+                                      checked={role.assigned === staff}
+                                      readOnly
+                                      className="h-4 w-4 text-primary"
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Level 2 - Board Roles */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Board Roles</h3>
+                      <div className="border rounded-lg overflow-hidden">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Role
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Board Member 1
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-r">
+                                Board Member 2
+                              </th>
+                              <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Board Member 3
+                              </th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {[
+                              { name: "Board Chair", assigned: "Board Member 1" },
+                              { name: "Board Secretary", assigned: "Board Member 2" },
+                              { name: "Board Treasurer", assigned: null }
+                            ].map((role, index) => (
+                              <tr key={role.name} className={`${role.assigned ? 'bg-green-50' : 'bg-red-50'} ${index % 2 === 0 ? '' : 'bg-opacity-50'}`}>
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900 border-r">
+                                  <div className="flex items-center">
+                                    <div className={`w-3 h-3 rounded-full mr-2 ${role.assigned ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                                    {role.name}
+                                  </div>
+                                </td>
+                                {["Board Member 1", "Board Member 2", "Board Member 3"].map((staff) => (
+                                  <td key={staff} className="px-3 py-3 text-center border-r last:border-r-0">
+                                    <input 
+                                      type="radio" 
+                                      name={`role-${role.name}`}
+                                      value={staff}
+                                      checked={role.assigned === staff}
+                                      readOnly
+                                      className="h-4 w-4 text-primary"
+                                    />
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-600">
-                      <strong>3 of 5</strong> roles assigned
-                    </div>
-                    <div className="flex space-x-2">
-                      <Button variant="outline">Save Draft</Button>
-                      <Button>Finalize Assignments</Button>
+
+                    {/* Assignment Summary */}
+                    <div className="flex justify-between items-center pt-4 border-t">
+                      <div className="text-sm text-gray-600">
+                        <strong>5 of 7</strong> roles assigned
+                      </div>
+                      <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex items-center">
+                          <div className="w-4 h-4 bg-red-100 border border-red-300 rounded mr-2"></div>
+                          <span>Unassigned</span>
+                        </div>
+                        <div className="flex items-center">
+                          <div className="w-4 h-4 bg-green-100 border border-green-300 rounded mr-2"></div>
+                          <span>Assigned</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1212,50 +1290,52 @@ export default function SchoolSettingsPage() {
                   <div className="grid grid-cols-5 gap-4 text-sm font-medium text-gray-600 border-b pb-2">
                     <div>Role</div>
                     <div>Staff Member</div>
-                    <div>School Year</div>
                     <div>Date Assigned</div>
+                    <div>Date Ended</div>
                     <div>Status</div>
                   </div>
                   
                   {[
                     {
-                      role: "Teacher Leader",
+                      role: "Educator Admin → Ongoing → Finance",
                       staff: "Sarah Johnson",
-                      schoolYear: "2024-25",
                       dateAssigned: "2024-08-15",
+                      dateEnded: null,
                       status: "Active"
                     },
                     {
-                      role: "Operations Manager", 
-                      staff: "Emily Rodriguez",
-                      schoolYear: "2024-25",
-                      dateAssigned: "2024-08-20",
-                      status: "Active"
-                    },
-                    {
-                      role: "Primary Guide",
+                      role: "Educator Classroom → Lead", 
                       staff: "Michael Chen",
-                      schoolYear: "2024-25", 
-                      dateAssigned: "2024-08-25",
+                      dateAssigned: "2024-08-20",
+                      dateEnded: null,
                       status: "Active"
                     },
                     {
-                      role: "Teacher Leader",
+                      role: "Board Chair",
+                      staff: "Board Member 1",
+                      dateAssigned: "2024-08-25",
+                      dateEnded: null,
+                      status: "Active"
+                    },
+                    {
+                      role: "Educator Admin → Startup → Marketing",
                       staff: "Former Staff",
-                      schoolYear: "2023-24",
                       dateAssigned: "2023-08-15",
+                      dateEnded: "2024-06-30",
                       status: "Ended"
                     }
                   ].map((assignment, index) => (
                     <div key={index} className="grid grid-cols-5 gap-4 py-2 border-b border-gray-100 last:border-b-0 text-sm">
                       <div className="font-medium">{assignment.role}</div>
                       <div>{assignment.staff}</div>
-                      <div>{assignment.schoolYear}</div>
                       <div className="text-gray-600">
                         {new Date(assignment.dateAssigned).toLocaleDateString()}
                       </div>
+                      <div className="text-gray-600">
+                        {assignment.dateEnded ? new Date(assignment.dateEnded).toLocaleDateString() : "—"}
+                      </div>
                       <div>
-                        <Badge className={assignment.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                        <Badge variant={assignment.status === 'Active' ? 'default' : 'secondary'}>
                           {assignment.status}
                         </Badge>
                       </div>

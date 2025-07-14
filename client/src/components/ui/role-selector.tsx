@@ -257,7 +257,7 @@ export default function RoleSelector() {
           </div>
           <div className="space-y-2">
             {userRoles.map((role) => {
-              const Icon = roleIcons[role.role];
+              const Icon = roleIcons[role.roleCategory];
               const isActive = currentRole?.id === role.id;
               
               return (
@@ -272,13 +272,13 @@ export default function RoleSelector() {
                   <Icon className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-gray-500"}`} />
                   <div className="flex-1">
                     <div className={`text-sm ${isActive ? "font-medium text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-gray-100"}`}>
-                      {roleLabels[role.role]}
+                      {role.roleDisplayName || roleLabels[role.roleCategory]}
                     </div>
-                    {role.schoolId && (
-                      <div className="text-xs text-gray-500">
-                        School-specific role
-                      </div>
-                    )}
+                    <div className="text-xs text-gray-500">
+                      {roleLabels[role.roleCategory]}
+                      {role.schoolId && " • School-specific"}
+                      {!role.schoolId && !role.legalEntityId && " • Network-wide"}
+                    </div>
                   </div>
                   {isActive && (
                     <Badge variant="default" size="sm">

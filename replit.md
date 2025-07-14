@@ -25,14 +25,14 @@ Preferred communication style: Simple, everyday language.
   - Connected edit and delete buttons with proper click handlers
   - Added edit classroom dialog with form fields and validation
   - All classroom operations (create, read, update, delete) now fully functional
-- **Enhanced role system with scope-based permissions**
-  - Added classroom_id field to user_sub_roles table for classroom-specific roles
-  - Created complete role structure for Matthew Kramer with proper scoping:
-    - Parent role (billing contact + custodian) scoped to specific school
-    - Educator role (school admin + classroom guide for Primary) scoped to school/classroom
-    - Systems Administrator role scoped network-wide
-  - Updated role selector to show only main role categories with scope badges
-  - Role system now supports network-wide, school-specific, and classroom-specific permissions
+- **Migrated role system from enums to database tables for flexibility**
+  - Created role_definitions table with core system roles supporting future customization
+  - Replaced enum-based roles with database-driven role assignments
+  - Updated user_roles table to reference role definitions instead of hardcoded values
+  - Added support for network-wide, school-specific, and classroom-specific role scoping
+  - Updated role selector to display only main role categories (parent, educator, board_director, systems_administrator)
+  - System now supports custom roles per school while maintaining core operational roles
+  - Created Matthew's complete role structure: parent (billing/custodian) at school level, educator (school admin + classroom guide) at school/classroom level, systems admin at network level
 
 ## System Architecture
 

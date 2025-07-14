@@ -65,23 +65,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/current-role', isAuthenticated, async (req: any, res) => {
     try {
       const currentRoleId = req.session.currentRoleId;
+      const userId = req.user.claims.sub;
+      const userRoles = await storage.getUserRoles(userId);
+      
+      // Get role definitions for enrichment
+      const roleDefinitions = await storage.getRoleDefinitions();
+      
       if (!currentRoleId) {
         // If no role is set, get the first active role
-        const userId = req.user.claims.sub;
-        const userRoles = await storage.getUserRoles(userId);
         const activeRoles = userRoles.filter(role => role.active);
         
         if (activeRoles.length > 0) {
           req.session.currentRoleId = activeRoles[0].id;
-          return res.json(activeRoles[0]);
+          const roleDefinition = roleDefinitions.find(rd => rd.id === activeRoles[0].roleId);
+          const enrichedRole = {
+            ...activeRoles[0],
+            roleName: roleDefinition?.name,
+            roleDisplayName: roleDefinition?.displayName,
+            roleCategory: roleDefinition?.category,
+            roleDescription: roleDefinition?.description
+          };
+          return res.json(enrichedRole);
         }
         
         return res.json(null);
       }
 
       // Get the current role details
-      const userId = req.user.claims.sub;
-      const userRoles = await storage.getUserRoles(userId);
       const currentRole = userRoles.find(role => role.id === currentRoleId);
       
       if (!currentRole || !currentRole.active) {
@@ -90,7 +100,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(null);
       }
 
-      res.json(currentRole);
+      // Enrich with role definition
+      const roleDefinition = roleDefinitions.find(rd => rd.id === currentRole.roleId);
+      const enrichedRole = {
+        ...currentRole,
+        roleName: roleDefinition?.name,
+        roleDisplayName: roleDefinition?.displayName,
+        roleCategory: roleDefinition?.category,
+        roleDescription: roleDefinition?.description
+      };
+
+      res.json(enrichedRole);
     } catch (error) {
       console.error("Error fetching current role:", error);
       res.status(500).json({ message: "Failed to fetch current role" });
@@ -110,6 +130,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid role or role not active" });
       }
 
+      // Enrich with role definition
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const roleDefinition = roleDefinitions.find(rd => rd.id === targetRole.roleId);
+      const enrichedRole = {
+        ...targetRole,
+        roleName: roleDefinition?.name,
+        roleDisplayName: roleDefinition?.displayName,
+        roleCategory: roleDefinition?.category,
+        roleDescription: roleDefinition?.description
+      };
+
       // Set the current role in session
       req.session.currentRoleId = roleId;
       
@@ -119,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error saving session:", err);
           return res.status(500).json({ message: "Failed to save session" });
         }
-        res.json({ success: true, currentRole: targetRole });
+        res.json({ success: true, currentRole: enrichedRole });
       });
     } catch (error) {
       console.error("Error switching role:", error);

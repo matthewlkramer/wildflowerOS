@@ -1,0 +1,80 @@
+hook.js:608 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+overrideMethod @ hook.js:608Understand this error
+hook.js:608 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+overrideMethod @ hook.js:608Understand this warning
+hook.js:608 `DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+overrideMethod @ hook.js:608Understand this error
+hook.js:608 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+overrideMethod @ hook.js:608Understand this warning
+hook.js:608 task queue exceeded allotted deadline by 41ms
+overrideMethod @ hook.js:608Understand this warning
+967[Report Only] Refused to connect to '<URL>' because it violates the following Content Security Policy directive: "connect-src 'none'".
+
+19Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.Understand this error
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'battery'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'layout-animations'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'navigation-override'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'oversized-images'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'publickey-credentials'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'speaker-selection'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'unoptimized-images'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'unsized-media'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Unrecognized feature: 'pointer-lock'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+framework-5de1dd47b1714f7e.js:1 Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-5de1dd47b1714f7e.js:1Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'battery'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.Understand this warning
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.Understand this warning
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.Understand this warning
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.Understand this warning
+Network.js:227 WebSocket connection to 'wss://8efb642c-ece5-4bf3-b2ef-12404e4141ef-00-8zlt5borab8n.janeway.replit.dev/?token=TimOYaJoDbRS' failed: 
+t @ Network.js:227Understand this error
+Network.js:227 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=TimOYaJoDbRS' is invalid.Understand this error
+Network.js:227 WebSocket connection to 'wss://8efb642c-ece5-4bf3-b2ef-12404e4141ef-00-8zlt5borab8n.janeway.replit.dev/?token=TimOYaJoDbRS' failed: 
+t @ Network.js:227Understand this error
+Network.js:227 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=TimOYaJoDbRS' is invalid.Understand this error
+Network.js:227 WebSocket connection to 'wss://8efb642c-ece5-4bf3-b2ef-12404e4141ef-00-8zlt5borab8n.janeway.replit.dev/?token=TimOYaJoDbRS' failed: 
+t @ Network.js:227Understand this error
+Network.js:227 Uncaught (in promise) SyntaxError: Failed to construct 'WebSocket': The URL 'wss://localhost:undefined/?token=TimOYaJoDbRS' is invalid.
+    at new t (Network.js:227:18)
+    at setupWebSocket (client:536:19)
+    at fallback (client:509:16)
+    at WebSocket.<anonymous> (client:555:7)Understand this error
+13386 log entries are not shown.Understand this warning
+stallwart.build.js:1 stallwart: failed ping 1

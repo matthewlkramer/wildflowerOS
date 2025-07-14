@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -43,6 +50,8 @@ const roleLabels = {
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
   const [notificationCount] = useState(3);
   const [messageCount] = useState(7);
+  const [showSchoolSelector, setShowSchoolSelector] = useState(false);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -54,6 +63,12 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   // Fetch current role
   const { data: currentUserRole } = useQuery<UserRole>({
     queryKey: ['/api/user/current-role'],
+  });
+
+  // Fetch available educators for emulation when needed
+  const { data: availableEducators = [] } = useQuery<any[]>({
+    queryKey: ['/api/educator-admins'],
+    enabled: showSchoolSelector,
   });
 
   // Role switching mutation
@@ -81,6 +96,28 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     },
   });
 
+  // Check if we need to show school selector when switching to educator role
+  useEffect(() => {
+    console.log('TopNav school selector check:', { 
+      currentUserRole: currentUserRole?.roleName, 
+      schoolId: currentUserRole?.schoolId,
+      showSchoolSelector
+    });
+    
+    if (currentUserRole && currentUserRole.roleName?.startsWith('educator') && !currentUserRole.schoolId && !showSchoolSelector) {
+      console.log('Triggering school selector popup from TopNav');
+      setShowSchoolSelector(true);
+    }
+  }, [currentUserRole?.roleName, currentUserRole?.schoolId]);
+
+  // Reset school selection when role changes away from educator
+  useEffect(() => {
+    if (currentUserRole && !currentUserRole.roleName?.startsWith('educator')) {
+      setSelectedSchoolId(null);
+      setShowSchoolSelector(false);
+    }
+  }, [currentUserRole?.roleName]);
+
   const getContextDisplayName = () => {
     if (currentUserRole) {
       // Extract the Level 1 category from the hierarchical role name
@@ -106,7 +143,53 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   };
 
   return (
-    <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+    <>
+      {/* School Selector Dialog for Educators without School ID */}
+      <Dialog open={showSchoolSelector} onOpenChange={setShowSchoolSelector}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select School to Emulate</DialogTitle>
+            <DialogDescription>
+              You're in educator mode but don't have a specific school assigned. 
+              Choose an educator to emulate and work with their school context.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {availableEducators.length > 0 ? (
+              <div className="space-y-2">
+                {availableEducators.map((educator: any) => (
+                  <div
+                    key={`${educator.userId}-${educator.schoolId}`}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedSchoolId(educator.schoolId);
+                      setShowSchoolSelector(false);
+                      toast({
+                        title: "School context selected",
+                        description: `Now working with ${educator.schoolName} as ${educator.firstName} ${educator.lastName}`,
+                      });
+                      // Reload to apply new context
+                      window.location.reload();
+                    }}
+                  >
+                    <div>
+                      <div className="font-medium">{educator.firstName} {educator.lastName}</div>
+                      <div className="text-sm text-gray-600">{educator.schoolName}</div>
+                      <div className="text-xs text-gray-500">{educator.roleDisplayName}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                No educator admins found. Contact support to set up school access.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -215,5 +298,6 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
         </div>
       </div>
     </nav>
+    </>
   );
 }

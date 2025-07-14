@@ -533,21 +533,29 @@ export default function SchoolSettingsPage() {
   // Use session-selected school or role's school
   const effectiveSchoolId = selectedSchoolId || schoolId;
 
-  // Check if we need to show school selector
+  // Check if we need to show school selector - trigger immediately when conditions are met
   React.useEffect(() => {
     console.log('School selector check:', { 
       currentRole: currentRole?.roleName, 
       schoolId: currentRole?.schoolId,
       effectiveSchoolId, 
       showSchoolSelector,
-      shouldShow: currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId && !showSchoolSelector
+      shouldShow: currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId
     });
     
-    if (currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId && !showSchoolSelector) {
+    if (currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId) {
       console.log('Triggering school selector popup');
       setShowSchoolSelector(true);
     }
-  }, [currentRole, effectiveSchoolId, showSchoolSelector]);
+  }, [currentRole?.roleName, currentRole?.schoolId]);
+
+  // Reset school selection when role changes
+  useEffect(() => {
+    if (currentRole && !currentRole.roleName?.startsWith('educator')) {
+      setSelectedSchoolId(null);
+      setShowSchoolSelector(false);
+    }
+  }, [currentRole?.roleName]);
 
   // Fetch school data
   const { data: school } = useQuery({

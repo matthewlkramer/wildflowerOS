@@ -1112,14 +1112,10 @@ export default function SchoolSettingsPage() {
                     
                     {/* Default Settings Tabs (excluding staff and classrooms) */}
                     <Tabs defaultValue="roles" className="w-full">
-                      <TabsList className="grid w-full grid-cols-6">
+                      <TabsList className="grid w-full grid-cols-5">
                         <TabsTrigger value="roles" className="flex items-center">
                           <Users className="mr-2 h-4 w-4" />
                           Roles
-                        </TabsTrigger>
-                        <TabsTrigger value="role-assignments" className="flex items-center">
-                          <Settings className="mr-2 h-4 w-4" />
-                          Role Assignments
                         </TabsTrigger>
                         <TabsTrigger value="school-years" className="flex items-center">
                           <Calendar className="mr-2 h-4 w-4" />
@@ -1169,73 +1165,7 @@ export default function SchoolSettingsPage() {
                         </Card>
                       </TabsContent>
 
-                      {/* Default Role Assignments */}
-                      <TabsContent value="role-assignments" className="space-y-6">
-                        <Card>
-                          <CardHeader>
-                            <CardTitle>Default Role Assignment Process</CardTitle>
-                            <p className="text-sm text-gray-600">Configure the default process new schools will use for role assignments.</p>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-6">
-                              <div className="grid gap-4">
-                                <div className="border rounded-lg p-4">
-                                  <h4 className="font-medium text-gray-900 mb-2">Assignment Survey Questions</h4>
-                                  <div className="text-sm text-gray-500 mb-3">
-                                    Default questions that will be used in role assignment surveys
-                                  </div>
-                                  <div className="space-y-3">
-                                    <div className="bg-gray-50 p-3 rounded">
-                                      <div className="font-medium text-sm">1. Skill/Experience Level</div>
-                                      <div className="text-sm text-gray-600">Rate your skill and experience for this role (1-10 scale)</div>
-                                    </div>
-                                    <div className="bg-gray-50 p-3 rounded">
-                                      <div className="font-medium text-sm">2. Enthusiasm Level</div>
-                                      <div className="text-sm text-gray-600">Rate your enthusiasm for taking on this role (1-10 scale)</div>
-                                    </div>
-                                    <div className="bg-gray-50 p-3 rounded">
-                                      <div className="font-medium text-sm">3. Growth Interest</div>
-                                      <div className="text-sm text-gray-600">Are you interested in growing into this role? (Yes/No)</div>
-                                    </div>
-                                  </div>
-                                </div>
 
-                                <div className="border rounded-lg p-4">
-                                  <h4 className="font-medium text-gray-900 mb-2">Assignment Process Flow</h4>
-                                  <div className="text-sm text-gray-500 mb-3">
-                                    The default workflow new schools will follow
-                                  </div>
-                                  <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</div>
-                                      <span className="text-sm">Staff complete role assignment surveys</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</div>
-                                      <span className="text-sm">Leadership reviews survey responses</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">3</div>
-                                      <span className="text-sm">Formal discussion and final assignments</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">4</div>
-                                      <span className="text-sm">Roles activated for school year</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mt-6 pt-4 border-t">
-                                <Button>
-                                  <Edit className="mr-2 h-4 w-4" />
-                                  Customize Assignment Process
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </TabsContent>
 
                       {/* Default School Years */}
                       <TabsContent value="school-years" className="space-y-6">

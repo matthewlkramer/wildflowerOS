@@ -184,24 +184,22 @@ export default function RoleSelector() {
             </div>
             <div className="flex items-center gap-2 mt-1">
               {(() => {
-                const Icon = roleIcons[currentRole.mainRole];
+                const Icon = roleIcons[currentRole.roleCategory];
                 return <Icon className="h-4 w-4 text-blue-600" />;
               })()}
               <span className="text-blue-900 dark:text-blue-100">
-                {roleLabels[currentRole.mainRole]}
+                {roleLabels[currentRole.roleCategory]}
               </span>
               <Badge variant="secondary" size="sm">
                 Active
               </Badge>
             </div>
-            {/* Show sub-roles if available */}
-            {currentRole.subRoles && currentRole.subRoles.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {currentRole.subRoles.map((subRole, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {roleLabels[subRole.subRole]}
-                  </Badge>
-                ))}
+            {/* Show current specific role */}
+            {currentRole.roleDisplayName && (
+              <div className="mt-2">
+                <Badge variant="outline" className="text-xs">
+                  {currentRole.roleDisplayName}
+                </Badge>
               </div>
             )}
           </div>
@@ -214,29 +212,32 @@ export default function RoleSelector() {
               <SelectValue placeholder="Switch to a different role..." />
             </SelectTrigger>
             <SelectContent>
-              {userRoles
-                .filter(role => role.active)
-                .map((role) => {
-                  const Icon = roleIcons[role.mainRole];
-                  return (
-                    <SelectItem key={role.id} value={role.id}>
-                      <div className="flex items-center gap-2">
-                        <Icon className="h-4 w-4" />
-                        <span>{roleLabels[role.mainRole]}</span>
-                        {role.schoolId && (
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            School
-                          </Badge>
-                        )}
-                        {!role.schoolId && !role.legalEntityId && (
-                          <Badge variant="outline" className="ml-auto text-xs">
-                            Network
-                          </Badge>
-                        )}
-                      </div>
-                    </SelectItem>
-                  );
-                })}
+              {/* Group roles by category and show only main categories */}
+              {Array.from(new Set(userRoles.filter(role => role.active).map(role => role.roleCategory))).map((category) => {
+                const Icon = roleIcons[category];
+                const rolesInCategory = userRoles.filter(role => role.roleCategory === category && role.active);
+                const hasSchoolScope = rolesInCategory.some(role => role.schoolId);
+                const hasNetworkScope = rolesInCategory.some(role => !role.schoolId && !role.legalEntityId);
+                
+                return (
+                  <SelectItem key={category} value={rolesInCategory[0].id}>
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-4 w-4" />
+                      <span>{roleLabels[category]}</span>
+                      {hasSchoolScope && (
+                        <Badge variant="outline" className="ml-auto text-xs">
+                          School
+                        </Badge>
+                      )}
+                      {hasNetworkScope && (
+                        <Badge variant="outline" className="ml-auto text-xs">
+                          Network
+                        </Badge>
+                      )}
+                    </div>
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
 

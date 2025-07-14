@@ -1,7 +1,7 @@
 import {
   users,
   userRoles,
-  userSubRoles,
+  roleDefinitions,
   schools,
   schoolYears,
   budgets,
@@ -20,8 +20,8 @@ import {
   type UpsertUser,
   type UserRole,
   type InsertUserRole,
-  type UserSubRole,
-  type InsertUserSubRole,
+  type RoleDefinition,
+  type InsertRoleDefinition,
   type School,
   type Classroom,
   type Family,
@@ -35,7 +35,7 @@ import {
   type InsertChannel,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, count, sql } from "drizzle-orm";
+import { eq, and, desc, asc, count, sql, isNull } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -47,11 +47,9 @@ export interface IStorage {
   createUserRole(role: InsertUserRole): Promise<UserRole>;
   updateUserRole(id: string, role: Partial<InsertUserRole>): Promise<UserRole>;
   
-  // User sub-roles
-  getUserSubRoles(userRoleId: string): Promise<UserSubRole[]>;
-  createUserSubRole(subRole: InsertUserSubRole): Promise<UserSubRole>;
-  updateUserSubRole(id: string, subRole: Partial<InsertUserSubRole>): Promise<UserSubRole>;
-  deleteUserSubRole(id: string): Promise<void>;
+  // Role definitions
+  getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]>;
+  createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition>;
   
   // Schools
   getSchools(): Promise<School[]>;
@@ -166,36 +164,25 @@ export class DatabaseStorage implements IStorage {
     return userRole;
   }
 
-  // User sub-roles
-  async getUserSubRoles(userRoleId: string): Promise<UserSubRole[]> {
+  // Role definitions
+  async getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]> {
     return await db
       .select()
-      .from(userSubRoles)
-      .where(and(eq(userSubRoles.userRoleId, userRoleId), eq(userSubRoles.active, true)));
+      .from(roleDefinitions)
+      .where(
+        and(
+          eq(roleDefinitions.active, true),
+          schoolId ? eq(roleDefinitions.schoolId, schoolId) : isNull(roleDefinitions.schoolId)
+        )
+      );
   }
 
-  async createUserSubRole(subRole: InsertUserSubRole): Promise<UserSubRole> {
-    const [newSubRole] = await db
-      .insert(userSubRoles)
-      .values(subRole)
+  async createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition> {
+    const [newRole] = await db
+      .insert(roleDefinitions)
+      .values(role)
       .returning();
-    return newSubRole;
-  }
-
-  async updateUserSubRole(id: string, subRole: Partial<InsertUserSubRole>): Promise<UserSubRole> {
-    const [updatedSubRole] = await db
-      .update(userSubRoles)
-      .set(subRole)
-      .where(eq(userSubRoles.id, id))
-      .returning();
-    return updatedSubRole;
-  }
-
-  async deleteUserSubRole(id: string): Promise<void> {
-    await db
-      .update(userSubRoles)
-      .set({ active: false })
-      .where(eq(userSubRoles.id, id));
+    return newRole;
   }
 
   // Schools
@@ -275,11 +262,12 @@ export class DatabaseStorage implements IStorage {
       .select({
         id: userRoles.id,
         userId: userRoles.userId,
-        mainRole: userRoles.mainRole,
-        startDate: userRoles.startDate,
-        active: userRoles.active,
+        roleId: userRoles.roleId,
         schoolId: userRoles.schoolId,
+        classroomId: userRoles.classroomId,
         legalEntityId: userRoles.legalEntityId,
+        active: userRoles.active,
+        startDate: userRoles.startDate,
         endDate: userRoles.endDate,
       })
       .from(userRoles)

@@ -37,37 +37,29 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Main role categories
+// Role definitions - can be customized per school or used network-wide
+export const roleDefinitions = pgTable("role_definitions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  displayName: varchar("display_name", { length: 100 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { 
+    enum: ["parent", "educator", "board_director", "systems_administrator"] 
+  }).notNull(),
+  isSystemRole: boolean("is_system_role").notNull().default(false), // Core roles that can't be modified
+  schoolId: uuid("school_id"), // If null, available network-wide
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// User role assignments
 export const userRoles = pgTable("user_roles", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  mainRole: varchar("main_role", { 
-    enum: ["parent", "educator", "board_director", "systems_administrator"]
-  }).notNull(),
-  schoolId: uuid("school_id"),
-  legalEntityId: uuid("legal_entity_id"),
-  active: boolean("active").notNull().default(true),
-  startDate: timestamp("start_date"),
-  endDate: timestamp("end_date"),
-});
-
-// Sub-roles for each main role
-export const userSubRoles = pgTable("user_sub_roles", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userRoleId: uuid("user_role_id").notNull().references(() => userRoles.id),
-  subRole: varchar("sub_role", { 
-    enum: [
-      // Parent sub-roles
-      "billing_contact", "custodian",
-      // Educator sub-roles  
-      "school_admin", "classroom_guide", "classroom_assistant", 
-      "classroom_aide", "before_after_care_supervisor",
-      // Board Director sub-roles
-      "chair", "treasury", "secretary", "member"
-      // Systems Administrator has no sub-roles
-    ]
-  }).notNull(),
-  classroomId: uuid("classroom_id"), // For classroom-specific sub-roles
+  roleId: uuid("role_id").notNull().references(() => roleDefinitions.id),
+  schoolId: uuid("school_id"), // Scope: which school this role applies to
+  classroomId: uuid("classroom_id"), // Scope: which classroom this role applies to  
+  legalEntityId: uuid("legal_entity_id"), // Scope: which legal entity this role applies to
   active: boolean("active").notNull().default(true),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
@@ -574,26 +566,34 @@ export const usersRelations = relations(users, ({ many }) => ({
   channelMemberships: many(channelMembers),
 }));
 
-export const userRolesRelations = relations(userRoles, ({ one, many }) => ({
+export const roleDefinitionsRelations = relations(roleDefinitions, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [roleDefinitions.schoolId],
+    references: [schools.id],
+  }),
+  userRoles: many(userRoles),
+}));
+
+export const userRolesRelations = relations(userRoles, ({ one }) => ({
   user: one(users, {
     fields: [userRoles.userId],
     references: [users.id],
+  }),
+  roleDefinition: one(roleDefinitions, {
+    fields: [userRoles.roleId],
+    references: [roleDefinitions.id],
   }),
   school: one(schools, {
     fields: [userRoles.schoolId],
     references: [schools.id],
   }),
+  classroom: one(classrooms, {
+    fields: [userRoles.classroomId],
+    references: [classrooms.id],
+  }),
   legalEntity: one(legalEntities, {
     fields: [userRoles.legalEntityId],
     references: [legalEntities.id],
-  }),
-  subRoles: many(userSubRoles),
-}));
-
-export const userSubRolesRelations = relations(userSubRoles, ({ one }) => ({
-  userRole: one(userRoles, {
-    fields: [userSubRoles.userRoleId],
-    references: [userRoles.id],
   }),
 }));
 
@@ -921,8 +921,8 @@ export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 export type UserRole = typeof userRoles.$inferSelect;
 export type InsertUserRole = typeof userRoles.$inferInsert;
-export type UserSubRole = typeof userSubRoles.$inferSelect;
-export type InsertUserSubRole = typeof userSubRoles.$inferInsert;
+export type RoleDefinition = typeof roleDefinitions.$inferSelect;
+export type InsertRoleDefinition = typeof roleDefinitions.$inferInsert;
 export type School = typeof schools.$inferSelect;
 export type InsertSchool = typeof schools.$inferInsert;
 export type Classroom = typeof classrooms.$inferSelect;
@@ -987,7 +987,7 @@ export type InsertFundraisingAnalytics = typeof fundraisingAnalytics.$inferInser
 // ======================== ZOD SCHEMAS ========================
 
 export const insertUserRoleSchema = createInsertSchema(userRoles);
-export const insertUserSubRoleSchema = createInsertSchema(userSubRoles);
+export const insertRoleDefinitionSchema = createInsertSchema(roleDefinitions);
 export const insertSchoolSchema = createInsertSchema(schools);
 export const insertClassroomSchema = createInsertSchema(classrooms);
 export const insertFamilySchema = createInsertSchema(families);

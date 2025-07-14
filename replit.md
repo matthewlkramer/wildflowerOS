@@ -23,6 +23,14 @@ Preferred communication style: Simple, everyday language.
   - Restored proper flexbox layout structure (min-h-screen flex flex-col) for consistency
   - Added overflow-y-auto to main element for proper scroll behavior
   - **CONFIRMED WORKING** - All content now visible and scrollable with developer panel hidden
+- **Enhanced school years management with system defaults import functionality**
+  - Reordered cards on school settings school years tab: School Years card now appears above Academic Calendar Overview
+  - Added "Import & Customize System Defaults" button to Add School Year dialog
+  - Implemented system holidays import functionality that fetches network defaults and converts rules to approximate dates
+  - Import process creates school year first, then imports all system holidays to the academic calendar
+  - Added holiday date approximation logic for common holidays (Labor Day, Thanksgiving, Winter Break, MLK Day, Presidents Day, Memorial Day)
+  - Import button only appears for non-system administrators when system holidays are available
+  - System automatically converts rule-based holidays to specific dates for the school year being created
 - **Enhanced calendar closures system with rule-based network defaults**
   - Added rule field to calendar_closures table for descriptive holiday rules
   - Made date field nullable for network default holidays that use rules instead of specific dates

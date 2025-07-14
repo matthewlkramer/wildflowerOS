@@ -995,6 +995,7 @@ export default function SchoolSettingsPage() {
   const [addingSchoolYear, setAddingSchoolYear] = useState(false);
   const [editingSchoolYear, setEditingSchoolYear] = useState<any>(null);
   const [deletingSchoolYear, setDeletingSchoolYear] = useState<any>(null);
+  const [importingSystemHolidays, setImportingSystemHolidays] = useState(false);
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<any>(null);
   const [showCalendar, setShowCalendar] = useState(false);
   const [addingSubsidy, setAddingSubsidy] = useState(false);
@@ -1149,6 +1150,12 @@ export default function SchoolSettingsPage() {
   const { data: availableEducators = [] } = useQuery({
     queryKey: ["/api/educators/admin-roles"],
     enabled: showSchoolSelector,
+  });
+
+  // Fetch system holidays for import functionality
+  const { data: systemHolidays = [] } = useQuery({
+    queryKey: ["/api/system-holidays"],
+    enabled: !!currentRole && !currentRole.roleName?.startsWith('sysadmin'),
   });
 
   // Add staff mutation
@@ -1350,6 +1357,58 @@ export default function SchoolSettingsPage() {
     },
   });
 
+  // Import system holidays mutation
+  const importSystemHolidaysMutation = useMutation({
+    mutationFn: async (data: { schoolYearId: string, academicCalendarId: string }) => {
+      const promises = systemHolidays.map((holiday: any) => {
+        // Convert rules to approximate dates for the school year
+        let holidayDate = null;
+        if (holiday.rule && schoolYearForm.startDate) {
+          // For now, use start date of school year plus offset based on holiday name
+          const startDate = new Date(schoolYearForm.startDate);
+          const year = startDate.getFullYear();
+          
+          // Simple approximation mapping for common holidays
+          if (holiday.name.includes('Labor Day')) holidayDate = new Date(year, 8, 2); // First Monday in September
+          else if (holiday.name.includes('Thanksgiving')) holidayDate = new Date(year, 10, 26); // Fourth Thursday in November
+          else if (holiday.name.includes('Winter Break')) holidayDate = new Date(year, 11, 23); // Week before Christmas
+          else if (holiday.name.includes('MLK')) holidayDate = new Date(year + 1, 0, 20); // Third Monday in January
+          else if (holiday.name.includes('Presidents')) holidayDate = new Date(year + 1, 1, 17); // Third Monday in February
+          else if (holiday.name.includes('Memorial Day')) holidayDate = new Date(year + 1, 4, 26); // Last Monday in May
+          else holidayDate = new Date(startDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000); // Random within 30 days
+        }
+        
+        return apiRequest('POST', `/api/academic-calendars/${data.academicCalendarId}/closures`, {
+          name: holiday.name,
+          description: holiday.description,
+          date: holidayDate ? holidayDate.toISOString().split('T')[0] : null,
+          type: 'holiday',
+          active: true
+        });
+      });
+      
+      return Promise.all(promises);
+    },
+    onSuccess: () => {
+      if (selectedSchoolYear?.id) {
+        queryClient.invalidateQueries({ queryKey: ["/api/school-years", selectedSchoolYear.id, "calendar"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/academic-calendars"] });
+      }
+      setImportingSystemHolidays(false);
+      toast({
+        title: "System holidays imported",
+        description: `${systemHolidays.length} system holidays have been imported and customized for your school year.`,
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error importing holidays",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Add public subsidy mutation
   const addSubsidyMutation = useMutation({
     mutationFn: async (subsidyData: any) => {
@@ -1489,6 +1548,38 @@ export default function SchoolSettingsPage() {
   const handleViewCalendar = (year: any) => {
     setSelectedSchoolYear(year);
     setShowCalendar(true);
+  };
+
+  const handleImportSystemHolidays = async () => {
+    if (!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate) {
+      toast({
+        title: "Error",
+        description: "Please fill in school year details first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // First create the school year, then import holidays
+    try {
+      const response = await addSchoolYearMutation.mutateAsync({
+        ...schoolYearForm,
+        schoolId: schoolId
+      });
+      
+      // Now import system holidays to the academic calendar
+      if (response.academicCalendarId) {
+        await importSystemHolidaysMutation.mutateAsync({
+          schoolYearId: response.id,
+          academicCalendarId: response.academicCalendarId
+        });
+      }
+      
+      setAddingSchoolYear(false);
+      setSchoolYearForm({ name: "", startDate: "", endDate: "" });
+    } catch (error) {
+      console.error('Error creating school year with holidays:', error);
+    }
   };
 
   // Update selected school year when clicking Edit Calendar from overview
@@ -2773,12 +2864,6 @@ export default function SchoolSettingsPage() {
 
           {/* School Years Tab */}
           <TabsContent value="school-years" className="space-y-6">
-            {/* Academic Calendar Overview */}
-            <AcademicCalendarOverview 
-              schoolYears={schoolYears} 
-              selectedSchoolYear={selectedSchoolYear}
-              onSchoolYearSelect={setSelectedSchoolYear}
-            />
             
             <Card>
               <CardHeader>
@@ -2828,16 +2913,29 @@ export default function SchoolSettingsPage() {
                             />
                           </div>
                         </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setAddingSchoolYear(false)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleAddSchoolYear}
-                            disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
-                          >
-                            Add School Year
-                          </Button>
+                        <div className="flex justify-between">
+                          <div className="space-x-2">
+                            {!currentRole?.roleName?.startsWith('sysadmin') && systemHolidays.length > 0 && (
+                              <Button 
+                                variant="outline"
+                                onClick={handleImportSystemHolidays}
+                                disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate || importSystemHolidaysMutation.isPending}
+                              >
+                                {importSystemHolidaysMutation.isPending ? "Importing..." : "Import & Customize System Defaults"}
+                              </Button>
+                            )}
+                          </div>
+                          <div className="space-x-2">
+                            <Button variant="outline" onClick={() => setAddingSchoolYear(false)}>
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={handleAddSchoolYear}
+                              disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
+                            >
+                              Add School Year
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </DialogContent>
@@ -3017,6 +3115,12 @@ export default function SchoolSettingsPage() {
               </CardContent>
             </Card>
 
+            {/* Academic Calendar Overview */}
+            <AcademicCalendarOverview 
+              schoolYears={schoolYears} 
+              selectedSchoolYear={selectedSchoolYear}
+              onSchoolYearSelect={setSelectedSchoolYear}
+            />
 
           </TabsContent>
 

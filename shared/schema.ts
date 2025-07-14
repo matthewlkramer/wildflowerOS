@@ -61,7 +61,7 @@ export const roleDefinitions = pgTable("role_definitions", {
   displayName: varchar("display_name", { length: 100 }).notNull(),
   description: text("description"),
   category: varchar("category", { 
-    enum: ["parent", "educator", "board_director", "systems_administrator"] 
+    enum: ["parent", "educator", "board_director", "systems_admin"] 
   }).notNull(),
   isSystemRole: boolean("is_system_role").notNull().default(false), // Core roles that can't be modified
   schoolId: uuid("school_id"), // If null, available network-wide

@@ -20,7 +20,8 @@ export default function Sidebar({ currentRole }: SidebarProps) {
   ];
 
   const showSchoolSettings = currentRole?.category === "educator" || 
-                            currentRole?.category === "systems_administrator" || 
+                            currentRole?.category === "systems_admin" || 
+                            currentRole?.category === "board_director" ||
                             currentRole?.name === "school_admin" ||
                             currentRole?.name === "teacher_leader" ||
                             currentRole?.name === "operations_manager";

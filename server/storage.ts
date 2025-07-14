@@ -427,15 +427,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]> {
+    const whereClause = schoolId 
+      ? and(
+          eq(roleDefinitions.active, true),
+          eq(roleDefinitions.category, category as any),
+          or(
+            eq(roleDefinitions.schoolId, schoolId),
+            isNull(roleDefinitions.schoolId)
+          )
+        )
+      : and(
+          eq(roleDefinitions.active, true),
+          eq(roleDefinitions.category, category as any)
+        );
+
     return await db
       .select()
       .from(roleDefinitions)
-      .where(
-        and(
-          eq(roleDefinitions.active, true),
-          eq(roleDefinitions.category, category)
-        )
-      )
+      .where(whereClause)
       .orderBy(roleDefinitions.displayName);
   }
 

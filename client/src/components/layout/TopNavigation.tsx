@@ -30,14 +30,14 @@ const roleIcons = {
   parent: Heart,
   educator: GraduationCap,
   board_director: Building2,
-  systems_administrator: Shield,
+  systems_admin: Shield,
 };
 
 const roleLabels = {
   parent: "Parent",
   educator: "Educator", 
   board_director: "Board",
-  systems_administrator: "Admin",
+  systems_admin: "Systems Admin",
 };
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {

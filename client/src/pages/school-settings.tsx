@@ -2504,42 +2504,7 @@ export default function SchoolSettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Calendar Events */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Academic Calendar</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-medium text-blue-800">First Day of School</h4>
-                    <p className="text-sm text-blue-600 mt-1">September 5, 2024</p>
-                  </div>
-                  <div className="p-4 bg-orange-50 rounded-lg">
-                    <h4 className="font-medium text-orange-800">Fall Break</h4>
-                    <p className="text-sm text-orange-600 mt-1">October 9-13, 2024</p>
-                  </div>
-                  <div className="p-4 bg-red-50 rounded-lg">
-                    <h4 className="font-medium text-red-800">Winter Break</h4>
-                    <p className="text-sm text-red-600 mt-1">December 18 - January 8</p>
-                  </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <h4 className="font-medium text-green-800">Spring Break</h4>
-                    <p className="text-sm text-green-600 mt-1">March 24-28, 2025</p>
-                  </div>
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <h4 className="font-medium text-purple-800">Last Day of School</h4>
-                    <p className="text-sm text-purple-600 mt-1">June 12, 2025</p>
-                  </div>
-                  <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
-                    <Button variant="outline" size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Event
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </TabsContent>
 
           {/* Schedules Tab */}

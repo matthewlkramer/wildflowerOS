@@ -135,6 +135,10 @@ Preferred communication style: Simple, everyday language.
   - Added edit and delete functionality for school years with proper confirmation dialogs
   - Academic calendar dialog accessible through calendar button on each school year
   - Full API integration with proper error handling and toast notifications
+  - **Removed hardcoded Academic Calendar placeholder data** and replaced with dynamic system
+    - Eliminated static Fall Break, Winter Break, Spring Break display cards
+    - Academic calendar now shows only real data from database through school year selection
+    - Calendar management happens through individual school year dialogs, not static overview
 - **Implemented comprehensive classroom scheduling and program offerings system**
   - Removed days-of-week fields from academic calendar (moved to classroom level)
   - Created classroom_schedules table with start/end dates, isActive flag, and operational days/hours

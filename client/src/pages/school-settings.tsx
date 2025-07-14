@@ -544,6 +544,37 @@ export default function SchoolSettingsPage() {
   // Debug logging for staff data
   console.log('Staff data:', { staff, staffLoading, staffError, schoolId, currentRole });
 
+  // If current role doesn't have schoolId, we need to switch to an educator role
+  if (!schoolId && currentRole && !currentRole.schoolId) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <TopNavigation user={user} currentSchool={school} currentRole={currentRole} />
+        
+        <div className="flex pt-16">
+          <Sidebar currentRole={currentRole} />
+          
+          <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center py-12">
+                <Settings className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">School Settings</h2>
+                <p className="text-gray-600 mb-6">
+                  To access school settings, please switch to an educator role using the role selector in the top navigation.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
+                  <p className="text-sm text-blue-800">
+                    You're currently in a "{currentRole.roleDisplayName}" role. 
+                    Use the role switcher at the top to select an educator role like "Educator" or "Systems Administrator".
+                  </p>
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   // Fetch classrooms
   const { data: classrooms = [] } = useQuery({
     queryKey: ["/api/schools", schoolId, "classrooms"],

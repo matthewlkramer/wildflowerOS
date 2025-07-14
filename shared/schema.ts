@@ -136,13 +136,6 @@ export const academicCalendars = pgTable("academic_calendars", {
   schoolYearId: uuid("school_year_id").notNull().references(() => schoolYears.id, { onDelete: "cascade" }),
   firstDayOfSchool: timestamp("first_day_of_school"),
   lastDayOfSchool: timestamp("last_day_of_school"),
-  mondayOpen: boolean("monday_open").notNull().default(true),
-  tuesdayOpen: boolean("tuesday_open").notNull().default(true),
-  wednesdayOpen: boolean("wednesday_open").notNull().default(true),
-  thursdayOpen: boolean("thursday_open").notNull().default(true),
-  fridayOpen: boolean("friday_open").notNull().default(true),
-  saturdayOpen: boolean("saturday_open").notNull().default(false),
-  sundayOpen: boolean("sunday_open").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -154,6 +147,49 @@ export const calendarClosures = pgTable("calendar_closures", {
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+// ======================== CLASSROOM SCHEDULES & PROGRAM OFFERINGS ========================
+
+export const classroomSchedules = pgTable("classroom_schedules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id, { onDelete: "cascade" }),
+  schoolYearId: uuid("school_year_id").references(() => schoolYears.id), // null for continuous programs
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"), // optional for continuous programs
+  isActive: boolean("is_active").notNull().default(true),
+  mondayOpen: boolean("monday_open").notNull().default(false),
+  tuesdayOpen: boolean("tuesday_open").notNull().default(false),
+  wednesdayOpen: boolean("wednesday_open").notNull().default(false),
+  thursdayOpen: boolean("thursday_open").notNull().default(false),
+  fridayOpen: boolean("friday_open").notNull().default(false),
+  saturdayOpen: boolean("saturday_open").notNull().default(false),
+  sundayOpen: boolean("sunday_open").notNull().default(false),
+  startTime: varchar("start_time", { length: 8 }), // HH:MM:SS format
+  endTime: varchar("end_time", { length: 8 }), // HH:MM:SS format
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const programOfferings = pgTable("program_offerings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id, { onDelete: "cascade" }),
+  schoolYearId: uuid("school_year_id").references(() => schoolYears.id), // null for continuous programs
+  name: varchar("name", { length: 100 }).notNull(), // e.g., "Full Day Montessori", "Before Care", "After Care"
+  description: text("description"),
+  startTime: varchar("start_time", { length: 8 }).notNull(), // HH:MM:SS format
+  endTime: varchar("end_time", { length: 8 }).notNull(), // HH:MM:SS format
+  mondayAvailable: boolean("monday_available").notNull().default(false),
+  tuesdayAvailable: boolean("tuesday_available").notNull().default(false),
+  wednesdayAvailable: boolean("wednesday_available").notNull().default(false),
+  thursdayAvailable: boolean("thursday_available").notNull().default(false),
+  fridayAvailable: boolean("friday_available").notNull().default(false),
+  saturdayAvailable: boolean("saturday_available").notNull().default(false),
+  sundayAvailable: boolean("sunday_available").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
+  tuitionRate: decimal("tuition_rate", { precision: 10, scale: 2 }), // optional pricing
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // ======================== CLASSROOMS ========================
@@ -674,6 +710,30 @@ export const classroomsRelations = relations(classrooms, ({ one, many }) => ({
     references: [schools.id],
   }),
   enrollments: many(enrollments),
+  schedules: many(classroomSchedules),
+  programOfferings: many(programOfferings),
+}));
+
+export const classroomSchedulesRelations = relations(classroomSchedules, ({ one }) => ({
+  classroom: one(classrooms, {
+    fields: [classroomSchedules.classroomId],
+    references: [classrooms.id],
+  }),
+  schoolYear: one(schoolYears, {
+    fields: [classroomSchedules.schoolYearId],
+    references: [schoolYears.id],
+  }),
+}));
+
+export const programOfferingsRelations = relations(programOfferings, ({ one }) => ({
+  classroom: one(classrooms, {
+    fields: [programOfferings.classroomId],
+    references: [classrooms.id],
+  }),
+  schoolYear: one(schoolYears, {
+    fields: [programOfferings.schoolYearId],
+    references: [schoolYears.id],
+  }),
 }));
 
 export const familiesRelations = relations(families, ({ many }) => ({
@@ -1069,6 +1129,12 @@ export type InsertAcademicCalendar = typeof academicCalendars.$inferInsert;
 export type CalendarClosure = typeof calendarClosures.$inferSelect;
 export type InsertCalendarClosure = typeof calendarClosures.$inferInsert;
 
+// Classroom Schedule and Program Offering types
+export type ClassroomSchedule = typeof classroomSchedules.$inferSelect;
+export type InsertClassroomSchedule = typeof classroomSchedules.$inferInsert;
+export type ProgramOffering = typeof programOfferings.$inferSelect;
+export type InsertProgramOffering = typeof programOfferings.$inferInsert;
+
 // ======================== ZOD SCHEMAS ========================
 
 export const insertUserRoleSchema = createInsertSchema(userRoles);
@@ -1095,3 +1161,5 @@ export const insertEmailAddressSchema = createInsertSchema(emailAddresses);
 export const insertSchoolYearSchema = createInsertSchema(schoolYears);
 export const insertAcademicCalendarSchema = createInsertSchema(academicCalendars);
 export const insertCalendarClosureSchema = createInsertSchema(calendarClosures);
+export const insertClassroomScheduleSchema = createInsertSchema(classroomSchedules);
+export const insertProgramOfferingSchema = createInsertSchema(programOfferings);

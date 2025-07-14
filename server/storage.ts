@@ -8,6 +8,8 @@ import {
   calendarClosures,
   budgets,
   classrooms,
+  classroomSchedules,
+  programOfferings,
   families,
   children,
   enrollments,
@@ -32,6 +34,10 @@ import {
   type InsertAcademicCalendar,
   type CalendarClosure,
   type InsertCalendarClosure,
+  type ClassroomSchedule,
+  type InsertClassroomSchedule,
+  type ProgramOffering,
+  type InsertProgramOffering,
   type Classroom,
   type Family,
   type Child,
@@ -109,6 +115,20 @@ export interface IStorage {
   createCalendarClosure(closure: InsertCalendarClosure): Promise<CalendarClosure>;
   updateCalendarClosure(id: string, closure: Partial<InsertCalendarClosure>): Promise<CalendarClosure>;
   deleteCalendarClosure(id: string): Promise<void>;
+  
+  // Classroom schedules
+  getSchedulesByClassroom(classroomId: string): Promise<any[]>;
+  getActiveScheduleByClassroom(classroomId: string): Promise<any | undefined>;
+  createClassroomSchedule(schedule: any): Promise<any>;
+  updateClassroomSchedule(id: string, schedule: any): Promise<any>;
+  deleteClassroomSchedule(id: string): Promise<void>;
+  
+  // Program offerings
+  getProgramOfferingsByClassroom(classroomId: string): Promise<any[]>;
+  getProgramOfferingsBySchoolYear(classroomId: string, schoolYearId: string): Promise<any[]>;
+  createProgramOffering(offering: any): Promise<any>;
+  updateProgramOffering(id: string, offering: any): Promise<any>;
+  deleteProgramOffering(id: string): Promise<void>;
   
   // Families
   getFamiliesBySchool(schoolId: string): Promise<Family[]>;
@@ -1017,6 +1037,105 @@ export class DatabaseStorage implements IStorage {
       pendingTasks: tasksResult.count,
       monthlyRevenue: 42500, // This would be calculated from billing data
     };
+  }
+
+  // Classroom schedules
+  async getSchedulesByClassroom(classroomId: string): Promise<ClassroomSchedule[]> {
+    return await db
+      .select()
+      .from(classroomSchedules)
+      .where(eq(classroomSchedules.classroomId, classroomId))
+      .orderBy(desc(classroomSchedules.startDate));
+  }
+
+  async getActiveScheduleByClassroom(classroomId: string): Promise<ClassroomSchedule | undefined> {
+    const currentDate = new Date();
+    const [schedule] = await db
+      .select()
+      .from(classroomSchedules)
+      .where(and(
+        eq(classroomSchedules.classroomId, classroomId),
+        eq(classroomSchedules.isActive, true),
+        lte(classroomSchedules.startDate, currentDate),
+        or(
+          isNull(classroomSchedules.endDate),
+          gt(classroomSchedules.endDate, currentDate)
+        )
+      ))
+      .orderBy(desc(classroomSchedules.startDate));
+    return schedule;
+  }
+
+  async createClassroomSchedule(scheduleData: InsertClassroomSchedule): Promise<ClassroomSchedule> {
+    // Convert string dates to Date objects if needed
+    const processedData = {
+      ...scheduleData,
+      startDate: scheduleData.startDate instanceof Date ? scheduleData.startDate : new Date(scheduleData.startDate),
+      endDate: scheduleData.endDate ? (scheduleData.endDate instanceof Date ? scheduleData.endDate : new Date(scheduleData.endDate)) : null,
+    };
+
+    const [schedule] = await db.insert(classroomSchedules).values(processedData).returning();
+    return schedule;
+  }
+
+  async updateClassroomSchedule(id: string, scheduleData: Partial<InsertClassroomSchedule>): Promise<ClassroomSchedule> {
+    // Convert string dates to Date objects if provided
+    const updateData: any = { ...scheduleData, updatedAt: new Date() };
+    if (updateData.startDate && typeof updateData.startDate === 'string') {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.endDate && typeof updateData.endDate === 'string') {
+      updateData.endDate = new Date(updateData.endDate);
+    }
+
+    const [schedule] = await db
+      .update(classroomSchedules)
+      .set(updateData)
+      .where(eq(classroomSchedules.id, id))
+      .returning();
+    return schedule;
+  }
+
+  async deleteClassroomSchedule(id: string): Promise<void> {
+    await db.delete(classroomSchedules).where(eq(classroomSchedules.id, id));
+  }
+
+  // Program offerings
+  async getProgramOfferingsByClassroom(classroomId: string): Promise<ProgramOffering[]> {
+    return await db
+      .select()
+      .from(programOfferings)
+      .where(eq(programOfferings.classroomId, classroomId))
+      .orderBy(asc(programOfferings.startTime));
+  }
+
+  async getProgramOfferingsBySchoolYear(classroomId: string, schoolYearId: string): Promise<ProgramOffering[]> {
+    return await db
+      .select()
+      .from(programOfferings)
+      .where(and(
+        eq(programOfferings.classroomId, classroomId),
+        eq(programOfferings.schoolYearId, schoolYearId)
+      ))
+      .orderBy(asc(programOfferings.startTime));
+  }
+
+  async createProgramOffering(offeringData: InsertProgramOffering): Promise<ProgramOffering> {
+    const [offering] = await db.insert(programOfferings).values(offeringData).returning();
+    return offering;
+  }
+
+  async updateProgramOffering(id: string, offeringData: Partial<InsertProgramOffering>): Promise<ProgramOffering> {
+    const [offering] = await db
+      .update(programOfferings)
+      .set({ ...offeringData, updatedAt: new Date() })
+      .where(eq(programOfferings.id, id))
+      .returning();
+    return offering;
+  }
+
+  async deleteProgramOffering(id: string): Promise<void> {
+    await db.delete(programOfferings).where(eq(programOfferings.id, id));
   }
 }
 

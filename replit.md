@@ -89,11 +89,21 @@ Preferred communication style: Simple, everyday language.
   - Added calendar_closures table for tracking holidays, breaks, and school closure dates
   - Implemented full CRUD operations for academic calendars and closures
   - Added first/last day of school date tracking
-  - Operational days of week configuration (Monday-Sunday open/closed flags)
   - Built comprehensive academic calendar UI with school year overview, calendar settings, and holiday management
   - Added edit and delete functionality for school years with proper confirmation dialogs
   - Academic calendar dialog accessible through calendar button on each school year
   - Full API integration with proper error handling and toast notifications
+- **Implemented comprehensive classroom scheduling and program offerings system**
+  - Removed days-of-week fields from academic calendar (moved to classroom level)
+  - Created classroom_schedules table with start/end dates, isActive flag, and operational days/hours
+  - Continuous programs get schedules with optional end dates for flexibility
+  - School year programs get schedules per school year with mid-year adjustment capability
+  - Created program_offerings table for flexible enrollment options (full-day, half-day, before/after care)
+  - Program offerings support different day combinations and time slots with tuition rates
+  - Added comprehensive API routes for schedule and offering CRUD operations
+  - Database changes applied successfully with proper foreign key relationships
+  - Storage layer methods handle date conversions and active schedule detection
+  - Academic calendar UI updated with explanatory note about classroom-level scheduling
 
 ## System Architecture
 

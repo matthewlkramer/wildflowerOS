@@ -610,6 +610,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Classroom Schedules
+  app.get('/api/classrooms/:classroomId/schedules', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const schedules = await storage.getSchedulesByClassroom(classroomId);
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error fetching classroom schedules:", error);
+      res.status(500).json({ message: "Failed to fetch classroom schedules" });
+    }
+  });
+
+  app.get('/api/classrooms/:classroomId/schedules/active', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const schedule = await storage.getActiveScheduleByClassroom(classroomId);
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error fetching active classroom schedule:", error);
+      res.status(500).json({ message: "Failed to fetch active classroom schedule" });
+    }
+  });
+
+  app.post('/api/classrooms/:classroomId/schedules', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const scheduleData = { ...req.body, classroomId };
+      const schedule = await storage.createClassroomSchedule(scheduleData);
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error("Error creating classroom schedule:", error);
+      res.status(500).json({ message: "Failed to create classroom schedule" });
+    }
+  });
+
+  app.patch('/api/classroom-schedules/:scheduleId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scheduleId } = req.params;
+      const schedule = await storage.updateClassroomSchedule(scheduleId, req.body);
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error updating classroom schedule:", error);
+      res.status(500).json({ message: "Failed to update classroom schedule" });
+    }
+  });
+
+  app.delete('/api/classroom-schedules/:scheduleId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scheduleId } = req.params;
+      await storage.deleteClassroomSchedule(scheduleId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting classroom schedule:", error);
+      res.status(500).json({ message: "Failed to delete classroom schedule" });
+    }
+  });
+
+  // Program Offerings
+  app.get('/api/classrooms/:classroomId/program-offerings', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { schoolYearId } = req.query;
+      
+      let offerings;
+      if (schoolYearId) {
+        offerings = await storage.getProgramOfferingsBySchoolYear(classroomId, schoolYearId as string);
+      } else {
+        offerings = await storage.getProgramOfferingsByClassroom(classroomId);
+      }
+      
+      res.json(offerings);
+    } catch (error) {
+      console.error("Error fetching program offerings:", error);
+      res.status(500).json({ message: "Failed to fetch program offerings" });
+    }
+  });
+
+  app.post('/api/classrooms/:classroomId/program-offerings', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const offeringData = { ...req.body, classroomId };
+      const offering = await storage.createProgramOffering(offeringData);
+      res.status(201).json(offering);
+    } catch (error) {
+      console.error("Error creating program offering:", error);
+      res.status(500).json({ message: "Failed to create program offering" });
+    }
+  });
+
+  app.patch('/api/program-offerings/:offeringId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { offeringId } = req.params;
+      const offering = await storage.updateProgramOffering(offeringId, req.body);
+      res.json(offering);
+    } catch (error) {
+      console.error("Error updating program offering:", error);
+      res.status(500).json({ message: "Failed to update program offering" });
+    }
+  });
+
+  app.delete('/api/program-offerings/:offeringId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { offeringId } = req.params;
+      await storage.deleteProgramOffering(offeringId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting program offering:", error);
+      res.status(500).json({ message: "Failed to delete program offering" });
+    }
+  });
+
   // Families
   app.get('/api/schools/:schoolId/families', isAuthenticated, async (req: any, res) => {
     try {

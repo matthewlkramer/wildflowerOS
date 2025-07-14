@@ -61,13 +61,6 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
   const [calendarForm, setCalendarForm] = useState({
     firstDayOfSchool: "",
     lastDayOfSchool: "",
-    mondayOpen: true,
-    tuesdayOpen: true,
-    wednesdayOpen: true,
-    thursdayOpen: true,
-    fridayOpen: true,
-    saturdayOpen: false,
-    sundayOpen: false,
   });
 
   // Fetch academic calendar for this school year
@@ -87,13 +80,6 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
       setCalendarForm({
         firstDayOfSchool: academicCalendar.firstDayOfSchool ? new Date(academicCalendar.firstDayOfSchool).toISOString().split('T')[0] : "",
         lastDayOfSchool: academicCalendar.lastDayOfSchool ? new Date(academicCalendar.lastDayOfSchool).toISOString().split('T')[0] : "",
-        mondayOpen: academicCalendar.mondayOpen ?? true,
-        tuesdayOpen: academicCalendar.tuesdayOpen ?? true,
-        wednesdayOpen: academicCalendar.wednesdayOpen ?? true,
-        thursdayOpen: academicCalendar.thursdayOpen ?? true,
-        fridayOpen: academicCalendar.fridayOpen ?? true,
-        saturdayOpen: academicCalendar.saturdayOpen ?? false,
-        sundayOpen: academicCalendar.sundayOpen ?? false,
       });
     }
   }, [academicCalendar]);
@@ -196,34 +182,12 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
             </div>
           </div>
 
-          {/* Days of Week */}
-          <div>
-            <Label className="text-base font-medium mb-3 block">School Operating Days</Label>
-            <div className="grid grid-cols-4 gap-3">
-              {[
-                { key: 'mondayOpen', label: 'Monday' },
-                { key: 'tuesdayOpen', label: 'Tuesday' },
-                { key: 'wednesdayOpen', label: 'Wednesday' },
-                { key: 'thursdayOpen', label: 'Thursday' },
-                { key: 'fridayOpen', label: 'Friday' },
-                { key: 'saturdayOpen', label: 'Saturday' },
-                { key: 'sundayOpen', label: 'Sunday' },
-              ].map(({ key, label }) => (
-                <div key={key} className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id={key}
-                    checked={calendarForm[key as keyof typeof calendarForm] as boolean}
-                    onChange={(e) => setCalendarForm(prev => ({ 
-                      ...prev, 
-                      [key]: e.target.checked 
-                    }))}
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor={key} className="text-sm">{label}</Label>
-                </div>
-              ))}
-            </div>
+          {/* Note about scheduling */}
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> Classroom operating days and hours are now managed per classroom in the scheduling system. 
+              This calendar focuses on academic year boundaries and school-wide closures.
+            </p>
           </div>
 
           <div className="flex justify-end">

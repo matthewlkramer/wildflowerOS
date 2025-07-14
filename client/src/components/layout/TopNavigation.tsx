@@ -111,7 +111,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-primary">Wildflower Schools</h1>
+              <h1 className="text-xl font-bold text-primary">WildflowerOS</h1>
             </div>
             
             {/* Role Switcher */}

@@ -48,7 +48,7 @@ Preferred communication style: Simple, everyday language.
   - **Operational Roles Under Educator→Admin:** Admissions, Assessment, Communications, Compliance, Curriculum, Data, Equity, Facility, Family Engagement, Finance, Food Program, Fundraising, HR, Legal/Risk, Licensing, Student Health/Wellness/Safety, Student Support, Technology, Ways of Working, Wildflower Network Liaison
   - **Classroom Roles Under Educator→Classroom:** Lead Guide, Assistant, Aide
   - **Board Roles:** Chair, Treasurer, Secretary, Member
-  - **Parent Roles:** Parent/Guardian, Billing Contact
+  - **Parent Roles:** Billing Contact, Custodian
   - **Systems Admin Role:** Systems Administrator
   - Addressed "Multiple Roles per Person" open issue with flexible role assignment system
   - User can now hold multiple simultaneous roles across different operational areas

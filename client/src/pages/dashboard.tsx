@@ -56,12 +56,14 @@ export default function Dashboard() {
   const currentSchool = user.schools?.[0];
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
-      <Sidebar currentRole={currentRole} />
       
-      <main className="pt-16 lg:ml-64 bg-gray-50 min-h-screen">
-        <div className="p-4 lg:p-6 pb-20">
+      <div className="flex-1 flex pt-16">
+        <Sidebar currentRole={currentRole} />
+        
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="p-4 lg:p-6 pb-20">
           {/* Dashboard Header */}
           <div className="mb-8">
             <div className="md:flex md:items-center md:justify-between">
@@ -107,10 +109,11 @@ export default function Dashboard() {
 
           {/* Family Management Section */}
           {currentSchool && <FamilyManagement schoolId={currentSchool.id} />}
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
 
       <MobileBottomNav currentRole={currentRole} />
-    </>
+    </div>
   );
 }

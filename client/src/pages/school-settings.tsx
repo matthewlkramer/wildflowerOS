@@ -571,17 +571,17 @@ export default function SchoolSettingsPage() {
                           <div>
                             <h4 className="font-medium">{person.firstName} {person.lastName}</h4>
                             <p className="text-sm text-gray-600">{person.email}</p>
+                            {person.startDate && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Since {new Date(person.startDate).toLocaleDateString()}
+                              </p>
+                            )}
                             <div className="mt-2 flex items-center space-x-2 flex-wrap">
                               {person.roles.map((roleInfo: any, roleIndex: number) => (
                                 <Badge key={roleIndex} className={getRoleColor(roleInfo.role)}>
                                   {formatRole(roleInfo.role)}
                                 </Badge>
                               ))}
-                              {person.startDate && (
-                                <span className="text-xs text-gray-500 mt-1">
-                                  Since {new Date(person.startDate).toLocaleDateString()}
-                                </span>
-                              )}
                             </div>
                           </div>
                           <div className="flex space-x-2">

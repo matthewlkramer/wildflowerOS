@@ -21,6 +21,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { 
   Settings, 
   Users, 
@@ -48,6 +58,7 @@ export default function SchoolSettingsPage() {
   const [addingStaff, setAddingStaff] = useState(false);
   const [addingClassroom, setAddingClassroom] = useState(false);
   const [editingClassroom, setEditingClassroom] = useState<any>(null);
+  const [deletingClassroom, setDeletingClassroom] = useState<any>(null);
   const [addingTuitionPlan, setAddingTuitionPlan] = useState(false);
   const [addingSchoolYear, setAddingSchoolYear] = useState(false);
   
@@ -319,9 +330,14 @@ export default function SchoolSettingsPage() {
     });
   };
 
-  const handleDeleteClassroom = (classroomId: string) => {
-    if (confirm("Are you sure you want to delete this classroom? This action cannot be undone.")) {
-      deleteClassroomMutation.mutate(classroomId);
+  const handleDeleteClassroom = (classroom: any) => {
+    setDeletingClassroom(classroom);
+  };
+
+  const confirmDeleteClassroom = () => {
+    if (deletingClassroom) {
+      deleteClassroomMutation.mutate(deletingClassroom.id);
+      setDeletingClassroom(null);
     }
   };
 
@@ -716,6 +732,29 @@ export default function SchoolSettingsPage() {
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Delete Classroom Confirmation Dialog */}
+                  <AlertDialog open={deletingClassroom !== null} onOpenChange={(open) => !open && setDeletingClassroom(null)}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Classroom</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{deletingClassroom?.name}"? This action cannot be undone and will remove all associated data.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDeletingClassroom(null)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={confirmDeleteClassroom}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete Classroom
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -756,7 +795,7 @@ export default function SchoolSettingsPage() {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleDeleteClassroom(classroom.id)}
+                          onClick={() => handleDeleteClassroom(classroom)}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

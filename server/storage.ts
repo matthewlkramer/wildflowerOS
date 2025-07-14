@@ -510,10 +510,14 @@ export class DatabaseStorage implements IStorage {
 
   // School years
   async getSchoolYearsBySchool(schoolId: string): Promise<any[]> {
+    // Get both school-specific years and network-wide default years
     return await db
       .select()
       .from(schoolYears)
-      .where(eq(schoolYears.schoolId, schoolId))
+      .where(or(
+        eq(schoolYears.schoolId, schoolId),
+        eq(schoolYears.networkDefault, true)
+      ))
       .orderBy(desc(schoolYears.startDate));
   }
 

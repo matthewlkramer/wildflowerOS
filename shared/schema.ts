@@ -121,7 +121,7 @@ export const schools = pgTable("schools", {
 
 export const schoolYears = pgTable("school_years", {
   id: uuid("id").primaryKey().defaultRandom(),
-  schoolId: uuid("school_id").notNull().references(() => schools.id),
+  schoolId: uuid("school_id").references(() => schools.id),
   name: varchar("name", { length: 50 }).notNull(),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),

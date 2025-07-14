@@ -872,6 +872,9 @@ export default function SchoolSettingsPage() {
                     <DialogContent>
                       <DialogHeader>
                         <DialogTitle>Add New School Year</DialogTitle>
+                        <DialogDescription>
+                          Create a new school year with start and end dates for your school.
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <div>

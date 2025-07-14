@@ -56,7 +56,7 @@ export default function Dashboard() {
   const currentSchool = user.schools?.[0];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
       <div className="pt-16">

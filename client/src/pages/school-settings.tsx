@@ -1597,7 +1597,7 @@ export default function SchoolSettingsPage() {
         <Sidebar currentRole={currentRole} />
         
         <div className="lg:ml-64">
-          <div className="p-4 lg:p-6 max-w-6xl mx-auto pb-20">
+          <div className="p-4 lg:p-6 pb-20">
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (
               // System Administrator View

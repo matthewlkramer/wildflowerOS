@@ -133,7 +133,7 @@ export default function FamiliesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <TopNavigation user={user} currentSchool={null} currentRole={currentRole} />
       
       <div className="pt-16">

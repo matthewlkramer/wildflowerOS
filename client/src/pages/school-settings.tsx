@@ -498,38 +498,37 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
 
       {/* Add Holiday Dialog */}
       <Dialog open={addingClosure} onOpenChange={setAddingClosure}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add Holiday/Closure</DialogTitle>
             <DialogDescription>
-              Add a holiday, break, or school closure date to the academic calendar.
+              Add a holiday, break, or school closure date.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
-            <div>
-              <Label>Holiday Name</Label>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Holiday Name</Label>
               <Input
+                id="name"
                 value={closureForm.name}
                 onChange={(e) => setClosureForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="e.g., Winter Break, Thanksgiving"
+                placeholder="e.g., Winter Break"
               />
             </div>
-            <div>
-              <Label>Date</Label>
+            <div className="grid gap-2">
+              <Label htmlFor="date">Date</Label>
               <Input
+                id="date"
                 type="date"
                 value={closureForm.date}
                 onChange={(e) => setClosureForm(prev => ({ ...prev, date: e.target.value }))}
               />
             </div>
-            <div>
-              <Label>Type</Label>
-              <Select 
-                value={closureForm.type} 
-                onValueChange={(value) => setClosureForm(prev => ({ ...prev, type: value }))}
-              >
+            <div className="grid gap-2">
+              <Label htmlFor="type">Type</Label>
+              <Select value={closureForm.type} onValueChange={(value) => setClosureForm(prev => ({ ...prev, type: value }))}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="holiday">Holiday</SelectItem>
@@ -539,25 +538,17 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <Label>Description (Optional)</Label>
-              <Textarea
-                value={closureForm.description}
-                onChange={(e) => setClosureForm(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Additional details about this holiday or closure"
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setAddingClosure(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleAddClosure}
-                disabled={!closureForm.name || !closureForm.date || createClosureMutation.isPending}
-              >
-                {createClosureMutation.isPending ? "Adding..." : "Add Holiday"}
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setAddingClosure(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAddClosure}
+              disabled={!closureForm.name || !closureForm.date || createClosureMutation.isPending}
+            >
+              {createClosureMutation.isPending ? "Adding..." : "Add Holiday"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

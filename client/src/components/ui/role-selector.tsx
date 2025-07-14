@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { UserRole } from "@shared/schema";
-import { Users, GraduationCap, Heart, Building2, Shield, Star, Clock, Calendar, History } from "lucide-react";
+import { Users, GraduationCap, Heart, Building2, Shield, Star } from "lucide-react";
 
 const roleIcons = {
   // Main roles
@@ -53,7 +53,7 @@ const roleLabels = {
 export default function RoleSelector() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [showHistory, setShowHistory] = useState(false);
+
   const [selectedRole, setSelectedRole] = useState<string>("");
 
   // Get user's current active role
@@ -66,11 +66,7 @@ export default function RoleSelector() {
     queryKey: ["/api/user/roles"],
   });
 
-  // Fetch role history when needed
-  const { data: roleHistory = [], isLoading: isHistoryLoading } = useQuery<UserRole[]>({
-    queryKey: ["/api/user/roles/history"],
-    enabled: showHistory,
-  });
+
 
 
 
@@ -283,24 +279,10 @@ export default function RoleSelector() {
                     <div className={`text-sm ${isActive ? "font-medium text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-gray-100"}`}>
                       {role.roleDisplayName || roleLabels[role.roleCategory] || role.roleCategory}
                     </div>
-                    <div className="text-xs text-gray-500 space-y-1">
-                      <div>
-                        {roleLabels[role.roleCategory] || role.roleCategory}
-                        {role.schoolId && " • School-specific"}
-                        {!role.schoolId && !role.legalEntityId && " • Network-wide"}
-                      </div>
-                      {role.startDate && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          <span>Started: {new Date(role.startDate).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                      {role.endDate && (
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          <span>Ended: {new Date(role.endDate).toLocaleDateString()}</span>
-                        </div>
-                      )}
+                    <div className="text-xs text-gray-500">
+                      {roleLabels[role.roleCategory] || role.roleCategory}
+                      {role.schoolId && " • School-specific"}
+                      {!role.schoolId && !role.legalEntityId && " • Network-wide"}
                     </div>
                   </div>
                   {isActive && (
@@ -317,95 +299,6 @@ export default function RoleSelector() {
               );
             })}
           </div>
-          
-          {/* Role History Button */}
-          <div className="mt-4 pt-4 border-t">
-            <Button 
-              variant="outline" 
-              className="w-full text-sm"
-              onClick={() => setShowHistory(!showHistory)}
-            >
-              <History className="h-4 w-4 mr-2" />
-              {showHistory ? "Hide Role History" : "View Role History"}
-            </Button>
-          </div>
-          
-          {/* Role History Section */}
-          {showHistory && (
-            <div className="mt-4 pt-4 border-t">
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                Role History
-              </div>
-              {isHistoryLoading ? (
-                <div className="text-center text-gray-500 py-4">
-                  <Clock className="h-4 w-4 mx-auto mb-2 animate-spin" />
-                  Loading history...
-                </div>
-              ) : roleHistory.length > 0 ? (
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {roleHistory.map((role) => {
-                    const Icon = roleIcons[role.roleCategory] || Users;
-                    const isCurrentlyActive = role.active && !role.endDate;
-                    
-                    return (
-                      <div
-                        key={role.id}
-                        className={`flex items-start gap-3 p-3 rounded-lg border ${
-                          isCurrentlyActive 
-                            ? "bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800" 
-                            : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                        }`}
-                      >
-                        <Icon className={`h-4 w-4 mt-0.5 ${isCurrentlyActive ? "text-green-600" : "text-gray-500"}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-medium ${isCurrentlyActive ? "text-green-900 dark:text-green-100" : "text-gray-900 dark:text-gray-100"}`}>
-                            {role.roleDisplayName || roleLabels[role.roleCategory] || role.roleCategory}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            {roleLabels[role.roleCategory] || role.roleCategory}
-                            {role.schoolId && " • School-specific"}
-                            {!role.schoolId && !role.legalEntityId && " • Network-wide"}
-                          </div>
-                          <div className="text-xs text-gray-500 mt-2 space-y-1">
-                            {role.startDate && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                <span>Started: {new Date(role.startDate).toLocaleDateString()}</span>
-                              </div>
-                            )}
-                            {role.endDate && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>Ended: {new Date(role.endDate).toLocaleDateString()}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <Badge 
-                            variant={isCurrentlyActive ? "default" : "secondary"} 
-                            size="sm"
-                          >
-                            {isCurrentlyActive ? "Active" : "Inactive"}
-                          </Badge>
-                          {role.endDate && (
-                            <Badge variant="outline" size="sm">
-                              Ended
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center text-gray-500 py-4">
-                  <History className="h-4 w-4 mx-auto mb-2" />
-                  No role history available
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

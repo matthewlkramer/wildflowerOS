@@ -33,6 +33,13 @@ Preferred communication style: Simple, everyday language.
   - Updated role selector to display only main role categories (parent, educator, board_director, systems_administrator)
   - System now supports custom roles per school while maintaining core operational roles
   - Created Matthew's complete role structure: parent (billing/custodian) at school level, educator (school admin + classroom guide) at school/classroom level, systems admin at network level
+- **Implemented time-based role management with audit trail**
+  - Added start_date (defaults to current timestamp) and end_date fields to user_roles table
+  - Updated storage layer to filter roles by active status and time validity
+  - Roles must be active=true and within start/end date range to be considered valid
+  - Created API endpoints for role history and role termination
+  - New roles automatically get start_date set to current timestamp
+  - Role history preserved through soft deletion (setting active=false and end_date)
 
 ## System Architecture
 

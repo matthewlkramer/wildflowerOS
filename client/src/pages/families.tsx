@@ -141,185 +141,186 @@ export default function FamiliesPage() {
         
         <div className="lg:ml-64">
           <div className="p-4 lg:p-6 pb-20">
-          <div className="max-w-6xl mx-auto">
-            {/* Page Header */}
-            <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <Users className="mr-3 h-8 w-8 text-primary" />
-                Families
-              </h1>
-              <p className="mt-2 text-gray-600">
-                Manage family enrollment, billing, and communication
-              </p>
-            </div>
-            <Button className="flex items-center">
-              <Plus className="mr-2 h-4 w-4" />
-              Add Family
-            </Button>
-          </div>
-        </div>
-
-        {/* Filters and Search */}
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search families..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="max-w-6xl mx-auto">
+              {/* Page Header */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <Users className="mr-3 h-8 w-8 text-primary" />
+                      Families
+                    </h1>
+                    <p className="mt-2 text-gray-600">
+                      Manage family enrollment, billing, and communication
+                    </p>
+                  </div>
+                  <Button className="flex items-center">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Family
+                  </Button>
+                </div>
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="prospective">Prospective</SelectItem>
-                  <SelectItem value="enrolled">Enrolled</SelectItem>
-                  <SelectItem value="graduated">Graduated</SelectItem>
-                  <SelectItem value="withdrawn">Withdrawn</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={classroomFilter} onValueChange={setClassroomFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Classrooms" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Classrooms</SelectItem>
-                  {classrooms.map((classroom: any) => (
-                    <SelectItem key={classroom.id} value={classroom.id}>
-                      {classroom.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="text-sm text-gray-600 flex items-center">
-                {filteredFamilies.length} families found
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Family List */}
-        <div className="space-y-4">
-          {filteredFamilies.map((familyGroup: any) => (
-            <Card key={familyGroup.family.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-start space-x-4">
-                    {/* Family Avatar */}
-                    <div className="flex-shrink-0">
-                      <div className="h-12 w-12 rounded-full bg-primary text-white flex items-center justify-center">
-                        <span className="text-lg font-medium">
-                          {getFamilyInitials(familyGroup.family.name)}
-                        </span>
-                      </div>
+              {/* Filters and Search */}
+              <Card className="mb-6">
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Search families..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                      />
                     </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="prospective">Prospective</SelectItem>
+                        <SelectItem value="enrolled">Enrolled</SelectItem>
+                        <SelectItem value="graduated">Graduated</SelectItem>
+                        <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={classroomFilter} onValueChange={setClassroomFilter}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="All Classrooms" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Classrooms</SelectItem>
+                        {classrooms.map((classroom: any) => (
+                          <SelectItem key={classroom.id} value={classroom.id}>
+                            {classroom.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="text-sm text-gray-600 flex items-center">
+                      {filteredFamilies.length} families found
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-                    {/* Family Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {familyGroup.family.name || "Unnamed Family"}
-                        </h3>
-                        <Badge className="bg-blue-100 text-blue-800">
-                          {familyGroup.children.length} {familyGroup.children.length === 1 ? "child" : "children"}
-                        </Badge>
-                      </div>
+              {/* Family List */}
+              <div className="space-y-4">
+                {filteredFamilies.map((familyGroup: any) => (
+                  <Card key={familyGroup.family.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-4">
+                          {/* Family Avatar */}
+                          <div className="flex-shrink-0">
+                            <div className="h-12 w-12 rounded-full bg-primary text-white flex items-center justify-center">
+                              <span className="text-lg font-medium">
+                                {getFamilyInitials(familyGroup.family.name)}
+                              </span>
+                            </div>
+                          </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
-                        {familyGroup.family.email && (
-                          <div className="flex items-center">
-                            <Mail className="mr-2 h-4 w-4" />
-                            {familyGroup.family.email}
-                          </div>
-                        )}
-                        {familyGroup.family.phone && (
-                          <div className="flex items-center">
-                            <Phone className="mr-2 h-4 w-4" />
-                            {familyGroup.family.phone}
-                          </div>
-                        )}
-                        {familyGroup.family.address && (
-                          <div className="flex items-center">
-                            <MapPin className="mr-2 h-4 w-4" />
-                            {familyGroup.family.address}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Children */}
-                      <div className="mt-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-2">Children:</h4>
-                        <div className="space-y-2">
-                          {familyGroup.children.map((child: any, index: number) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                <GraduationCap className="h-4 w-4 text-gray-400" />
-                                <span className="font-medium">{child.firstName} {child.lastName}</span>
-                                {child.classroom && (
-                                  <Badge className={getClassroomColor(child.classroom.level)}>
-                                    {child.classroom.name}
-                                  </Badge>
-                                )}
-                              </div>
-                              <Badge className={getStatusColor(child.status)}>
-                                {child.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                          {/* Family Info */}
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-3 mb-2">
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {familyGroup.family.name || "Unnamed Family"}
+                              </h3>
+                              <Badge className="bg-blue-100 text-blue-800">
+                                {familyGroup.children.length} {familyGroup.children.length === 1 ? "child" : "children"}
                               </Badge>
                             </div>
-                          ))}
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                              {familyGroup.family.email && (
+                                <div className="flex items-center">
+                                  <Mail className="mr-2 h-4 w-4" />
+                                  {familyGroup.family.email}
+                                </div>
+                              )}
+                              {familyGroup.family.phone && (
+                                <div className="flex items-center">
+                                  <Phone className="mr-2 h-4 w-4" />
+                                  {familyGroup.family.phone}
+                                </div>
+                              )}
+                              {familyGroup.family.address && (
+                                <div className="flex items-center">
+                                  <MapPin className="mr-2 h-4 w-4" />
+                                  {familyGroup.family.address}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Children */}
+                            <div className="mt-4">
+                              <h4 className="text-sm font-medium text-gray-900 mb-2">Children:</h4>
+                              <div className="space-y-2">
+                                {familyGroup.children.map((child: any, index: number) => (
+                                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center space-x-3">
+                                      <GraduationCap className="h-4 w-4 text-gray-400" />
+                                      <span className="font-medium">{child.firstName} {child.lastName}</span>
+                                      {child.classroom && (
+                                        <Badge className={getClassroomColor(child.classroom.level)}>
+                                          {child.classroom.name}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <Badge className={getStatusColor(child.status)}>
+                                      {child.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                    </Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-col space-y-2">
+                          <Link href={`/families/${familyGroup.family.id}`}>
+                            <Button variant="outline" size="sm" className="w-full">
+                              View Details
+                            </Button>
+                          </Link>
+                          <Link href={`/families/${familyGroup.family.id}/billing`}>
+                            <Button variant="outline" size="sm" className="w-full">
+                              <DollarSign className="mr-2 h-4 w-4" />
+                              Billing
+                            </Button>
+                          </Link>
+                          <Button variant="outline" size="sm" className="w-full">
+                            <MessageCircle className="mr-2 h-4 w-4" />
+                            Message
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
+                ))}
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-col space-y-2">
-                    <Link href={`/families/${familyGroup.family.id}`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        View Details
+                {filteredFamilies.length === 0 && (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">No families found</h3>
+                      <p className="text-gray-600 mb-4">
+                        {searchTerm || statusFilter !== "all" || classroomFilter !== "all" 
+                          ? "Try adjusting your search criteria" 
+                          : "Get started by adding your first family"}
+                      </p>
+                      <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Family
                       </Button>
-                    </Link>
-                    <Link href={`/families/${familyGroup.family.id}/billing`}>
-                      <Button variant="outline" size="sm" className="w-full">
-                        <DollarSign className="mr-2 h-4 w-4" />
-                        Billing
-                      </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" className="w-full">
-                      <MessageCircle className="mr-2 h-4 w-4" />
-                      Message
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {filteredFamilies.length === 0 && (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No families found</h3>
-                <p className="text-gray-600 mb-4">
-                  {searchTerm || statusFilter !== "all" || classroomFilter !== "all" 
-                    ? "Try adjusting your search criteria" 
-                    : "Get started by adding your first family"}
-                </p>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Family
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

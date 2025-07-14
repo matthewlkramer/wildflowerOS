@@ -2347,15 +2347,18 @@ export class DatabaseStorage implements IStorage {
     // Sort in logical school year order (September to August)
     const schoolYearOrder = [
       'Labor Day',
+      'Rosh Hashanah',
       'Indigenous Peoples Day', 
+      'Yom Kippur',
       'Veterans Day',
       'Thanksgiving',
-      'Winter Break Start',
+      'Winter Break',
       'MLK Day',
       'Presidents Day',
       'Good Friday',
       'Memorial Day',
-      'Juneteenth'
+      'Juneteenth',
+      'Eid'
     ];
     
     return holidays.sort((a, b) => {

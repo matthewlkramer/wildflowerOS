@@ -1546,13 +1546,13 @@ export default function SchoolSettingsPage() {
   const currentSchoolForNav = school;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
-      <div className="flex">
+      <div className="flex-1 flex">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1">
+        <main className="flex-1 overflow-y-auto bg-gray-50">
           <div className="p-4 lg:p-6 pb-20">
       
       {/* School Selector Dialog for Educators without School ID */}
@@ -1814,6 +1814,11 @@ export default function SchoolSettingsPage() {
                     </Tabs>
                   </TabsContent>
                 </Tabs>
+                
+                {/* Debug element to test scrolling */}
+                <div className="h-96 bg-red-100 mt-8 p-4">
+                  <p>Debug: This is a test element to force scrolling</p>
+                </div>
               </div>
             ) : currentRole?.roleName?.startsWith('parent') ? (
               // Parent View

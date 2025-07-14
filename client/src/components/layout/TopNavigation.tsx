@@ -119,7 +119,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-4">
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.roleCategory || ""} onValueChange={handleRoleSwitch}>
@@ -181,7 +181,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               {/* User Profile */}
               <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center space-x-2">
+                <Button variant="ghost" className="p-1">
                   {user.profileImageUrl ? (
                     <img 
                       className="h-8 w-8 rounded-full object-cover" 
@@ -195,8 +195,6 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                       </span>
                     </div>
                   )}
-                  <span className="text-gray-700 font-medium">{user.firstName}</span>
-                  <ChevronDown className="h-4 w-4 text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

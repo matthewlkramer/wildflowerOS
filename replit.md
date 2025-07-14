@@ -21,6 +21,7 @@ Preferred communication style: Simple, everyday language.
   - **Fixed duplicate holiday issue** - removed 99 duplicate entries that were causing incorrect filtering
   - **Fixed incomplete holiday creation** - all 13 system holidays now properly created for each network school year
   - **Enhanced holiday rule logic** - added support for religious holidays (Rosh Hashanah, Yom Kippur, Eid) and Winter Break
+  - **Completely repopulated holiday data** - cleared and regenerated all school-year-specific holidays with proper dates and chronological ordering
   - **Simplified calendar structure** by removing academic_calendars table - calendar_closures now link directly to school_years
   - Fixed auto-population regex to support both "2024-25" and "2024-2025" formats with proper year conversion
   - All holiday dates are calculated correctly based on academic year (Labor Day = first Monday in September, etc.)

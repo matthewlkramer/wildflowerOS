@@ -817,6 +817,10 @@ export default function FamilyDetailsPage() {
           </DialogContent>
         </Dialog>
       </div>
+        </main>
+      </div>
+      
+      <MobileBottomNav currentRole={currentRole} />
     </div>
   );
 }

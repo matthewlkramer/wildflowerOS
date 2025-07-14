@@ -238,11 +238,12 @@ export class DatabaseStorage implements IStorage {
         startDate: userRoles.startDate,
         active: userRoles.active,
         schoolId: userRoles.schoolId,
-        firstName: sql<string>`split_part(${userRoles.userId}, '@', 1)`.as('firstName'),
-        lastName: sql<string>`''`.as('lastName'),
-        email: userRoles.userId,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
       })
       .from(userRoles)
+      .leftJoin(users, eq(userRoles.userId, users.id))
       .where(and(
         eq(userRoles.schoolId, schoolId),
         eq(userRoles.active, true)

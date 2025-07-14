@@ -223,9 +223,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { schoolId } = req.params;
       const staffData = req.body;
       
-      // Create user role for the new staff member
+      // First, create or get the user record
+      const user = await storage.upsertUser({
+        id: staffData.email, // Use email as user ID for now
+        email: staffData.email,
+        firstName: staffData.firstName,
+        lastName: staffData.lastName,
+      });
+      
+      // Then create user role for the new staff member
       const userRole = await storage.createUserRole({
-        userId: staffData.email, // This would normally be resolved from user lookup
+        userId: user.id,
         schoolId,
         role: staffData.role,
         active: true,

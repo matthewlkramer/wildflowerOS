@@ -195,6 +195,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get educator admins for emulation (used by school selector)
+  app.get('/api/educator-admins', isAuthenticated, async (req: any, res) => {
+    try {
+      console.log('API: Fetching educator admins for emulation');
+      const educators = await storage.getEducatorAdminsForEmulation();
+      console.log('API: Found', educators.length, 'educators');
+      res.json(educators);
+    } catch (error) {
+      console.error("Error fetching educator admins:", error);
+      res.status(500).json({ message: "Failed to fetch educator admins" });
+    }
+  });
+
   // Get all user roles including history
   app.get('/api/user/roles/history', isAuthenticated, async (req: any, res) => {
     try {

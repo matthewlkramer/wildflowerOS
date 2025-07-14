@@ -956,7 +956,7 @@ export class DatabaseStorage implements IStorage {
       let holidayDate = null;
       
       // Convert rules to specific dates for this school year
-      if (holiday.rule) {
+      if (holiday.rule || holiday.name) {
         if (holiday.name.includes('Labor Day')) {
           // First Monday in September
           holidayDate = this.getFirstMondayOfMonth(year, 8);
@@ -968,7 +968,7 @@ export class DatabaseStorage implements IStorage {
         } else if (holiday.name.includes('Thanksgiving')) {
           // Fourth Thursday in November
           holidayDate = this.getNthThursdayOfMonth(year, 10, 4);
-        } else if (holiday.name.includes('Winter Break Start')) {
+        } else if (holiday.name.includes('Winter Break')) {
           holidayDate = new Date(year, 11, 23); // December 23
         } else if (holiday.name.includes('MLK')) {
           // Third Monday in January (next year)
@@ -984,6 +984,24 @@ export class DatabaseStorage implements IStorage {
           holidayDate = this.getLastMondayOfMonth(year + 1, 4);
         } else if (holiday.name.includes('Juneteenth')) {
           holidayDate = new Date(year + 1, 5, 19); // June 19 (next year)
+        } else if (holiday.name.includes('Rosh Hashanah')) {
+          // Approximate date for Rosh Hashanah (usually September/October)
+          holidayDate = new Date(year, 8, 15); // September 15 (approximate)
+        } else if (holiday.name.includes('Yom Kippur')) {
+          // Approximate date for Yom Kippur (10 days after Rosh Hashanah)
+          holidayDate = new Date(year, 8, 25); // September 25 (approximate)
+        } else if (holiday.name.includes('Eid')) {
+          // Eid can occur twice a year, using approximate spring date
+          holidayDate = new Date(year + 1, 3, 10); // April 10 (approximate)
+        }
+      } else {
+        // For holidays without rules, create approximate dates based on name
+        if (holiday.name.includes('Rosh Hashanah')) {
+          holidayDate = new Date(year, 8, 15); // September 15
+        } else if (holiday.name.includes('Yom Kippur')) {
+          holidayDate = new Date(year, 8, 25); // September 25
+        } else if (holiday.name.includes('Eid')) {
+          holidayDate = new Date(year + 1, 3, 10); // April 10
         }
       }
       

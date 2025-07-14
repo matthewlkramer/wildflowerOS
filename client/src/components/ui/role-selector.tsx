@@ -69,7 +69,9 @@ export default function RoleSelector() {
   // Debug logging
   console.log("Role selector - isLoading:", isLoading);
   console.log("Role selector - userRoles:", userRoles);
+  console.log("Role selector - userRoles length:", userRoles?.length);
   console.log("Role selector - error:", error);
+  console.log("Role selector - first role:", userRoles?.[0]);
 
 
 
@@ -128,7 +130,7 @@ export default function RoleSelector() {
     );
   }
 
-  if (userRoles.length === 0) {
+  if (!userRoles || userRoles.length === 0) {
     return (
       <Card className="w-full max-w-md">
         <CardHeader>

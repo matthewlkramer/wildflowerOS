@@ -50,7 +50,7 @@ const roleLabels = {
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
   const [notificationCount] = useState(3);
-  const [messageCount] = useState(0);
+  const [messageCount] = useState(7);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -183,7 +183,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
                       <span className="text-sm font-medium">
-                        {user.firstName?.[0]}{user.lastName?.[0]}
+                        {user.firstName?.[0] || 'U'}{user.lastName?.[0] || ''}
                       </span>
                     </div>
                   )}

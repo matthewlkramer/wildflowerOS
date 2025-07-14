@@ -44,7 +44,9 @@ import {
   Save,
   X,
   School,
-  Clock
+  Clock,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";

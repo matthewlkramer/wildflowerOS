@@ -1142,61 +1142,27 @@ export default function SchoolSettingsPage() {
                       <TabsContent value="roles" className="space-y-6">
                         <Card>
                           <CardHeader>
-                            <CardTitle>Default Role Definitions</CardTitle>
-                            <p className="text-sm text-gray-600">Configure default roles that will be available in all new schools.</p>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle>Default Role Definitions</CardTitle>
+                                <p className="text-sm text-gray-600">
+                                  Manage default roles that will be available in all new schools. These roles form the foundation for staff assignments.
+                                </p>
+                              </div>
+                              <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Role
+                              </Button>
+                            </div>
                           </CardHeader>
                           <CardContent>
                             <div className="space-y-4">
                               <div className="text-sm text-gray-600 mb-4">
-                                These role definitions will be automatically available in every new school that joins the network.
+                                These role definitions will be automatically available in every new school that joins the network. The "Active" badge indicates roles that are currently enabled and available for assignment.
                               </div>
                               
-                              {/* Role categories */}
-                              <div className="grid gap-4">
-                                <div className="border rounded-lg p-4">
-                                  <h4 className="font-medium text-gray-900 mb-2">Educator Roles</h4>
-                                  <div className="text-sm text-gray-500 mb-3">
-                                    Core teaching and administrative roles for school operations
-                                  </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    <Badge variant="outline">Educator Admin</Badge>
-                                    <Badge variant="outline">Classroom Lead</Badge>
-                                    <Badge variant="outline">Classroom Assistant</Badge>
-                                    <Badge variant="outline">Classroom Aide</Badge>
-                                  </div>
-                                </div>
-
-                                <div className="border rounded-lg p-4">
-                                  <h4 className="font-medium text-gray-900 mb-2">Parent Roles</h4>
-                                  <div className="text-sm text-gray-500 mb-3">
-                                    Family engagement and support roles
-                                  </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    <Badge variant="outline">Parent Billing</Badge>
-                                    <Badge variant="outline">Parent Custodian</Badge>
-                                  </div>
-                                </div>
-
-                                <div className="border rounded-lg p-4">
-                                  <h4 className="font-medium text-gray-900 mb-2">Board Roles</h4>
-                                  <div className="text-sm text-gray-500 mb-3">
-                                    Governance and oversight roles
-                                  </div>
-                                  <div className="flex flex-wrap gap-2">
-                                    <Badge variant="outline">Board Chair</Badge>
-                                    <Badge variant="outline">Board Treasurer</Badge>
-                                    <Badge variant="outline">Board Secretary</Badge>
-                                    <Badge variant="outline">Board Member</Badge>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mt-6 pt-4 border-t">
-                                <Button>
-                                  <Plus className="mr-2 h-4 w-4" />
-                                  Add Custom Default Role
-                                </Button>
-                              </div>
+                              {/* Role tree structure matching school version */}
+                              <RoleTree showSSJ={false} />
                             </div>
                           </CardContent>
                         </Card>

@@ -60,6 +60,12 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 function RoleTree() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
+  // Fetch all role definitions from the database
+  const { data: roles = [] } = useQuery({
+    queryKey: ["/api/roles"],
+    enabled: true,
+  });
+
   const toggleNode = (nodeId: string) => {
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
@@ -72,87 +78,65 @@ function RoleTree() {
     });
   };
 
-  const roleHierarchy = [
-    {
-      id: "educator",
-      name: "Educator",
-      count: 12,
-      color: "bg-blue-100 text-blue-800",
-      children: [
-        {
-          id: "educator_admin",
-          name: "Admin",
-          description: "Administrative roles within education",
-          count: 5,
-          children: [
-            {
-              id: "educator_admin_startup",
-              name: "Startup",
-              description: "Roles for new school setup",
-              count: 2,
-              children: [
-                { id: "educator_admin_startup_marketing", name: "Marketing", count: 1, active: true },
-                { id: "educator_admin_startup_finances", name: "Finances", count: 1, active: true }
-              ]
-            },
-            {
-              id: "educator_admin_ongoing",
-              name: "Ongoing",
-              description: "Ongoing operational roles",
-              count: 3,
-              children: [
-                { id: "educator_admin_ongoing_finance", name: "Finance", count: 1, active: true },
-                { id: "educator_admin_ongoing_admissions", name: "Admissions", count: 1, active: true },
-                { id: "educator_admin_ongoing_board", name: "Board", count: 1, active: true }
-              ]
-            }
-          ]
-        },
-        {
-          id: "educator_classroom",
-          name: "Classroom",
-          description: "Direct classroom teaching roles",
-          count: 7,
-          children: [
-            { id: "educator_classroom_lead", name: "Lead", count: 3, active: true },
-            { id: "educator_classroom_assistant", name: "Assistant", count: 3, active: true },
-            { id: "educator_classroom_aide", name: "Aide", count: 1, active: true }
-          ]
+  // Build hierarchical structure from flat role data
+  const buildHierarchy = (roles: any[]) => {
+    const hierarchy: any = {};
+    
+    roles.forEach(role => {
+      const parts = role.name.split('_');
+      let current = hierarchy;
+      
+      // Build the nested structure
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        const fullPath = parts.slice(0, i + 1).join('_');
+        
+        if (!current[part]) {
+          current[part] = {
+            id: fullPath,
+            name: part,
+            displayName: i === parts.length - 1 ? role.displayName : part.charAt(0).toUpperCase() + part.slice(1),
+            description: i === parts.length - 1 ? role.description : '',
+            active: role.networkDefault,
+            children: {},
+            isLeaf: i === parts.length - 1,
+            level: i + 1
+          };
         }
-      ]
-    },
-    {
-      id: "parent",
-      name: "Parent",
-      count: 3,
-      color: "bg-green-100 text-green-800",
-      children: [
-        { id: "parent_billing", name: "Billing", description: "Financial contact roles", count: 1, active: true },
-        { id: "parent_custodian", name: "Custodian", description: "Primary guardian roles", count: 2, active: true }
-      ]
-    },
-    {
-      id: "board",
-      name: "Board",
-      count: 5,
-      color: "bg-purple-100 text-purple-800",
-      children: [
-        { id: "board_chair", name: "Chair", description: "Board leadership role", count: 1, active: true },
-        { id: "board_treasurer", name: "Treasurer", description: "Financial oversight", count: 1, active: true },
-        { id: "board_secretary", name: "Secretary", description: "Record keeping", count: 1, active: false },
-        { id: "board_member", name: "Member", description: "General board member roles", count: 2, active: true }
-      ]
-    },
-    {
-      id: "sysadmin",
-      name: "Systems Admin",
-      count: 1,
-      color: "bg-orange-100 text-orange-800",
-      children: [
-        { id: "sysadmin_administrator", name: "Administrator", description: "System administration", count: 1, active: true }
-      ]
+        
+        current = current[part].children;
+      }
+    });
+    
+    return hierarchy;
+  };
+
+  // Convert hierarchy object to array format for rendering
+  const convertToArray = (obj: any): any[] => {
+    return Object.keys(obj).map(key => {
+      const item = obj[key];
+      const children = Object.keys(item.children).length > 0 ? convertToArray(item.children) : [];
+      
+      return {
+        ...item,
+        children,
+        count: children.length > 0 ? children.reduce((sum, child) => sum + (child.count || 1), 0) : 1
+      };
+    });
+  };
+
+  const roleHierarchy = roles.length > 0 ? convertToArray(buildHierarchy(roles)) : [];
+
+  // Add colors for top-level categories
+  const getColorForCategory = (name: string) => {
+    switch (name) {
+      case 'educator': return 'bg-blue-100 text-blue-800';
+      case 'parent': return 'bg-green-100 text-green-800';
+      case 'board': return 'bg-purple-100 text-purple-800';
+      case 'sysadmin': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
-  ];
+  };
 
   const renderNode = (node: any, level: number = 0) => {
     const isExpanded = expandedNodes.has(node.id);
@@ -179,15 +163,15 @@ function RoleTree() {
             {!hasChildren && <div className="w-4 h-4"></div>}
             <div className={`w-2 h-2 rounded-full ${node.active === false ? 'bg-gray-400' : 'bg-green-500'}`}></div>
             <div className="flex-1">
-              <div className="font-medium">{node.name}</div>
+              <div className="font-medium">{node.displayName || node.name}</div>
               {node.description && (
                 <div className="text-sm text-gray-600">{node.description}</div>
               )}
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {level === 0 && node.color && (
-              <Badge className={node.color}>{node.count}</Badge>
+            {level === 0 && (
+              <Badge className={getColorForCategory(node.name)}>{node.count}</Badge>
             )}
             {level > 0 && (
               <Badge variant="outline">{node.count} {node.count === 1 ? 'role' : 'roles'}</Badge>

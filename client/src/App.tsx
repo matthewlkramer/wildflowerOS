@@ -7,6 +7,9 @@ import { useAuth } from "@/hooks/useAuth";
 import Dashboard from "@/pages/dashboard";
 import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
+import FamiliesPage from "@/pages/families";
+import FamilyDetailsPage from "@/pages/family-details";
+import FamilyBillingPage from "@/pages/family-billing";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -18,6 +21,9 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
+          <Route path="/families" component={FamiliesPage} />
+          <Route path="/families/:familyId" component={FamilyDetailsPage} />
+          <Route path="/families/:familyId/billing" component={FamilyBillingPage} />
           {/* Add more authenticated routes here */}
         </>
       )}

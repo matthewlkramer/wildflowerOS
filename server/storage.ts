@@ -10,6 +10,9 @@ import {
   messages,
   channels,
   channelMembers,
+  billingSetups,
+  invoices,
+  payments,
   type User,
   type UpsertUser,
   type UserRole,
@@ -52,13 +55,17 @@ export interface IStorage {
   getFamiliesBySchool(schoolId: string): Promise<Family[]>;
   getFamilyById(id: string): Promise<Family | undefined>;
   createFamily(family: any): Promise<Family>;
+  updateFamily(id: string, family: any): Promise<Family>;
   
   // Children
   getChildrenByFamily(familyId: string): Promise<Child[]>;
+  createChild(child: any): Promise<Child>;
   
   // Enrollments
   getEnrollmentsBySchool(schoolId: string): Promise<any[]>;
   getEnrollmentsByClassroom(classroomId: string): Promise<any[]>;
+  getEnrollmentsByFamily(familyId: string): Promise<any[]>;
+  createEnrollment(enrollment: any): Promise<any>;
   
   // Tasks
   getTasksByUser(userId: string): Promise<Task[]>;
@@ -72,6 +79,14 @@ export interface IStorage {
   createMessage(message: InsertMessage): Promise<Message>;
   createChannel(channel: InsertChannel): Promise<Channel>;
   
+  // Billing and invoicing
+  getBillingSetupByFamily(familyId: string): Promise<any>;
+  createBillingSetup(billingSetup: any): Promise<any>;
+  updateBillingSetup(familyId: string, billingSetup: any): Promise<any>;
+  getInvoicesByFamily(familyId: string): Promise<any[]>;
+  createInvoice(invoice: any): Promise<any>;
+  getPaymentsByFamily(familyId: string): Promise<any[]>;
+
   // Dashboard stats
   getDashboardStats(schoolId: string): Promise<{
     totalStudents: number;
@@ -205,9 +220,23 @@ export class DatabaseStorage implements IStorage {
     return family;
   }
 
+  async updateFamily(id: string, familyData: any): Promise<Family> {
+    const [family] = await db
+      .update(families)
+      .set({ ...familyData, updatedAt: new Date() })
+      .where(eq(families.id, id))
+      .returning();
+    return family;
+  }
+
   // Children
   async getChildrenByFamily(familyId: string): Promise<Child[]> {
     return await db.select().from(children).where(eq(children.familyId, familyId));
+  }
+
+  async createChild(childData: any): Promise<Child> {
+    const [child] = await db.insert(children).values(childData).returning();
+    return child;
   }
 
   // Enrollments
@@ -265,6 +294,48 @@ export class DatabaseStorage implements IStorage {
         eq(enrollments.classroomId, classroomId),
         eq(enrollments.status, "enrolled")
       ));
+  }
+
+  async getEnrollmentsByFamily(familyId: string): Promise<any[]> {
+    return await db
+      .select({
+        id: enrollments.id,
+        childId: enrollments.childId,
+        schoolId: enrollments.schoolId,
+        classroomId: enrollments.classroomId,
+        status: enrollments.status,
+        startDate: enrollments.startDate,
+        endDate: enrollments.endDate,
+        notes: enrollments.notes,
+        child: {
+          id: children.id,
+          firstName: children.firstName,
+          lastName: children.lastName,
+          birthDate: children.birthDate,
+          familyId: children.familyId,
+        },
+        family: {
+          id: families.id,
+          name: families.name,
+          email: families.email,
+          phone: families.phone,
+        },
+        classroom: {
+          id: classrooms.id,
+          name: classrooms.name,
+          level: classrooms.level,
+        },
+      })
+      .from(enrollments)
+      .leftJoin(children, eq(enrollments.childId, children.id))
+      .leftJoin(families, eq(children.familyId, families.id))
+      .leftJoin(classrooms, eq(enrollments.classroomId, classrooms.id))
+      .where(eq(children.familyId, familyId));
+  }
+
+  async createEnrollment(enrollmentData: any): Promise<any> {
+    const [enrollment] = await db.insert(enrollments).values(enrollmentData).returning();
+    return enrollment;
   }
 
   // Tasks
@@ -346,6 +417,50 @@ export class DatabaseStorage implements IStorage {
   async createChannel(channel: InsertChannel): Promise<Channel> {
     const [newChannel] = await db.insert(channels).values(channel).returning();
     return newChannel;
+  }
+
+  // Billing and invoicing
+  async getBillingSetupByFamily(familyId: string): Promise<any> {
+    const [billingSetup] = await db
+      .select()
+      .from(billingSetups)
+      .where(eq(billingSetups.familyId, familyId));
+    return billingSetup;
+  }
+
+  async createBillingSetup(billingData: any): Promise<any> {
+    const [billingSetup] = await db.insert(billingSetups).values(billingData).returning();
+    return billingSetup;
+  }
+
+  async updateBillingSetup(familyId: string, billingData: any): Promise<any> {
+    const [billingSetup] = await db
+      .update(billingSetups)
+      .set({ ...billingData, updatedAt: new Date() })
+      .where(eq(billingSetups.familyId, familyId))
+      .returning();
+    return billingSetup;
+  }
+
+  async getInvoicesByFamily(familyId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(invoices)
+      .where(eq(invoices.familyId, familyId))
+      .orderBy(desc(invoices.issueDate));
+  }
+
+  async createInvoice(invoiceData: any): Promise<any> {
+    const [invoice] = await db.insert(invoices).values(invoiceData).returning();
+    return invoice;
+  }
+
+  async getPaymentsByFamily(familyId: string): Promise<any[]> {
+    return await db
+      .select()
+      .from(payments)
+      .where(eq(payments.familyId, familyId))
+      .orderBy(desc(payments.paymentDate));
   }
 
   // Dashboard stats

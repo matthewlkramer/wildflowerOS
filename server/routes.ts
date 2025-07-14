@@ -186,6 +186,129 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/families/:familyId", isAuthenticated, async (req, res) => {
+    try {
+      const family = await storage.getFamilyById(req.params.familyId);
+      if (!family) {
+        return res.status(404).json({ message: "Family not found" });
+      }
+      res.json(family);
+    } catch (error) {
+      console.error("Error fetching family:", error);
+      res.status(500).json({ message: "Failed to fetch family" });
+    }
+  });
+
+  app.patch("/api/families/:familyId", isAuthenticated, async (req, res) => {
+    try {
+      const family = await storage.updateFamily(req.params.familyId, req.body);
+      res.json(family);
+    } catch (error) {
+      console.error("Error updating family:", error);
+      res.status(500).json({ message: "Failed to update family" });
+    }
+  });
+
+  app.get("/api/families/:familyId/children", isAuthenticated, async (req, res) => {
+    try {
+      const children = await storage.getChildrenByFamily(req.params.familyId);
+      res.json(children);
+    } catch (error) {
+      console.error("Error fetching children:", error);
+      res.status(500).json({ message: "Failed to fetch children" });
+    }
+  });
+
+  app.post("/api/families/:familyId/children", isAuthenticated, async (req, res) => {
+    try {
+      const child = await storage.createChild(req.body);
+      res.json(child);
+    } catch (error) {
+      console.error("Error creating child:", error);
+      res.status(500).json({ message: "Failed to create child" });
+    }
+  });
+
+  app.get("/api/families/:familyId/enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const enrollments = await storage.getEnrollmentsByFamily(req.params.familyId);
+      res.json(enrollments);
+    } catch (error) {
+      console.error("Error fetching enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch enrollments" });
+    }
+  });
+
+  app.post("/api/enrollments", isAuthenticated, async (req, res) => {
+    try {
+      const enrollment = await storage.createEnrollment(req.body);
+      res.json(enrollment);
+    } catch (error) {
+      console.error("Error creating enrollment:", error);
+      res.status(500).json({ message: "Failed to create enrollment" });
+    }
+  });
+
+  app.get("/api/families/:familyId/billing", isAuthenticated, async (req, res) => {
+    try {
+      const billingSetup = await storage.getBillingSetupByFamily(req.params.familyId);
+      res.json(billingSetup);
+    } catch (error) {
+      console.error("Error fetching billing setup:", error);
+      res.status(500).json({ message: "Failed to fetch billing setup" });
+    }
+  });
+
+  app.post("/api/families/:familyId/billing", isAuthenticated, async (req, res) => {
+    try {
+      const billingSetup = await storage.createBillingSetup(req.body);
+      res.json(billingSetup);
+    } catch (error) {
+      console.error("Error creating billing setup:", error);
+      res.status(500).json({ message: "Failed to create billing setup" });
+    }
+  });
+
+  app.patch("/api/families/:familyId/billing", isAuthenticated, async (req, res) => {
+    try {
+      const billingSetup = await storage.updateBillingSetup(req.params.familyId, req.body);
+      res.json(billingSetup);
+    } catch (error) {
+      console.error("Error updating billing setup:", error);
+      res.status(500).json({ message: "Failed to update billing setup" });
+    }
+  });
+
+  app.get("/api/families/:familyId/invoices", isAuthenticated, async (req, res) => {
+    try {
+      const invoices = await storage.getInvoicesByFamily(req.params.familyId);
+      res.json(invoices);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      res.status(500).json({ message: "Failed to fetch invoices" });
+    }
+  });
+
+  app.post("/api/families/:familyId/invoices", isAuthenticated, async (req, res) => {
+    try {
+      const invoice = await storage.createInvoice(req.body);
+      res.json(invoice);
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      res.status(500).json({ message: "Failed to create invoice" });
+    }
+  });
+
+  app.get("/api/families/:familyId/payments", isAuthenticated, async (req, res) => {
+    try {
+      const payments = await storage.getPaymentsByFamily(req.params.familyId);
+      res.json(payments);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      res.status(500).json({ message: "Failed to fetch payments" });
+    }
+  });
+
   app.get('/api/schools/:schoolId/enrollments', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;

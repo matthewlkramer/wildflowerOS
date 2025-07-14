@@ -482,26 +482,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(roleDefinitions.id, id));
   }
 
-  // Staff and role assignments at school level
-  async getStaffBySchool(schoolId: string): Promise<any[]> {
-    return await db
-      .select({
-        id: users.id,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        email: users.email,
-        profileImageUrl: users.profileImageUrl,
-      })
-      .from(users)
-      .innerJoin(userRoles, eq(userRoles.userId, users.id))
-      .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoles.roleId))
-      .where(and(
-        eq(userRoles.schoolId, schoolId),
-        eq(userRoles.active, true),
-        eq(roleDefinitions.category, "educator")
-      ))
-      .groupBy(users.id, users.firstName, users.lastName, users.email, users.profileImageUrl);
-  }
+
 
   async getStaffRoleAssignments(schoolId: string): Promise<any[]> {
     return await db
@@ -517,7 +498,7 @@ export class DatabaseStorage implements IStorage {
         roleName: roleDefinitions.name,
         roleDisplayName: roleDefinitions.displayName,
         roleCategory: roleDefinitions.category,
-        roleSubCategory: roleDefinitions.subCategory,
+
         roleType: roleDefinitions.roleType,
         parentRoleId: roleDefinitions.parentRoleId,
         sortOrder: roleDefinitions.sortOrder,
@@ -668,7 +649,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(classrooms.id, id));
   }
 
-  // Staff management
+  // Staff management 
   async getStaffBySchool(schoolId: string): Promise<UserRole[]> {
     const staffRoles = await db
       .select({

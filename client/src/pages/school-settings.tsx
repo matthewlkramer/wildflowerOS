@@ -43,8 +43,8 @@ import {
   Trash2,
   Save,
   X,
-  School,
   Clock,
+  School,
   ChevronDown,
   ChevronRight
 } from "lucide-react";
@@ -471,6 +471,9 @@ export default function SchoolSettingsPage() {
   const [showSSJ, setShowSSJ] = useState(true);
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  
+  // System administrator tab state
+  const [systemAdminTab, setSystemAdminTab] = useState("non-school-users");
   
   const [staffForm, setStaffForm] = useState({
     firstName: "",
@@ -1039,6 +1042,338 @@ export default function SchoolSettingsPage() {
         
         <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
           <div className="max-w-6xl mx-auto">
+            {/* Render different interfaces based on user role */}
+            {currentRole?.roleName?.startsWith('sysadmin') ? (
+              // System Administrator View
+              <div className="space-y-6">
+                {/* System Admin Header */}
+                <div className="border-b border-gray-200 pb-5">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">System Administration</h3>
+                  <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                    Manage network-wide settings, user accounts, and school configurations.
+                  </p>
+                </div>
+
+                {/* System Admin Top Level Tabs */}
+                <Tabs value={systemAdminTab} onValueChange={setSystemAdminTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="non-school-users" className="flex items-center">
+                      <Users className="mr-2 h-4 w-4" />
+                      Non-School Users
+                    </TabsTrigger>
+                    <TabsTrigger value="schools" className="flex items-center">
+                      <Home className="mr-2 h-4 w-4" />
+                      Schools
+                    </TabsTrigger>
+                    <TabsTrigger value="sensible-defaults" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Sensible Defaults
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Non-School Users Tab */}
+                  <TabsContent value="non-school-users" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Network-Wide Users</CardTitle>
+                        <p className="text-sm text-gray-600">Users with roles that span across multiple schools or the entire network.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Non-school user management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Schools Tab */}
+                  <TabsContent value="schools" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>School Management</CardTitle>
+                        <p className="text-sm text-gray-600">Manage all schools in the Wildflower network.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          School management interface will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Sensible Defaults Tab */}
+                  <TabsContent value="sensible-defaults" className="space-y-6">
+                    {/* This will contain the same tabs as school settings, but for defaults */}
+                    <div className="border-b border-gray-200 pb-2">
+                      <h4 className="text-md font-medium text-gray-900">Default Settings for New Schools</h4>
+                      <p className="text-sm text-gray-500">Configure the default settings that new schools will inherit.</p>
+                    </div>
+                    
+                    {/* Default Settings Tabs (excluding staff and classrooms) */}
+                    <Tabs defaultValue="school-years" className="w-full">
+                      <TabsList className="grid w-full grid-cols-4">
+                        <TabsTrigger value="school-years" className="flex items-center">
+                          <Calendar className="mr-2 h-4 w-4" />
+                          School Years
+                        </TabsTrigger>
+                        <TabsTrigger value="schedules" className="flex items-center">
+                          <Clock className="mr-2 h-4 w-4" />
+                          Schedules
+                        </TabsTrigger>
+                        <TabsTrigger value="tuition" className="flex items-center">
+                          <DollarSign className="mr-2 h-4 w-4" />
+                          Tuition Plans
+                        </TabsTrigger>
+                        <TabsTrigger value="subsidies" className="flex items-center">
+                          <School className="mr-2 h-4 w-4" />
+                          Public Subsidies
+                        </TabsTrigger>
+                      </TabsList>
+
+                      {/* Default School Years */}
+                      <TabsContent value="school-years" className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Default School Years</CardTitle>
+                            <p className="text-sm text-gray-600">Configure default school year templates for new schools.</p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-center py-8 text-gray-500">
+                              Default school year templates will be implemented here.
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+
+                      {/* Default Schedules */}
+                      <TabsContent value="schedules" className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Default Classroom Schedules</CardTitle>
+                            <p className="text-sm text-gray-600">Configure default schedule templates for new schools.</p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-center py-8 text-gray-500">
+                              Default schedule templates will be implemented here.
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+
+                      {/* Default Tuition Plans */}
+                      <TabsContent value="tuition" className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Default Tuition Plans</CardTitle>
+                            <p className="text-sm text-gray-600">Configure default tuition plan templates for new schools.</p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-center py-8 text-gray-500">
+                              Default tuition plan templates will be implemented here.
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+
+                      {/* Default Subsidies */}
+                      <TabsContent value="subsidies" className="space-y-6">
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Default Public Subsidies</CardTitle>
+                            <p className="text-sm text-gray-600">Configure default public subsidy information for new schools.</p>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="text-center py-8 text-gray-500">
+                              Default public subsidy templates will be implemented here.
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </TabsContent>
+                    </Tabs>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : currentRole?.roleName?.startsWith('parent') ? (
+              // Parent View
+              <div className="space-y-6">
+                {/* Parent Header */}
+                <div className="border-b border-gray-200 pb-5">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Family Settings</h3>
+                  <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                    Manage your family's enrollment, billing, and communication preferences.
+                  </p>
+                </div>
+
+                {/* Parent-specific content */}
+                <Tabs defaultValue="family-info" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="family-info" className="flex items-center">
+                      <Users className="mr-2 h-4 w-4" />
+                      Family Info
+                    </TabsTrigger>
+                    <TabsTrigger value="enrollment" className="flex items-center">
+                      <Home className="mr-2 h-4 w-4" />
+                      Enrollment
+                    </TabsTrigger>
+                    <TabsTrigger value="billing" className="flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      Billing
+                    </TabsTrigger>
+                    <TabsTrigger value="communication" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Communication
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="family-info" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Family Information</CardTitle>
+                        <p className="text-sm text-gray-600">Update your family's contact information and emergency contacts.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Family information management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="enrollment" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Enrollment Status</CardTitle>
+                        <p className="text-sm text-gray-600">View and manage your children's enrollment status and applications.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Enrollment management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="billing" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Billing & Payments</CardTitle>
+                        <p className="text-sm text-gray-600">Manage payment methods, view statements, and update billing information.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Billing management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="communication" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Communication Preferences</CardTitle>
+                        <p className="text-sm text-gray-600">Set your preferences for receiving school communications and updates.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Communication preferences will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : currentRole?.roleName?.startsWith('board') ? (
+              // Board Member View
+              <div className="space-y-6">
+                {/* Board Header */}
+                <div className="border-b border-gray-200 pb-5">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Board Governance</h3>
+                  <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                    Access board documents, meeting materials, and governance tools.
+                  </p>
+                </div>
+
+                {/* Board-specific content */}
+                <Tabs defaultValue="meetings" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="meetings" className="flex items-center">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Meetings
+                    </TabsTrigger>
+                    <TabsTrigger value="documents" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Documents
+                    </TabsTrigger>
+                    <TabsTrigger value="finances" className="flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      Finances
+                    </TabsTrigger>
+                    <TabsTrigger value="policies" className="flex items-center">
+                      <School className="mr-2 h-4 w-4" />
+                      Policies
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="meetings" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Board Meetings</CardTitle>
+                        <p className="text-sm text-gray-600">View upcoming meetings, agendas, and past meeting minutes.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Board meeting management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="documents" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Board Documents</CardTitle>
+                        <p className="text-sm text-gray-600">Access bylaws, resolutions, and other governance documents.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Document management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="finances" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Financial Oversight</CardTitle>
+                        <p className="text-sm text-gray-600">Review budgets, financial reports, and audit materials.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Financial oversight tools will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="policies" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Policies & Procedures</CardTitle>
+                        <p className="text-sm text-gray-600">Review and approve school policies and procedures.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Policy management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : (
+              // Educator/Default School-Level Settings View (existing functionality)
+              <div className="space-y-6">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -2650,6 +2985,8 @@ export default function SchoolSettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+              </div>
+            )}
           </div>
         </main>
       </div>

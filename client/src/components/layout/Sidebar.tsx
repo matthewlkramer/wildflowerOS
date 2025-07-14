@@ -52,7 +52,7 @@ export default function Sidebar({ currentRole }: SidebarProps) {
               )}
             >
               <i className="fas fa-cog mr-3"></i>
-              <span>School Settings</span>
+              <span>Settings</span>
             </Link>
           </div>
         )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +53,236 @@ import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
+// Academic Calendar Component
+function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  const [calendarForm, setCalendarForm] = useState({
+    firstDayOfSchool: "",
+    lastDayOfSchool: "",
+    mondayOpen: true,
+    tuesdayOpen: true,
+    wednesdayOpen: true,
+    thursdayOpen: true,
+    fridayOpen: true,
+    saturdayOpen: false,
+    sundayOpen: false,
+  });
+
+  // Fetch academic calendar for this school year
+  const { data: academicCalendar, isLoading } = useQuery({
+    queryKey: ["/api/school-years", schoolYear?.id, "calendar"],
+    enabled: !!schoolYear?.id,
+  });
+
+  const { data: calendarClosures } = useQuery({
+    queryKey: ["/api/academic-calendars", academicCalendar?.id, "closures"],
+    enabled: !!academicCalendar?.id,
+  });
+
+  // Update form when calendar data loads
+  useEffect(() => {
+    if (academicCalendar) {
+      setCalendarForm({
+        firstDayOfSchool: academicCalendar.firstDayOfSchool ? new Date(academicCalendar.firstDayOfSchool).toISOString().split('T')[0] : "",
+        lastDayOfSchool: academicCalendar.lastDayOfSchool ? new Date(academicCalendar.lastDayOfSchool).toISOString().split('T')[0] : "",
+        mondayOpen: academicCalendar.mondayOpen ?? true,
+        tuesdayOpen: academicCalendar.tuesdayOpen ?? true,
+        wednesdayOpen: academicCalendar.wednesdayOpen ?? true,
+        thursdayOpen: academicCalendar.thursdayOpen ?? true,
+        fridayOpen: academicCalendar.fridayOpen ?? true,
+        saturdayOpen: academicCalendar.saturdayOpen ?? false,
+        sundayOpen: academicCalendar.sundayOpen ?? false,
+      });
+    }
+  }, [academicCalendar]);
+
+  const createCalendarMutation = useMutation({
+    mutationFn: async (calendarData: any) => {
+      return apiRequest('POST', `/api/school-years/${schoolYear.id}/calendar`, calendarData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYear.id, "calendar"] });
+      toast({
+        title: "Academic calendar created",
+        description: "Academic calendar has been set up successfully.",
+      });
+    },
+  });
+
+  const updateCalendarMutation = useMutation({
+    mutationFn: async (calendarData: any) => {
+      return apiRequest('PATCH', `/api/academic-calendars/${academicCalendar.id}`, calendarData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYear.id, "calendar"] });
+      toast({
+        title: "Academic calendar updated",
+        description: "Academic calendar has been updated successfully.",
+      });
+    },
+  });
+
+  const handleSaveCalendar = () => {
+    if (academicCalendar) {
+      updateCalendarMutation.mutate(calendarForm);
+    } else {
+      createCalendarMutation.mutate(calendarForm);
+    }
+  };
+
+  if (isLoading) {
+    return <div className="p-4">Loading calendar...</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* School Year Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">School Year Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm font-medium">School Year Period</Label>
+              <p className="text-sm text-gray-600">
+                {schoolYear?.startDate && schoolYear?.endDate ? (
+                  `${new Date(schoolYear.startDate).toLocaleDateString()} - ${new Date(schoolYear.endDate).toLocaleDateString()}`
+                ) : (
+                  "No dates set"
+                )}
+              </p>
+            </div>
+            <div>
+              <Label className="text-sm font-medium">Status</Label>
+              <div className="flex items-center space-x-2">
+                {schoolYear?.isActive && (
+                  <Badge className="bg-green-100 text-green-800">Current</Badge>
+                )}
+                {schoolYear?.networkDefault && (
+                  <Badge className="bg-blue-100 text-blue-800">Network Default</Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendar Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Academic Calendar Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* First and Last Day */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>First Day of School</Label>
+              <Input
+                type="date"
+                value={calendarForm.firstDayOfSchool}
+                onChange={(e) => setCalendarForm(prev => ({ ...prev, firstDayOfSchool: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Last Day of School</Label>
+              <Input
+                type="date"
+                value={calendarForm.lastDayOfSchool}
+                onChange={(e) => setCalendarForm(prev => ({ ...prev, lastDayOfSchool: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          {/* Days of Week */}
+          <div>
+            <Label className="text-base font-medium mb-3 block">School Operating Days</Label>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { key: 'mondayOpen', label: 'Monday' },
+                { key: 'tuesdayOpen', label: 'Tuesday' },
+                { key: 'wednesdayOpen', label: 'Wednesday' },
+                { key: 'thursdayOpen', label: 'Thursday' },
+                { key: 'fridayOpen', label: 'Friday' },
+                { key: 'saturdayOpen', label: 'Saturday' },
+                { key: 'sundayOpen', label: 'Sunday' },
+              ].map(({ key, label }) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id={key}
+                    checked={calendarForm[key as keyof typeof calendarForm] as boolean}
+                    onChange={(e) => setCalendarForm(prev => ({ 
+                      ...prev, 
+                      [key]: e.target.checked 
+                    }))}
+                    className="rounded border-gray-300"
+                  />
+                  <Label htmlFor={key} className="text-sm">{label}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSaveCalendar}>
+              {academicCalendar ? "Update Calendar" : "Create Calendar"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Calendar Closures */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg">Holidays & Closures</CardTitle>
+            <Button size="sm">
+              <Plus className="mr-2 h-4 w-4" />
+              Add Holiday
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {calendarClosures && calendarClosures.length > 0 ? (
+            <div className="space-y-2">
+              {calendarClosures.map((closure: any) => (
+                <div key={closure.id} className="flex justify-between items-center p-3 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{closure.name}</p>
+                    <p className="text-sm text-gray-600">
+                      {new Date(closure.date).toLocaleDateString()}
+                    </p>
+                    {closure.description && (
+                      <p className="text-xs text-gray-500 mt-1">{closure.description}</p>
+                    )}
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-gray-600 mb-2">No holidays or closures scheduled</p>
+              <p className="text-sm text-gray-500">Add holidays, breaks, and school closure dates.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function SchoolSettingsPage() {
   const { user } = useAuth();
   
@@ -68,6 +298,10 @@ export default function SchoolSettingsPage() {
   const [deletingClassroom, setDeletingClassroom] = useState<any>(null);
   const [addingTuitionPlan, setAddingTuitionPlan] = useState(false);
   const [addingSchoolYear, setAddingSchoolYear] = useState(false);
+  const [editingSchoolYear, setEditingSchoolYear] = useState<any>(null);
+  const [deletingSchoolYear, setDeletingSchoolYear] = useState<any>(null);
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState<any>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
   
   const [staffForm, setStaffForm] = useState({
     firstName: "",
@@ -260,7 +494,7 @@ export default function SchoolSettingsPage() {
     },
   });
 
-  // Add school year mutation
+  // School year mutations
   const addSchoolYearMutation = useMutation({
     mutationFn: async (schoolYearData: any) => {
       return apiRequest('POST', `/api/schools/${schoolId}/school-years`, schoolYearData);
@@ -277,6 +511,48 @@ export default function SchoolSettingsPage() {
     onError: (error: Error) => {
       toast({
         title: "Error adding school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateSchoolYearMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest('PATCH', `/api/school-years/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
+      setEditingSchoolYear(null);
+      toast({
+        title: "School year updated",
+        description: "School year has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteSchoolYearMutation = useMutation({
+    mutationFn: async (yearId: string) => {
+      return apiRequest('DELETE', `/api/school-years/${yearId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
+      setDeletingSchoolYear(null);
+      toast({
+        title: "School year deleted",
+        description: "School year has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting school year",
         description: error.message,
         variant: "destructive",
       });
@@ -367,8 +643,41 @@ export default function SchoolSettingsPage() {
     });
   };
 
+  const handleEditSchoolYear = (year: any) => {
+    setEditingSchoolYear(year);
+    setSchoolYearForm({
+      name: year.name,
+      startDate: year.startDate ? new Date(year.startDate).toISOString().split('T')[0] : "",
+      endDate: year.endDate ? new Date(year.endDate).toISOString().split('T')[0] : ""
+    });
+  };
+
+  const handleUpdateSchoolYear = () => {
+    if (editingSchoolYear) {
+      updateSchoolYearMutation.mutate({
+        id: editingSchoolYear.id,
+        data: schoolYearForm
+      });
+    }
+  };
+
+  const handleDeleteSchoolYear = (year: any) => {
+    setDeletingSchoolYear(year);
+  };
+
+  const confirmDeleteSchoolYear = () => {
+    if (deletingSchoolYear) {
+      deleteSchoolYearMutation.mutate(deletingSchoolYear.id);
+    }
+  };
+
   const handleSetActiveSchoolYear = (yearId: string) => {
     setActiveSchoolYearMutation.mutate(yearId);
+  };
+
+  const handleViewCalendar = (year: any) => {
+    setSelectedSchoolYear(year);
+    setShowCalendar(true);
   };
 
   const getRoleColor = (role: string) => {
@@ -917,6 +1226,93 @@ export default function SchoolSettingsPage() {
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Edit School Year Dialog */}
+                  <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit School Year</DialogTitle>
+                        <DialogDescription>
+                          Update the school year information and dates.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Year Name</Label>
+                          <Input
+                            value={schoolYearForm.name}
+                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., 2024-2025"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Start Date</Label>
+                            <Input
+                              type="date"
+                              value={schoolYearForm.startDate}
+                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>End Date</Label>
+                            <Input
+                              type="date"
+                              value={schoolYearForm.endDate}
+                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setEditingSchoolYear(null)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleUpdateSchoolYear}
+                            disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
+                          >
+                            Update School Year
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Delete School Year Confirmation Dialog */}
+                  <AlertDialog open={deletingSchoolYear !== null} onOpenChange={(open) => !open && setDeletingSchoolYear(null)}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete School Year</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{deletingSchoolYear?.name}"? This action cannot be undone and will remove all associated academic calendar data.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDeletingSchoolYear(null)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={confirmDeleteSchoolYear}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete School Year
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  {/* Academic Calendar Dialog */}
+                  <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>Academic Calendar - {selectedSchoolYear?.name}</DialogTitle>
+                        <DialogDescription>
+                          Manage the academic calendar including first/last day of school, operational days, and holidays.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <AcademicCalendarView schoolYear={selectedSchoolYear} />
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -932,6 +1328,11 @@ export default function SchoolSettingsPage() {
                                 Current
                               </Badge>
                             )}
+                            {year.networkDefault && (
+                              <Badge className="ml-2 bg-blue-100 text-blue-800">
+                                Network Default
+                              </Badge>
+                            )}
                           </h4>
                           <div className="text-sm text-gray-600 mt-1">
                             {year.startDate && year.endDate && (
@@ -943,9 +1344,29 @@ export default function SchoolSettingsPage() {
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewCalendar(year)}
+                          >
+                            <Calendar className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditSchoolYear(year)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
+                          {!year.isActive && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleDeleteSchoolYear(year)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                           {!year.isActive && (
                             <Button 
                               variant="outline" 

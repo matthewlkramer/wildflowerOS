@@ -78,6 +78,22 @@ Preferred communication style: Simple, everyday language.
   - Fixed Dialog accessibility warning by adding DialogDescription component
   - School year creation now works properly with start/end date validation
   - **CONFIRMED WORKING** - User successfully tested school year creation functionality
+- **Implemented classroom program type differentiation**
+  - Added programType field to classrooms table with enum values: continuous, school_year
+  - Infant and toddler classrooms default to continuous program type
+  - All other age levels default to school_year program type
+  - Updated storage methods to auto-set program type based on classroom level
+  - Program type can be explicitly overridden during classroom creation/editing
+- **Completed comprehensive academic calendar system**
+  - Created academic_calendars table linked to school years for calendar management
+  - Added calendar_closures table for tracking holidays, breaks, and school closure dates
+  - Implemented full CRUD operations for academic calendars and closures
+  - Added first/last day of school date tracking
+  - Operational days of week configuration (Monday-Sunday open/closed flags)
+  - Built comprehensive academic calendar UI with school year overview, calendar settings, and holiday management
+  - Added edit and delete functionality for school years with proper confirmation dialogs
+  - Academic calendar dialog accessible through calendar button on each school year
+  - Full API integration with proper error handling and toast notifications
 
 ## System Architecture
 

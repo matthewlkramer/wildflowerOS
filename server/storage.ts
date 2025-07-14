@@ -4,6 +4,8 @@ import {
   roleDefinitions,
   schools,
   schoolYears,
+  academicCalendars,
+  calendarClosures,
   budgets,
   classrooms,
   families,
@@ -24,6 +26,12 @@ import {
   type RoleDefinition,
   type InsertRoleDefinition,
   type School,
+  type SchoolYear,
+  type InsertSchoolYear,
+  type AcademicCalendar,
+  type InsertAcademicCalendar,
+  type CalendarClosure,
+  type InsertCalendarClosure,
   type Classroom,
   type Family,
   type Child,
@@ -83,9 +91,24 @@ export interface IStorage {
   createTuitionPlan(tuitionPlan: any): Promise<any>;
   
   // School years
-  getSchoolYearsBySchool(schoolId: string): Promise<any[]>;
-  createSchoolYear(schoolYear: any): Promise<any>;
-  setActiveSchoolYear(yearId: string): Promise<any>;
+  getSchoolYearsBySchool(schoolId: string): Promise<SchoolYear[]>;
+  getSchoolYearById(id: string): Promise<SchoolYear | undefined>;
+  createSchoolYear(schoolYear: InsertSchoolYear): Promise<SchoolYear>;
+  updateSchoolYear(id: string, schoolYear: Partial<InsertSchoolYear>): Promise<SchoolYear>;
+  deleteSchoolYear(id: string): Promise<void>;
+  setActiveSchoolYear(yearId: string): Promise<SchoolYear>;
+  
+  // Academic calendars
+  getAcademicCalendarBySchoolYear(schoolYearId: string): Promise<AcademicCalendar | undefined>;
+  createAcademicCalendar(calendar: InsertAcademicCalendar): Promise<AcademicCalendar>;
+  updateAcademicCalendar(id: string, calendar: Partial<InsertAcademicCalendar>): Promise<AcademicCalendar>;
+  deleteAcademicCalendar(id: string): Promise<void>;
+  
+  // Calendar closures
+  getCalendarClosuresByCalendar(calendarId: string): Promise<CalendarClosure[]>;
+  createCalendarClosure(closure: InsertCalendarClosure): Promise<CalendarClosure>;
+  updateCalendarClosure(id: string, closure: Partial<InsertCalendarClosure>): Promise<CalendarClosure>;
+  deleteCalendarClosure(id: string): Promise<void>;
   
   // Families
   getFamiliesBySchool(schoolId: string): Promise<Family[]>;
@@ -348,14 +371,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createClassroom(classroomData: any): Promise<Classroom> {
-    const [classroom] = await db.insert(classrooms).values(classroomData).returning();
+    // Set default program type based on level
+    const programType = (classroomData.level === 'infant' || classroomData.level === 'toddler') 
+      ? 'continuous' 
+      : 'school_year';
+    
+    const [classroom] = await db.insert(classrooms).values({
+      ...classroomData,
+      programType: classroomData.programType || programType
+    }).returning();
     return classroom;
   }
 
   async updateClassroom(id: string, classroomData: any): Promise<Classroom> {
+    // Auto-set program type based on level if level is being updated and programType isn't explicitly set
+    const updateData = { ...classroomData, updatedAt: new Date() };
+    if (classroomData.level && !classroomData.programType) {
+      updateData.programType = (classroomData.level === 'infant' || classroomData.level === 'toddler') 
+        ? 'continuous' 
+        : 'school_year';
+    }
+    
     const [classroom] = await db
       .update(classrooms)
-      .set({ ...classroomData, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(classrooms.id, id))
       .returning();
     return classroom;
@@ -533,7 +572,34 @@ export class DatabaseStorage implements IStorage {
     return schoolYear;
   }
 
-  async setActiveSchoolYear(yearId: string): Promise<any> {
+  async getSchoolYearById(id: string): Promise<SchoolYear | undefined> {
+    const [schoolYear] = await db.select().from(schoolYears).where(eq(schoolYears.id, id));
+    return schoolYear;
+  }
+
+  async updateSchoolYear(id: string, schoolYearData: Partial<InsertSchoolYear>): Promise<SchoolYear> {
+    // Convert string dates to Date objects if provided
+    const updateData: any = { ...schoolYearData };
+    if (updateData.startDate) {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.endDate) {
+      updateData.endDate = new Date(updateData.endDate);
+    }
+    
+    const [schoolYear] = await db
+      .update(schoolYears)
+      .set(updateData)
+      .where(eq(schoolYears.id, id))
+      .returning();
+    return schoolYear;
+  }
+
+  async deleteSchoolYear(id: string): Promise<void> {
+    await db.delete(schoolYears).where(eq(schoolYears.id, id));
+  }
+
+  async setActiveSchoolYear(yearId: string): Promise<SchoolYear> {
     // First, set all school years to inactive
     await db.update(schoolYears).set({ isActive: false });
     
@@ -545,6 +611,95 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return schoolYear;
+  }
+
+  // Academic calendars
+  async getAcademicCalendarBySchoolYear(schoolYearId: string): Promise<AcademicCalendar | undefined> {
+    const [calendar] = await db
+      .select()
+      .from(academicCalendars)
+      .where(eq(academicCalendars.schoolYearId, schoolYearId));
+    return calendar;
+  }
+
+  async createAcademicCalendar(calendarData: InsertAcademicCalendar): Promise<AcademicCalendar> {
+    // Convert string dates to Date objects
+    const firstDayOfSchool = calendarData.firstDayOfSchool ? new Date(calendarData.firstDayOfSchool) : null;
+    const lastDayOfSchool = calendarData.lastDayOfSchool ? new Date(calendarData.lastDayOfSchool) : null;
+    
+    const [calendar] = await db
+      .insert(academicCalendars)
+      .values({
+        ...calendarData,
+        firstDayOfSchool,
+        lastDayOfSchool,
+      })
+      .returning();
+    return calendar;
+  }
+
+  async updateAcademicCalendar(id: string, calendarData: Partial<InsertAcademicCalendar>): Promise<AcademicCalendar> {
+    // Convert string dates to Date objects if provided
+    const updateData: any = { ...calendarData };
+    if (updateData.firstDayOfSchool) {
+      updateData.firstDayOfSchool = new Date(updateData.firstDayOfSchool);
+    }
+    if (updateData.lastDayOfSchool) {
+      updateData.lastDayOfSchool = new Date(updateData.lastDayOfSchool);
+    }
+    
+    const [calendar] = await db
+      .update(academicCalendars)
+      .set(updateData)
+      .where(eq(academicCalendars.id, id))
+      .returning();
+    return calendar;
+  }
+
+  async deleteAcademicCalendar(id: string): Promise<void> {
+    await db.delete(academicCalendars).where(eq(academicCalendars.id, id));
+  }
+
+  // Calendar closures
+  async getCalendarClosuresByCalendar(calendarId: string): Promise<CalendarClosure[]> {
+    return await db
+      .select()
+      .from(calendarClosures)
+      .where(eq(calendarClosures.academicCalendarId, calendarId))
+      .orderBy(asc(calendarClosures.date));
+  }
+
+  async createCalendarClosure(closureData: InsertCalendarClosure): Promise<CalendarClosure> {
+    // Convert string date to Date object
+    const date = closureData.date ? new Date(closureData.date) : new Date();
+    
+    const [closure] = await db
+      .insert(calendarClosures)
+      .values({
+        ...closureData,
+        date,
+      })
+      .returning();
+    return closure;
+  }
+
+  async updateCalendarClosure(id: string, closureData: Partial<InsertCalendarClosure>): Promise<CalendarClosure> {
+    // Convert string date to Date object if provided
+    const updateData: any = { ...closureData };
+    if (updateData.date) {
+      updateData.date = new Date(updateData.date);
+    }
+    
+    const [closure] = await db
+      .update(calendarClosures)
+      .set(updateData)
+      .where(eq(calendarClosures.id, id))
+      .returning();
+    return closure;
+  }
+
+  async deleteCalendarClosure(id: string): Promise<void> {
+    await db.delete(calendarClosures).where(eq(calendarClosures.id, id));
   }
 
   // Families

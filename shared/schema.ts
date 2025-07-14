@@ -131,6 +131,31 @@ export const schoolYears = pgTable("school_years", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const academicCalendars = pgTable("academic_calendars", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolYearId: uuid("school_year_id").notNull().references(() => schoolYears.id, { onDelete: "cascade" }),
+  firstDayOfSchool: timestamp("first_day_of_school"),
+  lastDayOfSchool: timestamp("last_day_of_school"),
+  mondayOpen: boolean("monday_open").notNull().default(true),
+  tuesdayOpen: boolean("tuesday_open").notNull().default(true),
+  wednesdayOpen: boolean("wednesday_open").notNull().default(true),
+  thursdayOpen: boolean("thursday_open").notNull().default(true),
+  fridayOpen: boolean("friday_open").notNull().default(true),
+  saturdayOpen: boolean("saturday_open").notNull().default(false),
+  sundayOpen: boolean("sunday_open").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const calendarClosures = pgTable("calendar_closures", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  academicCalendarId: uuid("academic_calendar_id").notNull().references(() => academicCalendars.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // ======================== CLASSROOMS ========================
 
 export const classrooms = pgTable("classrooms", {
@@ -144,6 +169,7 @@ export const classrooms = pgTable("classrooms", {
     ]
   }).notNull(),
   capacity: integer("capacity"),
+  programType: varchar("program_type", { enum: ["continuous", "school_year"] }).notNull().default("school_year"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -939,6 +965,29 @@ export const fundraisingAnalyticsRelations = relations(fundraisingAnalytics, ({ 
   }),
 }));
 
+export const schoolYearsRelations = relations(schoolYears, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [schoolYears.schoolId],
+    references: [schools.id],
+  }),
+  academicCalendars: many(academicCalendars),
+}));
+
+export const academicCalendarsRelations = relations(academicCalendars, ({ one, many }) => ({
+  schoolYear: one(schoolYears, {
+    fields: [academicCalendars.schoolYearId],
+    references: [schoolYears.id],
+  }),
+  closures: many(calendarClosures),
+}));
+
+export const calendarClosuresRelations = relations(calendarClosures, ({ one }) => ({
+  academicCalendar: one(academicCalendars, {
+    fields: [calendarClosures.academicCalendarId],
+    references: [academicCalendars.id],
+  }),
+}));
+
 // ======================== TYPES ========================
 
 // ======================== TYPE EXPORTS ========================
@@ -1012,6 +1061,14 @@ export type InsertEnrollmentProjection = typeof enrollmentProjections.$inferInse
 export type FundraisingAnalytics = typeof fundraisingAnalytics.$inferSelect;
 export type InsertFundraisingAnalytics = typeof fundraisingAnalytics.$inferInsert;
 
+// School Year and Calendar types
+export type SchoolYear = typeof schoolYears.$inferSelect;
+export type InsertSchoolYear = typeof schoolYears.$inferInsert;
+export type AcademicCalendar = typeof academicCalendars.$inferSelect;
+export type InsertAcademicCalendar = typeof academicCalendars.$inferInsert;
+export type CalendarClosure = typeof calendarClosures.$inferSelect;
+export type InsertCalendarClosure = typeof calendarClosures.$inferInsert;
+
 // ======================== ZOD SCHEMAS ========================
 
 export const insertUserRoleSchema = createInsertSchema(userRoles);
@@ -1035,3 +1092,6 @@ export const insertBoardResolutionSchema = createInsertSchema(boardResolutions);
 export const insertAttendanceRecordSchema = createInsertSchema(attendanceRecords);
 export const insertAssessmentSchema = createInsertSchema(assessments);
 export const insertEmailAddressSchema = createInsertSchema(emailAddresses);
+export const insertSchoolYearSchema = createInsertSchema(schoolYears);
+export const insertAcademicCalendarSchema = createInsertSchema(academicCalendars);
+export const insertCalendarClosureSchema = createInsertSchema(calendarClosures);

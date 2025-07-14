@@ -471,6 +471,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/school-years/:yearId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { yearId } = req.params;
+      const schoolYear = await storage.getSchoolYearById(yearId);
+      if (!schoolYear) {
+        return res.status(404).json({ message: "School year not found" });
+      }
+      res.json(schoolYear);
+    } catch (error) {
+      console.error("Error fetching school year:", error);
+      res.status(500).json({ message: "Failed to fetch school year" });
+    }
+  });
+
+  app.patch('/api/school-years/:yearId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { yearId } = req.params;
+      const schoolYear = await storage.updateSchoolYear(yearId, req.body);
+      res.json(schoolYear);
+    } catch (error) {
+      console.error("Error updating school year:", error);
+      res.status(500).json({ message: "Failed to update school year" });
+    }
+  });
+
+  app.delete('/api/school-years/:yearId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { yearId } = req.params;
+      await storage.deleteSchoolYear(yearId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting school year:", error);
+      res.status(500).json({ message: "Failed to delete school year" });
+    }
+  });
+
   app.patch('/api/school-years/:yearId/set-active', isAuthenticated, async (req: any, res) => {
     try {
       const { yearId } = req.params;
@@ -479,6 +515,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error setting active school year:", error);
       res.status(500).json({ message: "Failed to set active school year" });
+    }
+  });
+
+  // Academic Calendar routes
+  app.get('/api/school-years/:yearId/calendar', isAuthenticated, async (req: any, res) => {
+    try {
+      const { yearId } = req.params;
+      const calendar = await storage.getAcademicCalendarBySchoolYear(yearId);
+      res.json(calendar);
+    } catch (error) {
+      console.error("Error fetching academic calendar:", error);
+      res.status(500).json({ message: "Failed to fetch academic calendar" });
+    }
+  });
+
+  app.post('/api/school-years/:yearId/calendar', isAuthenticated, async (req: any, res) => {
+    try {
+      const { yearId } = req.params;
+      const calendarData = { ...req.body, schoolYearId: yearId };
+      const calendar = await storage.createAcademicCalendar(calendarData);
+      res.status(201).json(calendar);
+    } catch (error) {
+      console.error("Error creating academic calendar:", error);
+      res.status(500).json({ message: "Failed to create academic calendar" });
+    }
+  });
+
+  app.patch('/api/academic-calendars/:calendarId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { calendarId } = req.params;
+      const calendar = await storage.updateAcademicCalendar(calendarId, req.body);
+      res.json(calendar);
+    } catch (error) {
+      console.error("Error updating academic calendar:", error);
+      res.status(500).json({ message: "Failed to update academic calendar" });
+    }
+  });
+
+  app.delete('/api/academic-calendars/:calendarId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { calendarId } = req.params;
+      await storage.deleteAcademicCalendar(calendarId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting academic calendar:", error);
+      res.status(500).json({ message: "Failed to delete academic calendar" });
+    }
+  });
+
+  // Calendar Closure routes
+  app.get('/api/academic-calendars/:calendarId/closures', isAuthenticated, async (req: any, res) => {
+    try {
+      const { calendarId } = req.params;
+      const closures = await storage.getCalendarClosuresByCalendar(calendarId);
+      res.json(closures);
+    } catch (error) {
+      console.error("Error fetching calendar closures:", error);
+      res.status(500).json({ message: "Failed to fetch calendar closures" });
+    }
+  });
+
+  app.post('/api/academic-calendars/:calendarId/closures', isAuthenticated, async (req: any, res) => {
+    try {
+      const { calendarId } = req.params;
+      const closureData = { ...req.body, academicCalendarId: calendarId };
+      const closure = await storage.createCalendarClosure(closureData);
+      res.status(201).json(closure);
+    } catch (error) {
+      console.error("Error creating calendar closure:", error);
+      res.status(500).json({ message: "Failed to create calendar closure" });
+    }
+  });
+
+  app.patch('/api/calendar-closures/:closureId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { closureId } = req.params;
+      const closure = await storage.updateCalendarClosure(closureId, req.body);
+      res.json(closure);
+    } catch (error) {
+      console.error("Error updating calendar closure:", error);
+      res.status(500).json({ message: "Failed to update calendar closure" });
+    }
+  });
+
+  app.delete('/api/calendar-closures/:closureId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { closureId } = req.params;
+      await storage.deleteCalendarClosure(closureId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting calendar closure:", error);
+      res.status(500).json({ message: "Failed to delete calendar closure" });
     }
   });
 

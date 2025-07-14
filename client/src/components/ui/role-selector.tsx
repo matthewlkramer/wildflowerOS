@@ -62,9 +62,14 @@ export default function RoleSelector() {
   });
 
   // Get all user roles
-  const { data: userRoles = [], isLoading } = useQuery<UserRole[]>({
+  const { data: userRoles = [], isLoading, error } = useQuery<UserRole[]>({
     queryKey: ["/api/user/roles"],
   });
+
+  // Debug logging
+  console.log("Role selector - isLoading:", isLoading);
+  console.log("Role selector - userRoles:", userRoles);
+  console.log("Role selector - error:", error);
 
 
 

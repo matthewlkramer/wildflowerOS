@@ -266,7 +266,7 @@ function SystemHolidaysOverview() {
   const [holidayForm, setHolidayForm] = useState({
     name: "",
     description: "",
-    date: "",
+    rule: "",
   });
 
   // Fetch system holidays from API
@@ -286,7 +286,7 @@ function SystemHolidaysOverview() {
         title: "Holiday added",
         description: `${holidayForm.name} has been added to system holidays.`
       });
-      setHolidayForm({ name: "", description: "", date: "" });
+      setHolidayForm({ name: "", description: "", rule: "" });
       setAddingHoliday(false);
     },
     onError: (error) => {
@@ -309,7 +309,7 @@ function SystemHolidaysOverview() {
         title: "Holiday updated",
         description: `${holidayForm.name} has been updated.`
       });
-      setHolidayForm({ name: "", description: "", date: "" });
+      setHolidayForm({ name: "", description: "", rule: "" });
       setEditingHoliday(null);
     },
     onError: (error) => {
@@ -343,10 +343,10 @@ function SystemHolidaysOverview() {
   });
 
   const handleAddHoliday = () => {
-    if (!holidayForm.name || !holidayForm.date) {
+    if (!holidayForm.name || !holidayForm.rule) {
       toast({
         title: "Error",
-        description: "Please fill in name and date fields.",
+        description: "Please fill in name and rule fields.",
         variant: "destructive"
       });
       return;
@@ -355,7 +355,9 @@ function SystemHolidaysOverview() {
     createHolidayMutation.mutate({
       name: holidayForm.name,
       description: holidayForm.description,
-      date: new Date(holidayForm.date).toISOString(),
+      rule: holidayForm.rule,
+      networkDefault: true,
+      active: true,
     });
   };
 
@@ -363,16 +365,16 @@ function SystemHolidaysOverview() {
     setHolidayForm({
       name: holiday.name,
       description: holiday.description || "",
-      date: holiday.date ? new Date(holiday.date).toISOString().split('T')[0] : "",
+      rule: holiday.rule || "",
     });
     setEditingHoliday(holiday);
   };
 
   const handleUpdateHoliday = () => {
-    if (!holidayForm.name || !holidayForm.date) {
+    if (!holidayForm.name || !holidayForm.rule) {
       toast({
         title: "Error",
-        description: "Please fill in name and date fields.",
+        description: "Please fill in name and rule fields.",
         variant: "destructive"
       });
       return;
@@ -382,7 +384,7 @@ function SystemHolidaysOverview() {
       id: editingHoliday.id,
       name: holidayForm.name,
       description: holidayForm.description,
-      date: new Date(holidayForm.date).toISOString(),
+      rule: holidayForm.rule,
     });
   };
 
@@ -411,7 +413,7 @@ function SystemHolidaysOverview() {
               <thead className="bg-gray-50 sticky top-0">
                 <tr className="border-b">
                   <th className="text-left p-3 font-medium">Holiday Name</th>
-                  <th className="text-left p-3 font-medium">Date</th>
+                  <th className="text-left p-3 font-medium">Rule</th>
                   <th className="text-left p-3 font-medium">Description</th>
                   <th className="text-left p-3 font-medium">Actions</th>
                 </tr>
@@ -434,7 +436,7 @@ function SystemHolidaysOverview() {
                     <tr key={holiday.id} className="border-b hover:bg-gray-50">
                       <td className="p-3 font-medium">{holiday.name}</td>
                       <td className="p-3 text-sm text-gray-600">
-                        {holiday.date ? new Date(holiday.date).toLocaleDateString() : 'No date set'}
+                        {holiday.rule || 'No rule set'}
                       </td>
                       <td className="p-3 text-sm text-gray-600">{holiday.description}</td>
                     <td className="p-3">
@@ -482,11 +484,11 @@ function SystemHolidaysOverview() {
                 />
               </div>
               <div>
-                <Label>Date</Label>
+                <Label>Rule</Label>
                 <Input
-                  type="date"
-                  value={holidayForm.date}
-                  onChange={(e) => setHolidayForm(prev => ({ ...prev, date: e.target.value }))}
+                  value={holidayForm.rule}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, rule: e.target.value }))}
+                  placeholder="e.g., First Monday in September"
                 />
               </div>
               <div>
@@ -527,11 +529,11 @@ function SystemHolidaysOverview() {
                 />
               </div>
               <div>
-                <Label>Date</Label>
+                <Label>Rule</Label>
                 <Input
-                  type="date"
-                  value={holidayForm.date}
-                  onChange={(e) => setHolidayForm(prev => ({ ...prev, date: e.target.value }))}
+                  value={holidayForm.rule}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, rule: e.target.value }))}
+                  placeholder="e.g., First Monday in September"
                 />
               </div>
               <div>

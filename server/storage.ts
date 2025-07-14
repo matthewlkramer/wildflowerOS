@@ -2184,26 +2184,35 @@ export class DatabaseStorage implements IStorage {
       )
     );
     
-    // Sort chronologically starting from September 1st (school year order)
+    // Sort in logical school year order (September to August)
+    const schoolYearOrder = [
+      'Labor Day',
+      'Indigenous Peoples Day', 
+      'Veterans Day',
+      'Thanksgiving',
+      'Winter Break Start',
+      'MLK Day',
+      'Presidents Day',
+      'Good Friday',
+      'Memorial Day',
+      'Juneteenth'
+    ];
+    
     return holidays.sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
+      const indexA = schoolYearOrder.indexOf(a.name);
+      const indexB = schoolYearOrder.indexOf(b.name);
       
-      // Convert to school year order (September = month 0, August = month 11)
-      const getSchoolYearMonth = (date: Date) => {
-        const month = date.getMonth();
-        return month >= 8 ? month - 8 : month + 4; // Sep=0, Oct=1...Aug=11
-      };
-      
-      const schoolMonthA = getSchoolYearMonth(dateA);
-      const schoolMonthB = getSchoolYearMonth(dateB);
-      
-      if (schoolMonthA !== schoolMonthB) {
-        return schoolMonthA - schoolMonthB;
+      // If both are in the predefined order, sort by that order
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
       }
       
-      // If same month, sort by day
-      return dateA.getDate() - dateB.getDate();
+      // If only one is in the predefined order, it comes first
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      
+      // Otherwise sort alphabetically
+      return a.name.localeCompare(b.name);
     });
   }
 

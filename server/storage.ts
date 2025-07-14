@@ -668,6 +668,8 @@ export class DatabaseStorage implements IStorage {
 
   // Get educator admins for emulation
   async getEducatorAdminsForEmulation(): Promise<any[]> {
+    console.log('Fetching educator admins for emulation...');
+    
     const educators = await db
       .select({
         userId: userRoles.userId,
@@ -685,11 +687,11 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(schools, eq(userRoles.schoolId, schools.id))
       .where(and(
         eq(userRoles.active, true),
-        sql`${roleDefinitions.name} LIKE 'educator_admin%'`,
+        like(roleDefinitions.name, 'educator_admin%'),
         isNotNull(userRoles.schoolId)
-      ))
-      .groupBy(userRoles.userId, userRoles.schoolId, users.firstName, users.lastName, users.email, schools.name, roleDefinitions.name, roleDefinitions.displayName);
+      ));
 
+    console.log('Found educators:', educators.length, educators);
     return educators;
   }
 

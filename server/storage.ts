@@ -2332,7 +2332,9 @@ export class DatabaseStorage implements IStorage {
     const holidays = await db.select().from(calendarClosures).where(
       and(
         eq(calendarClosures.networkDefault, true),
-        eq(calendarClosures.active, true)
+        eq(calendarClosures.active, true),
+        isNull(calendarClosures.schoolYearId), // System holidays don't belong to specific school years
+        isNull(calendarClosures.schoolId) // System holidays don't belong to specific schools
       )
     );
     
@@ -2375,6 +2377,7 @@ export class DatabaseStorage implements IStorage {
         ...holiday,
         networkDefault: true,
         schoolYearId: null, // System holidays don't belong to specific school years
+        schoolId: null, // System holidays don't belong to specific schools
       })
       .returning();
     return newHoliday;

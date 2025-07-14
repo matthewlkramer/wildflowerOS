@@ -102,7 +102,11 @@ export default function RoleSelector() {
 
   const handleRoleSwitch = () => {
     if (selectedRole) {
-      switchRoleMutation.mutate(selectedRole);
+      // Find the first role in the selected category
+      const rolesInCategory = userRoles.filter(role => role.roleCategory === selectedRole && role.active);
+      if (rolesInCategory.length > 0) {
+        switchRoleMutation.mutate(rolesInCategory[0].id);
+      }
     }
   };
 
@@ -227,7 +231,7 @@ export default function RoleSelector() {
                 const hasNetworkScope = rolesInCategory.some(role => !role.schoolId && !role.legalEntityId);
                 
                 return (
-                  <SelectItem key={category} value={rolesInCategory[0].id}>
+                  <SelectItem key={category} value={category}>
                     <div className="flex items-center gap-2">
                       <Icon className="h-4 w-4" />
                       <span>{roleLabels[category] || category}</span>

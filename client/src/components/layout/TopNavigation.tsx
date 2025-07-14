@@ -50,7 +50,7 @@ const roleLabels = {
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
   const [notificationCount] = useState(3);
-  const [messageCount] = useState(7);
+  const [messageCount] = useState(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

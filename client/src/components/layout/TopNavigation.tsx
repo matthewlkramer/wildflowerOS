@@ -145,7 +145,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
           </div>
           
-          <div className="flex items-center space-x-4 pr-4">
+          <div className="flex items-center space-x-4 mr-6">
             {/* Notifications */}
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-4 w-4" />

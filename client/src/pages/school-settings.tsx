@@ -2046,7 +2046,6 @@ export default function SchoolSettingsPage() {
                             
                             // Auto-populate dates based on year name (e.g., "2024-25" or "2024-2025" -> July 1, 2024 - June 30, 2025)
                             const yearMatch = newName.match(/^(\d{4})-(\d{2,4})$/);
-                            console.log('Year match check:', { newName, yearMatch });
                             if (yearMatch) {
                               const startYear = yearMatch[1];
                               let endYear = yearMatch[2];
@@ -2057,7 +2056,6 @@ export default function SchoolSettingsPage() {
                                 endYear = century + endYear;
                               }
                               
-                              console.log('Auto-populating dates:', { startYear, endYear });
                               setSchoolYearForm(prev => ({
                                 ...prev,
                                 name: newName,

@@ -1821,5 +1821,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/network-holidays/:schoolYearName", isAuthenticated, async (req, res) => {
+    try {
+      const { schoolYearName } = req.params;
+      const holidays = await storage.getNetworkHolidaysBySchoolYear(schoolYearName);
+      res.json(holidays);
+    } catch (error) {
+      console.error("Error fetching network holidays:", error);
+      res.status(500).json({ error: "Failed to fetch network holidays" });
+    }
+  });
+
   return httpServer;
 }

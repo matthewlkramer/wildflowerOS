@@ -935,7 +935,100 @@ export class DatabaseStorage implements IStorage {
     };
     
     const [schoolYear] = await db.insert(schoolYears).values(processedData).returning();
+    
+    // Create network default holidays for this school year based on system holiday rules
+    if (schoolYear.startDate) {
+      await this.createNetworkDefaultHolidays(schoolYear);
+    }
+    
     return schoolYear;
+  }
+
+  private async createNetworkDefaultHolidays(schoolYear: SchoolYear): Promise<void> {
+    // Get system holiday rules (templates)
+    const systemHolidays = await this.getSystemHolidays();
+    const startDate = new Date(schoolYear.startDate!);
+    const year = startDate.getFullYear();
+    
+    // Create network default holidays for this specific year
+    const holidayPromises = systemHolidays.map(async (holiday) => {
+      let holidayDate = null;
+      
+      // Convert rules to specific dates for this school year
+      if (holiday.rule) {
+        if (holiday.name.includes('Labor Day')) {
+          // First Monday in September
+          holidayDate = this.getFirstMondayOfMonth(year, 8);
+        } else if (holiday.name.includes('Indigenous Peoples')) {
+          // Second Monday in October 
+          holidayDate = this.getNthMondayOfMonth(year, 9, 2);
+        } else if (holiday.name.includes('Veterans Day')) {
+          holidayDate = new Date(year, 10, 11); // November 11
+        } else if (holiday.name.includes('Thanksgiving')) {
+          // Fourth Thursday in November
+          holidayDate = this.getNthThursdayOfMonth(year, 10, 4);
+        } else if (holiday.name.includes('Winter Break Start')) {
+          holidayDate = new Date(year, 11, 23); // December 23
+        } else if (holiday.name.includes('MLK')) {
+          // Third Monday in January (next year)
+          holidayDate = this.getNthMondayOfMonth(year + 1, 0, 3);
+        } else if (holiday.name.includes('Presidents')) {
+          // Third Monday in February (next year)
+          holidayDate = this.getNthMondayOfMonth(year + 1, 1, 3);
+        } else if (holiday.name.includes('Good Friday')) {
+          // Easter calculation - simplified to approximate
+          holidayDate = new Date(year + 1, 3, 15); // Approximate April 15
+        } else if (holiday.name.includes('Memorial Day')) {
+          // Last Monday in May (next year)
+          holidayDate = this.getLastMondayOfMonth(year + 1, 4);
+        } else if (holiday.name.includes('Juneteenth')) {
+          holidayDate = new Date(year + 1, 5, 19); // June 19 (next year)
+        }
+      }
+      
+      if (holidayDate) {
+        return db.insert(calendarClosures).values({
+          name: holiday.name,
+          description: holiday.description,
+          rule: holiday.rule,
+          date: holidayDate,
+          networkDefault: true,
+          schoolId: null, // Network defaults
+          academicCalendarId: null,
+          active: true
+        });
+      }
+    });
+    
+    await Promise.all(holidayPromises.filter(p => p));
+  }
+
+  // Helper methods for date calculations
+  private getFirstMondayOfMonth(year: number, month: number): Date {
+    const date = new Date(year, month, 1);
+    const day = date.getDay();
+    const daysToAdd = day === 0 ? 1 : (8 - day);
+    return new Date(year, month, 1 + daysToAdd);
+  }
+
+  private getNthMondayOfMonth(year: number, month: number, n: number): Date {
+    const firstMonday = this.getFirstMondayOfMonth(year, month);
+    return new Date(firstMonday.getTime() + (n - 1) * 7 * 24 * 60 * 60 * 1000);
+  }
+
+  private getNthThursdayOfMonth(year: number, month: number, n: number): Date {
+    const date = new Date(year, month, 1);
+    const day = date.getDay();
+    const daysToAdd = day === 0 ? 4 : (4 - day + 7) % 7;
+    const firstThursday = new Date(year, month, 1 + daysToAdd);
+    return new Date(firstThursday.getTime() + (n - 1) * 7 * 24 * 60 * 60 * 1000);
+  }
+
+  private getLastMondayOfMonth(year: number, month: number): Date {
+    const lastDay = new Date(year, month + 1, 0);
+    const day = lastDay.getDay();
+    const daysToSubtract = day === 1 ? 0 : (day === 0 ? 6 : day - 1);
+    return new Date(lastDay.getTime() - daysToSubtract * 24 * 60 * 60 * 1000);
   }
 
   async updateNetworkSchoolYear(id: string, schoolYearData: Partial<InsertSchoolYear>): Promise<SchoolYear> {
@@ -2300,6 +2393,39 @@ export class DatabaseStorage implements IStorage {
       .update(calendarClosures)
       .set({ active: false })
       .where(eq(calendarClosures.id, id));
+  }
+
+  async getNetworkHolidaysBySchoolYear(schoolYearName: string): Promise<CalendarClosure[]> {
+    // Get network default holidays for a specific school year
+    const holidays = await db
+      .select()
+      .from(calendarClosures)
+      .where(
+        and(
+          eq(calendarClosures.networkDefault, true),
+          eq(calendarClosures.active, true),
+          isNotNull(calendarClosures.date) // Only holidays with actual dates
+        )
+      )
+      .orderBy(asc(calendarClosures.date));
+    
+    // Filter by school year based on dates
+    if (schoolYearName) {
+      const yearMatch = schoolYearName.match(/(\d{4})/);
+      if (yearMatch) {
+        const startYear = parseInt(yearMatch[1]);
+        const schoolYearStart = new Date(startYear, 6, 1); // July 1
+        const schoolYearEnd = new Date(startYear + 1, 5, 30); // June 30 next year
+        
+        return holidays.filter(holiday => {
+          if (!holiday.date) return false;
+          const holidayDate = new Date(holiday.date);
+          return holidayDate >= schoolYearStart && holidayDate <= schoolYearEnd;
+        });
+      }
+    }
+    
+    return holidays;
   }
 }
 

@@ -188,6 +188,12 @@ export interface IStorage {
   deleteSchoolYear(id: string): Promise<void>;
   setActiveSchoolYear(yearId: string): Promise<SchoolYear>;
   
+  // Network school years (for system admin defaults)
+  getNetworkSchoolYears(): Promise<SchoolYear[]>;
+  createNetworkSchoolYear(schoolYear: InsertSchoolYear): Promise<SchoolYear>;
+  updateNetworkSchoolYear(id: string, schoolYear: Partial<InsertSchoolYear>): Promise<SchoolYear>;
+  deleteNetworkSchoolYear(id: string): Promise<void>;
+  
   // Academic calendars
   getAcademicCalendarBySchoolYear(schoolYearId: string): Promise<AcademicCalendar | undefined>;
   createAcademicCalendar(calendar: InsertAcademicCalendar): Promise<AcademicCalendar>;
@@ -906,6 +912,58 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return schoolYear;
+  }
+
+  // ======================== NETWORK SCHOOL YEARS (SYSTEM ADMIN DEFAULTS) ========================
+
+  async getNetworkSchoolYears(): Promise<SchoolYear[]> {
+    return await db
+      .select()
+      .from(schoolYears)
+      .where(eq(schoolYears.networkDefault, true))
+      .orderBy(desc(schoolYears.startDate));
+  }
+
+  async createNetworkSchoolYear(schoolYearData: any): Promise<SchoolYear> {
+    // Convert date strings to Date objects if they exist and ensure network default
+    const processedData = {
+      ...schoolYearData,
+      networkDefault: true,
+      schoolId: null, // Network defaults have no specific school
+      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate) : undefined,
+      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate) : undefined,
+    };
+    
+    const [schoolYear] = await db.insert(schoolYears).values(processedData).returning();
+    return schoolYear;
+  }
+
+  async updateNetworkSchoolYear(id: string, schoolYearData: Partial<InsertSchoolYear>): Promise<SchoolYear> {
+    // Convert string dates to Date objects if provided
+    const updateData: any = { ...schoolYearData };
+    if (updateData.startDate) {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.endDate) {
+      updateData.endDate = new Date(updateData.endDate);
+    }
+    
+    const [schoolYear] = await db
+      .update(schoolYears)
+      .set(updateData)
+      .where(and(
+        eq(schoolYears.id, id),
+        eq(schoolYears.networkDefault, true) // Only update network defaults
+      ))
+      .returning();
+    return schoolYear;
+  }
+
+  async deleteNetworkSchoolYear(id: string): Promise<void> {
+    await db.delete(schoolYears).where(and(
+      eq(schoolYears.id, id),
+      eq(schoolYears.networkDefault, true) // Only delete network defaults
+    ));
   }
 
   // Academic calendars

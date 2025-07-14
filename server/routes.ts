@@ -1737,6 +1737,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Network School Years endpoints (for system admin defaults)
+  app.get("/api/network-school-years", isAuthenticated, async (req, res) => {
+    try {
+      const schoolYears = await storage.getNetworkSchoolYears();
+      res.json(schoolYears);
+    } catch (error) {
+      console.error("Error fetching network school years:", error);
+      res.status(500).json({ error: "Failed to fetch network school years" });
+    }
+  });
+
+  app.post("/api/network-school-years", isAuthenticated, async (req, res) => {
+    try {
+      const schoolYear = await storage.createNetworkSchoolYear(req.body);
+      res.json(schoolYear);
+    } catch (error) {
+      console.error("Error creating network school year:", error);
+      res.status(500).json({ error: "Failed to create network school year" });
+    }
+  });
+
+  app.patch("/api/network-school-years/:yearId", isAuthenticated, async (req, res) => {
+    try {
+      const { yearId } = req.params;
+      const schoolYear = await storage.updateNetworkSchoolYear(yearId, req.body);
+      res.json(schoolYear);
+    } catch (error) {
+      console.error("Error updating network school year:", error);
+      res.status(500).json({ error: "Failed to update network school year" });
+    }
+  });
+
+  app.delete("/api/network-school-years/:yearId", isAuthenticated, async (req, res) => {
+    try {
+      const { yearId } = req.params;
+      await storage.deleteNetworkSchoolYear(yearId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting network school year:", error);
+      res.status(500).json({ error: "Failed to delete network school year" });
+    }
+  });
+
   // System holidays endpoints
   app.get("/api/system-holidays", isAuthenticated, async (req, res) => {
     try {

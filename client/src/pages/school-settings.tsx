@@ -1158,6 +1158,12 @@ export default function SchoolSettingsPage() {
     enabled: !!currentRole && !currentRole.roleName?.startsWith('sysadmin'),
   });
 
+  // Fetch network default school years (for system admins)
+  const { data: networkSchoolYears = [] } = useQuery({
+    queryKey: ["/api/network-school-years"],
+    enabled: !!currentRole && currentRole.roleName?.startsWith('sysadmin'),
+  });
+
   // Add staff mutation
   const addStaffMutation = useMutation({
     mutationFn: async (staffData: any) => {
@@ -1336,6 +1342,71 @@ export default function SchoolSettingsPage() {
     },
   });
 
+  // Network school year mutations (for system admin)
+  const addNetworkSchoolYearMutation = useMutation({
+    mutationFn: async (schoolYearData: any) => {
+      return apiRequest('POST', `/api/network-school-years`, schoolYearData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/network-school-years"] });
+      setAddingSchoolYear(false);
+      setSchoolYearForm({ name: "", startDate: "", endDate: "" });
+      toast({
+        title: "Network school year created",
+        description: "New network default school year has been created successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating network school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateNetworkSchoolYearMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest('PATCH', `/api/network-school-years/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/network-school-years"] });
+      setEditingSchoolYear(null);
+      setSchoolYearForm({ name: "", startDate: "", endDate: "" });
+      toast({
+        title: "Network school year updated",
+        description: "Network default school year has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating network school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteNetworkSchoolYearMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest('DELETE', `/api/network-school-years/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/network-school-years"] });
+      toast({
+        title: "Network school year deleted",
+        description: "Network default school year has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting network school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Set active school year mutation
   const setActiveSchoolYearMutation = useMutation({
     mutationFn: async (yearId: string) => {
@@ -1503,10 +1574,20 @@ export default function SchoolSettingsPage() {
   };
 
   const handleAddSchoolYear = () => {
-    addSchoolYearMutation.mutate({
-      ...schoolYearForm,
-      schoolId: schoolId
-    });
+    // Handle network default school year creation for system admin
+    if (currentRole?.roleName?.startsWith('sysadmin')) {
+      addNetworkSchoolYearMutation.mutate({
+        ...schoolYearForm,
+        networkDefault: true,
+        schoolId: null // Network defaults have no specific school
+      });
+    } else {
+      // Handle regular school year creation
+      addSchoolYearMutation.mutate({
+        ...schoolYearForm,
+        schoolId: schoolId
+      });
+    }
   };
 
   const handleEditSchoolYear = (year: any) => {
@@ -1520,10 +1601,19 @@ export default function SchoolSettingsPage() {
 
   const handleUpdateSchoolYear = () => {
     if (editingSchoolYear) {
-      updateSchoolYearMutation.mutate({
-        id: editingSchoolYear.id,
-        data: schoolYearForm
-      });
+      // Handle network school year updates for system admin
+      if (currentRole?.roleName?.startsWith('sysadmin')) {
+        updateNetworkSchoolYearMutation.mutate({
+          id: editingSchoolYear.id,
+          data: schoolYearForm
+        });
+      } else {
+        // Handle regular school year updates
+        updateSchoolYearMutation.mutate({
+          id: editingSchoolYear.id,
+          data: schoolYearForm
+        });
+      }
     }
   };
 
@@ -1533,7 +1623,13 @@ export default function SchoolSettingsPage() {
 
   const confirmDeleteSchoolYear = () => {
     if (deletingSchoolYear) {
-      deleteSchoolYearMutation.mutate(deletingSchoolYear.id);
+      // Handle network school year deletion for system admin
+      if (currentRole?.roleName?.startsWith('sysadmin')) {
+        deleteNetworkSchoolYearMutation.mutate(deletingSchoolYear.id);
+      } else {
+        // Handle regular school year deletion
+        deleteSchoolYearMutation.mutate(deletingSchoolYear.id);
+      }
     }
   };
 
@@ -1818,6 +1914,60 @@ export default function SchoolSettingsPage() {
                         {/* System Holidays - Replace Academic Calendar Overview */}
                         <SystemHolidaysOverview />
                         
+                        {/* Network Default School Years */}
+                        <Card>
+                          <CardHeader>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle>Network Default School Years</CardTitle>
+                                <p className="text-sm text-gray-600">
+                                  Create school years with default holidays that all schools can inherit.
+                                </p>
+                              </div>
+                              <Button onClick={() => setAddingSchoolYear(true)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Network School Year
+                              </Button>
+                            </div>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-4">
+                              {networkSchoolYears?.map((year) => (
+                                <div key={year.id} className="p-4 border rounded-lg">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <h4 className="font-medium">{year.name}</h4>
+                                      <p className="text-sm text-gray-600">
+                                        {year.startDate ? new Date(year.startDate).toLocaleDateString() : 'No start date'} - {year.endDate ? new Date(year.endDate).toLocaleDateString() : 'No end date'}
+                                      </p>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => handleEditSchoolYear(year)}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => handleDeleteSchoolYear(year)}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              {(!networkSchoolYears || networkSchoolYears.length === 0) && (
+                                <div className="text-center py-8 text-gray-500">
+                                  No network default school years created yet.
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
 
                       </TabsContent>
 

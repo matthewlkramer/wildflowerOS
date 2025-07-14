@@ -1546,7 +1546,7 @@ export default function SchoolSettingsPage() {
   const currentSchoolForNav = school;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="bg-gray-50">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
       {/* School Selector Dialog for Educators without School ID */}
@@ -1593,11 +1593,11 @@ export default function SchoolSettingsPage() {
         </DialogContent>
       </Dialog>
 
-      <div className="flex pt-16">
+      <div className="pt-16">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 lg:ml-64">
-          <div className="max-w-6xl mx-auto pb-20">
+        <div className="lg:ml-64">
+          <div className="p-4 lg:p-6 max-w-6xl mx-auto pb-20">
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (
               // System Administrator View
@@ -3588,7 +3588,7 @@ export default function SchoolSettingsPage() {
               </div>
             )}
           </div>
-        </main>
+        </div>
       </div>
 
       <MobileBottomNav currentRole={currentRole} />

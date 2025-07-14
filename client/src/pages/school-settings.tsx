@@ -60,9 +60,9 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 function RoleTree() {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-  // Fetch all role definitions from the database
+  // Fetch only educator role definitions from the database
   const { data: roles = [] } = useQuery({
-    queryKey: ["/api/roles"],
+    queryKey: ["/api/roles/educator"],
     enabled: true,
   });
 
@@ -78,45 +78,36 @@ function RoleTree() {
     });
   };
 
-  // Build hierarchical structure from flat role data
+  // Build hierarchical structure starting from level 2 (educator subcategories)
   const buildHierarchy = (roles: any[]) => {
     const hierarchy: any = {};
     
     roles.forEach(role => {
       const parts = role.name.split('_');
-      let current = hierarchy;
       
-      // Special handling for sysadmin - treat as single level
-      if (parts[0] === 'sysadmin') {
-        if (!current['sysadmin']) {
-          current['sysadmin'] = {
-            id: 'sysadmin',
-            name: 'sysadmin',
-            displayName: 'Systems Administrator',
-            description: 'System administration and technical oversight',
-            active: role.networkDefault,
-            children: {},
-            isLeaf: true,
-            level: 1
-          };
-        }
-        return; // Skip building nested structure for sysadmin
+      // Skip if not educator role or if it's just "educator"
+      if (parts[0] !== 'educator' || parts.length < 2) {
+        return;
       }
       
-      // Build the nested structure for other roles
-      for (let i = 0; i < parts.length; i++) {
-        const part = parts[i];
-        const fullPath = parts.slice(0, i + 1).join('_');
+      // Start from level 2 - skip the "educator" prefix
+      const relevantParts = parts.slice(1);
+      let current = hierarchy;
+      
+      // Build the nested structure starting from level 2
+      for (let i = 0; i < relevantParts.length; i++) {
+        const part = relevantParts[i];
+        const fullPath = parts.slice(0, i + 2).join('_'); // Include "educator" in the full path
         
         if (!current[part]) {
           current[part] = {
             id: fullPath,
             name: part,
-            displayName: i === parts.length - 1 ? role.displayName : part.charAt(0).toUpperCase() + part.slice(1),
-            description: i === parts.length - 1 ? role.description : '',
+            displayName: i === relevantParts.length - 1 ? role.displayName : part.charAt(0).toUpperCase() + part.slice(1),
+            description: i === relevantParts.length - 1 ? role.description : '',
             active: role.networkDefault,
             children: {},
-            isLeaf: i === parts.length - 1,
+            isLeaf: i === relevantParts.length - 1,
             level: i + 1
           };
         }
@@ -144,13 +135,11 @@ function RoleTree() {
 
   const roleHierarchy = roles.length > 0 ? convertToArray(buildHierarchy(roles)) : [];
 
-  // Add colors for top-level categories
+  // Add colors for educator subcategories
   const getColorForCategory = (name: string) => {
     switch (name) {
-      case 'educator': return 'bg-blue-100 text-blue-800';
-      case 'parent': return 'bg-green-100 text-green-800';
-      case 'board': return 'bg-purple-100 text-purple-800';
-      case 'sysadmin': return 'bg-orange-100 text-orange-800';
+      case 'admin': return 'bg-blue-100 text-blue-800';
+      case 'classroom': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };

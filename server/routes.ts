@@ -1235,6 +1235,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get only educator role definitions
+  app.get('/api/roles/educator', isAuthenticated, async (req: any, res) => {
+    try {
+      const roles = await storage.getRolesByNamePrefix('educator');
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching educator role definitions:", error);
+      res.status(500).json({ message: "Failed to fetch educator role definitions" });
+    }
+  });
+
   app.get('/api/schools/:schoolId/roles/hierarchical', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;

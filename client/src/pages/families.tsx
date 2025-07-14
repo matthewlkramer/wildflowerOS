@@ -24,8 +24,13 @@ import {
   GraduationCap
 } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import TopNavigation from "@/components/layout/TopNavigation";
+import Sidebar from "@/components/layout/Sidebar";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function FamiliesPage() {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [classroomFilter, setClassroomFilter] = useState("all");
@@ -125,8 +130,14 @@ export default function FamiliesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <TopNavigation user={user} currentSchool={null} currentRole={currentRole} />
+      
+      <div className="flex pt-16">
+        <Sidebar currentRole={currentRole} />
+        
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
+          <div className="max-w-6xl mx-auto">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -305,7 +316,11 @@ export default function FamiliesPage() {
             </Card>
           )}
         </div>
+          </div>
+        </main>
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 }

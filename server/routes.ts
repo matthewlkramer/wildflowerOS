@@ -184,6 +184,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch('/api/classrooms/:classroomId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const classroom = await storage.updateClassroom(classroomId, req.body);
+      res.json(classroom);
+    } catch (error) {
+      console.error("Error updating classroom:", error);
+      res.status(500).json({ message: "Failed to update classroom" });
+    }
+  });
+
+  app.delete('/api/classrooms/:classroomId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      await storage.deleteClassroom(classroomId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting classroom:", error);
+      res.status(500).json({ message: "Failed to delete classroom" });
+    }
+  });
+
   // Staff management
   app.get('/api/schools/:schoolId/staff', isAuthenticated, async (req: any, res) => {
     try {

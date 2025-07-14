@@ -37,8 +37,13 @@ import {
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import TopNavigation from "@/components/layout/TopNavigation";
+import Sidebar from "@/components/layout/Sidebar";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function FamilyBillingPage() {
+  const { user } = useAuth();
   const [, params] = useRoute("/families/:familyId/billing");
   const familyId = params?.familyId;
   const [editingBilling, setEditingBilling] = useState(false);

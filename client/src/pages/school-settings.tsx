@@ -37,11 +37,17 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import TopNavigation from "@/components/layout/TopNavigation";
+import Sidebar from "@/components/layout/Sidebar";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function SchoolSettingsPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("staff");
   const [addingStaff, setAddingStaff] = useState(false);
   const [addingClassroom, setAddingClassroom] = useState(false);
+  const [editingClassroom, setEditingClassroom] = useState<any>(null);
   const [addingTuitionPlan, setAddingTuitionPlan] = useState(false);
   const [addingSchoolYear, setAddingSchoolYear] = useState(false);
   
@@ -313,9 +319,19 @@ export default function SchoolSettingsPage() {
     return levelMap[level] || level;
   };
 
+  // Get current school context for navigation
+  const currentSchoolForNav = school;
+  const currentRoleForNav = currentRole;
+
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRoleForNav} />
+      
+      <div className="flex pt-16">
+        <Sidebar currentRole={currentRoleForNav} />
+        
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
+          <div className="max-w-6xl mx-auto">
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -1039,7 +1055,11 @@ export default function SchoolSettingsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+          </div>
+        </main>
       </div>
+
+      <MobileBottomNav />
     </div>
   );
 }

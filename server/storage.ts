@@ -53,6 +53,8 @@ export interface IStorage {
   getClassroomsBySchool(schoolId: string): Promise<Classroom[]>;
   getClassroomById(id: string): Promise<Classroom | undefined>;
   createClassroom(classroom: any): Promise<Classroom>;
+  updateClassroom(id: string, classroom: any): Promise<Classroom>;
+  deleteClassroom(id: string): Promise<void>;
   
   // Staff management
   getStaffBySchool(schoolId: string): Promise<UserRole[]>;
@@ -208,6 +210,22 @@ export class DatabaseStorage implements IStorage {
   async createClassroom(classroomData: any): Promise<Classroom> {
     const [classroom] = await db.insert(classrooms).values(classroomData).returning();
     return classroom;
+  }
+
+  async updateClassroom(id: string, classroomData: any): Promise<Classroom> {
+    const [classroom] = await db
+      .update(classrooms)
+      .set({ ...classroomData, updatedAt: new Date() })
+      .where(eq(classrooms.id, id))
+      .returning();
+    return classroom;
+  }
+
+  async deleteClassroom(id: string): Promise<void> {
+    await db
+      .update(classrooms)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(classrooms.id, id));
   }
 
   // Staff management

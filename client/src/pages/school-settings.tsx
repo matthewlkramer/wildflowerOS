@@ -535,7 +535,16 @@ export default function SchoolSettingsPage() {
 
   // Check if we need to show school selector
   React.useEffect(() => {
+    console.log('School selector check:', { 
+      currentRole: currentRole?.roleName, 
+      schoolId: currentRole?.schoolId,
+      effectiveSchoolId, 
+      showSchoolSelector,
+      shouldShow: currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId && !showSchoolSelector
+    });
+    
     if (currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId && !showSchoolSelector) {
+      console.log('Triggering school selector popup');
       setShowSchoolSelector(true);
     }
   }, [currentRole, effectiveSchoolId, showSchoolSelector]);

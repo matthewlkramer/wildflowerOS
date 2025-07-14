@@ -154,7 +154,14 @@ function NetworkSchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
         <div className="text-center py-4 text-gray-500">No holidays found for this school year.</div>
       ) : (
         <div className="space-y-2">
-          {holidays.map((holiday: any) => (
+          {holidays
+            .sort((a: any, b: any) => {
+              // Sort by start_date if available, otherwise by date
+              const dateA = new Date(a.start_date || a.date);
+              const dateB = new Date(b.start_date || b.date);
+              return dateA.getTime() - dateB.getTime();
+            })
+            .map((holiday: any) => (
             <div key={holiday.id} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
               {editingHoliday?.id === holiday.id ? (
                 <div className="flex-1 space-y-2">
@@ -188,7 +195,13 @@ function NetworkSchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
                   <div className="flex-1">
                     <div className="font-medium text-sm">{holiday.name}</div>
                     <div className="text-xs text-gray-600">
-                      {holiday.date ? holiday.date.split('T')[0] : holiday.rule}
+                      {holiday.start_date ? 
+                        (holiday.start_date === holiday.end_date ? 
+                          holiday.start_date.split('T')[0] : 
+                          `${holiday.start_date.split('T')[0]} to ${holiday.end_date.split('T')[0]}`
+                        ) : 
+                        holiday.date ? holiday.date.split('T')[0] : 'No date set'
+                      }
                     </div>
                     {holiday.description && (
                       <div className="text-xs text-gray-500 mt-1">{holiday.description}</div>

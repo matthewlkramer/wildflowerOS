@@ -1088,7 +1088,7 @@ export class DatabaseStorage implements IStorage {
           isNull(calendarClosures.schoolId) // Only network defaults, not school-specific
         )
       )
-      .orderBy(asc(calendarClosures.date));
+      .orderBy(asc(calendarClosures.startDate));
   }
 
   async createCalendarClosure(closureData: InsertCalendarClosure): Promise<CalendarClosure> {

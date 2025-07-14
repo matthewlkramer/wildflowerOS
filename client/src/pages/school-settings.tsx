@@ -1503,18 +1503,6 @@ export default function SchoolSettingsPage() {
   };
 
   const handleAddSchoolYear = () => {
-    // Handle template creation for system admin
-    if (currentRole?.roleName?.startsWith('sysadmin')) {
-      toast({
-        title: "Template created",
-        description: `${schoolYearForm.name} school year template has been created.`,
-      });
-      setAddingSchoolYear(false);
-      setSchoolYearForm({ name: "", startDate: "", endDate: "" });
-      return;
-    }
-    
-    // Handle regular school year creation
     addSchoolYearMutation.mutate({
       ...schoolYearForm,
       schoolId: schoolId
@@ -1532,18 +1520,6 @@ export default function SchoolSettingsPage() {
 
   const handleUpdateSchoolYear = () => {
     if (editingSchoolYear) {
-      // Handle template editing for system admin
-      if (editingSchoolYear.id === "standard-template") {
-        toast({
-          title: "Template updated",
-          description: `${schoolYearForm.name} template has been updated with new dates.`,
-        });
-        setEditingSchoolYear(null);
-        setSchoolYearForm({ name: "", startDate: "", endDate: "" });
-        return;
-      }
-      
-      // Handle regular school year updates
       updateSchoolYearMutation.mutate({
         id: editingSchoolYear.id,
         data: schoolYearForm
@@ -1842,64 +1818,7 @@ export default function SchoolSettingsPage() {
                         {/* System Holidays - Replace Academic Calendar Overview */}
                         <SystemHolidaysOverview />
                         
-                        {/* School Years Template */}
-                        <Card>
-                          <CardHeader>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <CardTitle>School Years Template</CardTitle>
-                                <p className="text-sm text-gray-600">
-                                  Create default school year templates with outer boundary dates.
-                                </p>
-                              </div>
-                              <Button onClick={() => setAddingSchoolYear(true)}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add School Year Template
-                              </Button>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-4">
-                              {/* Mock school year templates for system admin */}
-                              <div className="p-4 border rounded-lg">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <h4 className="font-medium">Standard Academic Year</h4>
-                                    <p className="text-sm text-gray-600">July 1 - June 30 template</p>
-                                  </div>
-                                  <div className="flex space-x-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => {
-                                        setSchoolYearForm({
-                                          name: "Standard Academic Year",
-                                          startDate: "2024-07-01",
-                                          endDate: "2025-06-30"
-                                        });
-                                        setEditingSchoolYear({ id: "standard-template", name: "Standard Academic Year" });
-                                      }}
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => {
-                                        toast({
-                                          title: "Template deleted",
-                                          description: "Standard Academic Year template has been removed.",
-                                        });
-                                      }}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
+
                       </TabsContent>
 
                       {/* Default Schedules */}

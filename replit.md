@@ -40,12 +40,15 @@ Preferred communication style: Simple, everyday language.
   - Created API endpoints for role history and role termination
   - New roles automatically get start_date set to current timestamp
   - Role history preserved through soft deletion (setting active=false and end_date)
-- **Implemented true hierarchical role system with nested structure**
+- **Implemented complete 5-level hierarchical role system with CSV-based structure**
   - **Level 1 (Top Categories):** Board Director, Educator, Parent, Systems Admin
   - **Level 2 (Sub-categories):** Educator splits into Admin and Classroom; others have specific roles
-  - **Level 3 (Specific Roles):** Admin contains 20 operational roles from CSV; Classroom has Lead Guide/Assistant/Aide
+  - **Level 3 (Phase Categories):** Admin splits into Startup and Ongoing operational phases
+  - **Level 4 (CSV Categories):** Startup has 10 categories (Board/501c3, Marketing/Comm, Finances, etc.); Ongoing has 21 categories (Admissions, Assessment, Communications, etc.)
+  - **Level 5 (Specific Tasks):** Individual roles from CSV files under each category
   - Added parent_role_id and level fields to role_definitions table for proper nesting
-  - **Operational Roles Under Educator→Admin:** Admissions, Assessment, Communications, Compliance, Curriculum, Data, Equity, Facility, Family Engagement, Finance, Food Program, Fundraising, HR, Legal/Risk, Licensing, Student Health/Wellness/Safety, Student Support, Technology, Ways of Working, Wildflower Network Liaison
+  - **Startup Categories:** Board/501c3 Formation, Marketing/Communications, Finances, Licensing, Facility, Program Design, Family Engagement, Admissions/Enrollment, Business Insurance/Benefits, Vendors
+  - **Ongoing Categories:** Admissions & Enrollment, Assessment Coordinator, Board, Communications and Marketing, Compliance, Curriculum + Program Design, Data Coordinator, Equity Steward, Facility, Family Engagement, Finance, Food Program, Fundraising, Human Resources, Legal/Risk Management, Licensing, Student Health/Wellness/Safety, Student Support Services, Technology, Ways of Working, Wildflower Network Liaison
   - **Classroom Roles Under Educator→Classroom:** Lead Guide, Assistant, Aide
   - **Board Roles:** Chair, Treasurer, Secretary, Member
   - **Parent Roles:** Billing Contact, Custodian

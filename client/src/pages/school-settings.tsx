@@ -372,46 +372,13 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
 
   return (
     <div className="space-y-6">
-      {/* School Year Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">School Year Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-sm font-medium">School Year Period</Label>
-              <p className="text-sm text-gray-600">
-                {schoolYear?.startDate && schoolYear?.endDate ? (
-                  `${new Date(schoolYear.startDate).toLocaleDateString()} - ${new Date(schoolYear.endDate).toLocaleDateString()}`
-                ) : (
-                  "No dates set"
-                )}
-              </p>
-            </div>
-            <div>
-              <Label className="text-sm font-medium">Status</Label>
-              <div className="flex items-center space-x-2">
-                {schoolYear?.isActive && (
-                  <Badge className="bg-green-100 text-green-800">Current</Badge>
-                )}
-                {schoolYear?.networkDefault && (
-                  <Badge className="bg-blue-100 text-blue-800">Network Default</Badge>
-                )}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Calendar Settings */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Academic Calendar Settings</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          {/* First and Last Day */}
-          <div className="grid grid-cols-2 gap-4">
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 items-end">
             <div>
               <Label>First Day of School</Label>
               <Input
@@ -428,20 +395,11 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
                 onChange={(e) => setCalendarForm(prev => ({ ...prev, lastDayOfSchool: e.target.value }))}
               />
             </div>
-          </div>
-
-          {/* Note about scheduling */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> Classroom operating days and hours are now managed per classroom in the scheduling system. 
-              This calendar focuses on academic year boundaries and school-wide closures.
-            </p>
-          </div>
-
-          <div className="flex justify-end">
-            <Button onClick={handleSaveCalendar}>
-              {academicCalendar ? "Update Calendar" : "Create Calendar"}
-            </Button>
+            <div>
+              <Button onClick={handleSaveCalendar}>
+                {academicCalendar ? "Update Calendar" : "Create Calendar"}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

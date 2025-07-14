@@ -99,11 +99,22 @@ Preferred communication style: Simple, everyday language.
   - Continuous programs get schedules with optional end dates for flexibility
   - School year programs get schedules per school year with mid-year adjustment capability
   - Created program_offerings table for flexible enrollment options (full-day, half-day, before/after care)
-  - Program offerings support different day combinations and time slots with tuition rates
+  - Program offerings support different day combinations and time slots
   - Added comprehensive API routes for schedule and offering CRUD operations
   - Database changes applied successfully with proper foreign key relationships
   - Storage layer methods handle date conversions and active schedule detection
   - Academic calendar UI updated with explanatory note about classroom-level scheduling
+- **Implemented comprehensive tuition plans and sliding scale pricing system**
+  - Created tuition_plans table linking to program offerings with full pricing and billing frequency options
+  - Each tuition plan references a sliding scale policy for flexible income-based pricing
+  - Created sliding_scale_policies table for schools to manage pricing policies with start/end dates
+  - Created sliding_scale_rules table with income ranges and discount percentages
+  - Default sliding scale policy: 90% discount for <$50k income, 20% for $50k-$150k, 0% for >$150k
+  - Tuition plans support monthly, quarterly, annually, and weekly billing frequencies
+  - Schools can create new sliding scale policies and deactivate old ones while preserving history
+  - Comprehensive API routes for tuition plan and sliding scale policy CRUD operations
+  - Storage layer handles date conversions and policy activation/deactivation logic
+  - System supports version control for sliding scale policies with proper audit trails
 
 ## System Architecture
 

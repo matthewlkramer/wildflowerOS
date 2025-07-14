@@ -10,6 +10,9 @@ import {
   classrooms,
   classroomSchedules,
   programOfferings,
+  tuitionPlans,
+  slidingScalePolicies,
+  slidingScaleRules,
   families,
   children,
   enrollments,
@@ -38,6 +41,12 @@ import {
   type InsertClassroomSchedule,
   type ProgramOffering,
   type InsertProgramOffering,
+  type TuitionPlan,
+  type InsertTuitionPlan,
+  type SlidingScalePolicy,
+  type InsertSlidingScalePolicy,
+  type SlidingScaleRule,
+  type InsertSlidingScaleRule,
   type Classroom,
   type Family,
   type Child,
@@ -52,7 +61,7 @@ import {
   type InsertEmailAddress,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, count, sql, isNull, or, lte, gt } from "drizzle-orm";
+import { eq, and, desc, asc, count, sql, isNull, or, lte, gte, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -93,8 +102,20 @@ export interface IStorage {
   getStaffBySchool(schoolId: string): Promise<UserRole[]>;
   
   // Tuition plans
-  getTuitionPlansBySchool(schoolId: string): Promise<any[]>;
-  createTuitionPlan(tuitionPlan: any): Promise<any>;
+  getTuitionPlansByProgramOffering(programOfferingId: string): Promise<TuitionPlan[]>;
+  getTuitionPlansByClassroom(classroomId: string): Promise<TuitionPlan[]>;
+  createTuitionPlan(data: InsertTuitionPlan): Promise<TuitionPlan>;
+  updateTuitionPlan(id: string, data: Partial<InsertTuitionPlan>): Promise<TuitionPlan>;
+  deleteTuitionPlan(id: string): Promise<void>;
+  
+  // Sliding scale policies
+  getSlidingScalePoliciesBySchool(schoolId: string): Promise<SlidingScalePolicy[]>;
+  getActiveSlidingScalePoliciesBySchool(schoolId: string): Promise<SlidingScalePolicy[]>;
+  getSlidingScalePolicyWithRules(policyId: string): Promise<any>;
+  createSlidingScalePolicy(data: InsertSlidingScalePolicy, rules?: InsertSlidingScaleRule[]): Promise<SlidingScalePolicy>;
+  updateSlidingScalePolicy(id: string, data: Partial<InsertSlidingScalePolicy>): Promise<SlidingScalePolicy>;
+  deactivateSlidingScalePolicy(id: string): Promise<SlidingScalePolicy>;
+  deleteSlidingScalePolicy(id: string): Promise<void>;
   
   // School years
   getSchoolYearsBySchool(schoolId: string): Promise<SchoolYear[]>;
@@ -502,70 +523,7 @@ export class DatabaseStorage implements IStorage {
     return finalRoles;
   }
 
-  // Tuition plans (using budgets table as a placeholder)
-  async getTuitionPlansBySchool(schoolId: string): Promise<any[]> {
-    // Get the active school year for this school
-    const [schoolYear] = await db
-      .select()
-      .from(schoolYears)
-      .where(eq(schoolYears.isActive, true))
-      .limit(1);
 
-    if (!schoolYear) {
-      return [];
-    }
-
-    return await db
-      .select()
-      .from(budgets)
-      .where(and(
-        eq(budgets.schoolId, schoolId),
-        eq(budgets.schoolYearId, schoolYear.id)
-      ));
-  }
-
-  async createTuitionPlan(tuitionData: any): Promise<any> {
-    // Get the active school year for this school  
-    const [schoolYear] = await db
-      .select()
-      .from(schoolYears)
-      .where(eq(schoolYears.isActive, true))
-      .limit(1);
-
-    if (!schoolYear) {
-      // Create a default school year if none exists
-      const currentYear = new Date().getFullYear();
-      const [newSchoolYear] = await db
-        .insert(schoolYears)
-        .values({
-          schoolId: tuitionData.schoolId,
-          name: `${currentYear}-${currentYear + 1}`,
-          startDate: new Date(`${currentYear}-08-01`),
-          endDate: new Date(`${currentYear + 1}-06-30`),
-          isActive: true,
-          networkDefault: false,
-        })
-        .returning();
-      
-      const budgetData = {
-        schoolId: tuitionData.schoolId,
-        schoolYearId: newSchoolYear.id,
-        totalBudget: tuitionData.amount,
-        budgetNotes: `${tuitionData.name} - ${tuitionData.description}`,
-      };
-      const [budget] = await db.insert(budgets).values(budgetData).returning();
-      return { ...budget, name: tuitionData.name, level: tuitionData.level, schedule: tuitionData.schedule };
-    }
-
-    const budgetData = {
-      schoolId: tuitionData.schoolId,
-      schoolYearId: schoolYear.id,
-      totalBudget: tuitionData.amount,
-      budgetNotes: `${tuitionData.name} - ${tuitionData.description}`,
-    };
-    const [budget] = await db.insert(budgets).values(budgetData).returning();
-    return { ...budget, name: tuitionData.name, level: tuitionData.level, schedule: tuitionData.schedule };
-  }
 
   // School years
   async getSchoolYearsBySchool(schoolId: string): Promise<any[]> {
@@ -1136,6 +1094,164 @@ export class DatabaseStorage implements IStorage {
 
   async deleteProgramOffering(id: string): Promise<void> {
     await db.delete(programOfferings).where(eq(programOfferings.id, id));
+  }
+
+  // Tuition Plans
+  async getTuitionPlansByProgramOffering(programOfferingId: string): Promise<TuitionPlan[]> {
+    return await db
+      .select()
+      .from(tuitionPlans)
+      .where(eq(tuitionPlans.programOfferingId, programOfferingId))
+      .orderBy(asc(tuitionPlans.name));
+  }
+
+  async getTuitionPlansByClassroom(classroomId: string): Promise<TuitionPlan[]> {
+    return await db
+      .select({
+        id: tuitionPlans.id,
+        programOfferingId: tuitionPlans.programOfferingId,
+        slidingScalePolicyId: tuitionPlans.slidingScalePolicyId,
+        name: tuitionPlans.name,
+        fullPrice: tuitionPlans.fullPrice,
+        billingFrequency: tuitionPlans.billingFrequency,
+        isActive: tuitionPlans.isActive,
+        createdAt: tuitionPlans.createdAt,
+        updatedAt: tuitionPlans.updatedAt,
+      })
+      .from(tuitionPlans)
+      .innerJoin(programOfferings, eq(tuitionPlans.programOfferingId, programOfferings.id))
+      .where(eq(programOfferings.classroomId, classroomId))
+      .orderBy(asc(tuitionPlans.name));
+  }
+
+  async createTuitionPlan(data: InsertTuitionPlan): Promise<TuitionPlan> {
+    const [plan] = await db
+      .insert(tuitionPlans)
+      .values(data)
+      .returning();
+    return plan;
+  }
+
+  async updateTuitionPlan(id: string, data: Partial<InsertTuitionPlan>): Promise<TuitionPlan> {
+    const [plan] = await db
+      .update(tuitionPlans)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(tuitionPlans.id, id))
+      .returning();
+    return plan;
+  }
+
+  async deleteTuitionPlan(id: string): Promise<void> {
+    await db.delete(tuitionPlans).where(eq(tuitionPlans.id, id));
+  }
+
+  // Sliding Scale Policies
+  async getSlidingScalePoliciesBySchool(schoolId: string): Promise<SlidingScalePolicy[]> {
+    return await db
+      .select()
+      .from(slidingScalePolicies)
+      .where(eq(slidingScalePolicies.schoolId, schoolId))
+      .orderBy(desc(slidingScalePolicies.createdAt));
+  }
+
+  async getActiveSlidingScalePoliciesBySchool(schoolId: string): Promise<SlidingScalePolicy[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(slidingScalePolicies)
+      .where(
+        and(
+          eq(slidingScalePolicies.schoolId, schoolId),
+          eq(slidingScalePolicies.isActive, true),
+          lte(slidingScalePolicies.startDate, now),
+          or(
+            isNull(slidingScalePolicies.endDate),
+            gte(slidingScalePolicies.endDate, now)
+          )
+        )
+      )
+      .orderBy(desc(slidingScalePolicies.createdAt));
+  }
+
+  async getSlidingScalePolicyWithRules(policyId: string): Promise<any> {
+    const [policy] = await db
+      .select()
+      .from(slidingScalePolicies)
+      .where(eq(slidingScalePolicies.id, policyId));
+    
+    if (!policy) return null;
+
+    const rules = await db
+      .select()
+      .from(slidingScaleRules)
+      .where(eq(slidingScaleRules.policyId, policyId))
+      .orderBy(asc(slidingScaleRules.minIncome));
+
+    return { ...policy, rules };
+  }
+
+  async createSlidingScalePolicy(data: InsertSlidingScalePolicy, rules: InsertSlidingScaleRule[] = []): Promise<SlidingScalePolicy> {
+    // Convert string dates to Date objects if needed
+    const processedData: any = { ...data };
+    if (processedData.startDate && typeof processedData.startDate === 'string') {
+      processedData.startDate = new Date(processedData.startDate);
+    }
+    if (processedData.endDate && typeof processedData.endDate === 'string') {
+      processedData.endDate = new Date(processedData.endDate);
+    }
+
+    const [policy] = await db
+      .insert(slidingScalePolicies)
+      .values(processedData)
+      .returning();
+
+    if (rules.length > 0) {
+      const rulesWithPolicyId = rules.map(rule => ({
+        ...rule,
+        policyId: policy.id
+      }));
+      
+      await db
+        .insert(slidingScaleRules)
+        .values(rulesWithPolicyId);
+    }
+
+    return policy;
+  }
+
+  async updateSlidingScalePolicy(id: string, data: Partial<InsertSlidingScalePolicy>): Promise<SlidingScalePolicy> {
+    // Convert string dates to Date objects if needed
+    const updateData: any = { ...data, updatedAt: new Date() };
+    if (updateData.startDate && typeof updateData.startDate === 'string') {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.endDate && typeof updateData.endDate === 'string') {
+      updateData.endDate = new Date(updateData.endDate);
+    }
+
+    const [policy] = await db
+      .update(slidingScalePolicies)
+      .set(updateData)
+      .where(eq(slidingScalePolicies.id, id))
+      .returning();
+    return policy;
+  }
+
+  async deactivateSlidingScalePolicy(id: string): Promise<SlidingScalePolicy> {
+    const [policy] = await db
+      .update(slidingScalePolicies)
+      .set({ 
+        isActive: false,
+        endDate: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(slidingScalePolicies.id, id))
+      .returning();
+    return policy;
+  }
+
+  async deleteSlidingScalePolicy(id: string): Promise<void> {
+    await db.delete(slidingScalePolicies).where(eq(slidingScalePolicies.id, id));
   }
 }
 

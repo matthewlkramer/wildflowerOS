@@ -721,6 +721,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tuition Plans
+  app.get('/api/program-offerings/:offeringId/tuition-plans', isAuthenticated, async (req: any, res) => {
+    try {
+      const { offeringId } = req.params;
+      const plans = await storage.getTuitionPlansByProgramOffering(offeringId);
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching tuition plans:", error);
+      res.status(500).json({ message: "Failed to fetch tuition plans" });
+    }
+  });
+
+  app.get('/api/classrooms/:classroomId/tuition-plans', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const plans = await storage.getTuitionPlansByClassroom(classroomId);
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching classroom tuition plans:", error);
+      res.status(500).json({ message: "Failed to fetch classroom tuition plans" });
+    }
+  });
+
+  app.post('/api/tuition-plans', isAuthenticated, async (req: any, res) => {
+    try {
+      const plan = await storage.createTuitionPlan(req.body);
+      res.status(201).json(plan);
+    } catch (error) {
+      console.error("Error creating tuition plan:", error);
+      res.status(500).json({ message: "Failed to create tuition plan" });
+    }
+  });
+
+  app.patch('/api/tuition-plans/:planId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { planId } = req.params;
+      const plan = await storage.updateTuitionPlan(planId, req.body);
+      res.json(plan);
+    } catch (error) {
+      console.error("Error updating tuition plan:", error);
+      res.status(500).json({ message: "Failed to update tuition plan" });
+    }
+  });
+
+  app.delete('/api/tuition-plans/:planId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { planId } = req.params;
+      await storage.deleteTuitionPlan(planId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting tuition plan:", error);
+      res.status(500).json({ message: "Failed to delete tuition plan" });
+    }
+  });
+
+  // Sliding Scale Policies
+  app.get('/api/schools/:schoolId/sliding-scale-policies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const { active } = req.query;
+      
+      let policies;
+      if (active === 'true') {
+        policies = await storage.getActiveSlidingScalePoliciesBySchool(schoolId);
+      } else {
+        policies = await storage.getSlidingScalePoliciesBySchool(schoolId);
+      }
+      
+      res.json(policies);
+    } catch (error) {
+      console.error("Error fetching sliding scale policies:", error);
+      res.status(500).json({ message: "Failed to fetch sliding scale policies" });
+    }
+  });
+
+  app.get('/api/sliding-scale-policies/:policyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { policyId } = req.params;
+      const policy = await storage.getSlidingScalePolicyWithRules(policyId);
+      if (!policy) {
+        return res.status(404).json({ message: "Sliding scale policy not found" });
+      }
+      res.json(policy);
+    } catch (error) {
+      console.error("Error fetching sliding scale policy:", error);
+      res.status(500).json({ message: "Failed to fetch sliding scale policy" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/sliding-scale-policies', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const { rules, ...policyData } = req.body;
+      const policy = await storage.createSlidingScalePolicy(
+        { ...policyData, schoolId },
+        rules || []
+      );
+      res.status(201).json(policy);
+    } catch (error) {
+      console.error("Error creating sliding scale policy:", error);
+      res.status(500).json({ message: "Failed to create sliding scale policy" });
+    }
+  });
+
+  app.patch('/api/sliding-scale-policies/:policyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { policyId } = req.params;
+      const policy = await storage.updateSlidingScalePolicy(policyId, req.body);
+      res.json(policy);
+    } catch (error) {
+      console.error("Error updating sliding scale policy:", error);
+      res.status(500).json({ message: "Failed to update sliding scale policy" });
+    }
+  });
+
+  app.post('/api/sliding-scale-policies/:policyId/deactivate', isAuthenticated, async (req: any, res) => {
+    try {
+      const { policyId } = req.params;
+      const policy = await storage.deactivateSlidingScalePolicy(policyId);
+      res.json(policy);
+    } catch (error) {
+      console.error("Error deactivating sliding scale policy:", error);
+      res.status(500).json({ message: "Failed to deactivate sliding scale policy" });
+    }
+  });
+
+  app.delete('/api/sliding-scale-policies/:policyId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { policyId } = req.params;
+      await storage.deleteSlidingScalePolicy(policyId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting sliding scale policy:", error);
+      res.status(500).json({ message: "Failed to delete sliding scale policy" });
+    }
+  });
+
   // Families
   app.get('/api/schools/:schoolId/families', isAuthenticated, async (req: any, res) => {
     try {

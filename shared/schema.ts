@@ -187,10 +187,46 @@ export const programOfferings = pgTable("program_offerings", {
   saturdayAvailable: boolean("saturday_available").notNull().default(false),
   sundayAvailable: boolean("sunday_available").notNull().default(false),
   isActive: boolean("is_active").notNull().default(true),
-  tuitionRate: decimal("tuition_rate", { precision: 10, scale: 2 }), // optional pricing
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+
+export const tuitionPlans = pgTable("tuition_plans", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  programOfferingId: uuid("program_offering_id").notNull().references(() => programOfferings.id, { onDelete: "cascade" }),
+  slidingScalePolicyId: uuid("sliding_scale_policy_id").references(() => slidingScalePolicies.id), // optional, null means no sliding scale
+  name: varchar("name", { length: 100 }).notNull(), // e.g., "Full Day Montessori - Monthly"
+  fullPrice: decimal("full_price", { precision: 10, scale: 2 }).notNull(),
+  billingFrequency: varchar("billing_frequency", { 
+    enum: ["monthly", "quarterly", "annually", "weekly"] 
+  }).notNull().default("monthly"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const slidingScalePolicies = pgTable("sliding_scale_policies", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"), // optional, null means active indefinitely
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const slidingScaleRules = pgTable("sliding_scale_rules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  policyId: uuid("policy_id").notNull().references(() => slidingScalePolicies.id, { onDelete: "cascade" }),
+  minIncome: decimal("min_income", { precision: 12, scale: 2 }).notNull(),
+  maxIncome: decimal("max_income", { precision: 12, scale: 2 }), // null means no upper limit
+  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }).notNull(), // 0.00 to 100.00
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+
 
 // ======================== CLASSROOMS ========================
 
@@ -725,7 +761,7 @@ export const classroomSchedulesRelations = relations(classroomSchedules, ({ one 
   }),
 }));
 
-export const programOfferingsRelations = relations(programOfferings, ({ one }) => ({
+export const programOfferingsRelations = relations(programOfferings, ({ one, many }) => ({
   classroom: one(classrooms, {
     fields: [programOfferings.classroomId],
     references: [classrooms.id],
@@ -734,7 +770,37 @@ export const programOfferingsRelations = relations(programOfferings, ({ one }) =
     fields: [programOfferings.schoolYearId],
     references: [schoolYears.id],
   }),
+  tuitionPlans: many(tuitionPlans),
 }));
+
+export const tuitionPlansRelations = relations(tuitionPlans, ({ one }) => ({
+  programOffering: one(programOfferings, {
+    fields: [tuitionPlans.programOfferingId],
+    references: [programOfferings.id],
+  }),
+  slidingScalePolicy: one(slidingScalePolicies, {
+    fields: [tuitionPlans.slidingScalePolicyId],
+    references: [slidingScalePolicies.id],
+  }),
+}));
+
+export const slidingScalePoliciesRelations = relations(slidingScalePolicies, ({ one, many }) => ({
+  school: one(schools, {
+    fields: [slidingScalePolicies.schoolId],
+    references: [schools.id],
+  }),
+  rules: many(slidingScaleRules),
+  tuitionPlans: many(tuitionPlans),
+}));
+
+export const slidingScaleRulesRelations = relations(slidingScaleRules, ({ one }) => ({
+  policy: one(slidingScalePolicies, {
+    fields: [slidingScaleRules.policyId],
+    references: [slidingScalePolicies.id],
+  }),
+}));
+
+
 
 export const familiesRelations = relations(families, ({ many }) => ({
   children: many(children),
@@ -1135,6 +1201,14 @@ export type InsertClassroomSchedule = typeof classroomSchedules.$inferInsert;
 export type ProgramOffering = typeof programOfferings.$inferSelect;
 export type InsertProgramOffering = typeof programOfferings.$inferInsert;
 
+// Tuition and Sliding Scale types
+export type TuitionPlan = typeof tuitionPlans.$inferSelect;
+export type InsertTuitionPlan = typeof tuitionPlans.$inferInsert;
+export type SlidingScalePolicy = typeof slidingScalePolicies.$inferSelect;
+export type InsertSlidingScalePolicy = typeof slidingScalePolicies.$inferInsert;
+export type SlidingScaleRule = typeof slidingScaleRules.$inferSelect;
+export type InsertSlidingScaleRule = typeof slidingScaleRules.$inferInsert;
+
 // ======================== ZOD SCHEMAS ========================
 
 export const insertUserRoleSchema = createInsertSchema(userRoles);
@@ -1163,3 +1237,6 @@ export const insertAcademicCalendarSchema = createInsertSchema(academicCalendars
 export const insertCalendarClosureSchema = createInsertSchema(calendarClosures);
 export const insertClassroomScheduleSchema = createInsertSchema(classroomSchedules);
 export const insertProgramOfferingSchema = createInsertSchema(programOfferings);
+export const insertTuitionPlanSchema = createInsertSchema(tuitionPlans);
+export const insertSlidingScalePolicySchema = createInsertSchema(slidingScalePolicies);
+export const insertSlidingScaleRuleSchema = createInsertSchema(slidingScaleRules);

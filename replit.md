@@ -40,14 +40,16 @@ Preferred communication style: Simple, everyday language.
   - Created API endpoints for role history and role termination
   - New roles automatically get start_date set to current timestamp
   - Role history preserved through soft deletion (setting active=false and end_date)
-- **Implemented comprehensive hierarchical role system from CSV specifications**
-  - Created 28 distinct operational roles covering all school administration areas
-  - Roles span: Admissions & Enrollment, Assessment, Board governance, Communications & Marketing
-  - Operations include: Compliance, Curriculum Design, Data Coordination, Equity Stewardship
-  - Management covers: Facility, Family Engagement, Finance, Food Program, Fundraising
-  - Support areas: HR, Legal/Risk, Licensing, Student Health/Wellness/Safety, Student Support
-  - Technical roles: Technology, Ways of Working, Wildflower Network Liaison
-  - Governance: Board Chair, Treasurer, Secretary, Member roles plus Systems Administrator
+- **Implemented true hierarchical role system with nested structure**
+  - **Level 1 (Top Categories):** Board Director, Educator, Parent, Systems Admin
+  - **Level 2 (Sub-categories):** Educator splits into Admin and Classroom; others have specific roles
+  - **Level 3 (Specific Roles):** Admin contains 20 operational roles from CSV; Classroom has Lead Guide/Assistant/Aide
+  - Added parent_role_id and level fields to role_definitions table for proper nesting
+  - **Operational Roles Under Educator→Admin:** Admissions, Assessment, Communications, Compliance, Curriculum, Data, Equity, Facility, Family Engagement, Finance, Food Program, Fundraising, HR, Legal/Risk, Licensing, Student Health/Wellness/Safety, Student Support, Technology, Ways of Working, Wildflower Network Liaison
+  - **Classroom Roles Under Educator→Classroom:** Lead Guide, Assistant, Aide
+  - **Board Roles:** Chair, Treasurer, Secretary, Member
+  - **Parent Roles:** Parent/Guardian, Billing Contact
+  - **Systems Admin Role:** Systems Administrator
   - Addressed "Multiple Roles per Person" open issue with flexible role assignment system
   - User can now hold multiple simultaneous roles across different operational areas
 - **Completed functional role switching system with compact navigation**

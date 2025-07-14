@@ -534,34 +534,62 @@ export default function SchoolSettingsPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {staff.map((member: any) => (
-                    <div key={member.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium">{member.firstName} {member.lastName}</h4>
-                          <p className="text-sm text-gray-600">{member.email}</p>
-                          <div className="mt-2 flex items-center space-x-2">
-                            <Badge className={getRoleColor(member.role)}>
-                              {formatRole(member.role)}
-                            </Badge>
-                            {member.startDate && (
-                              <span className="text-xs text-gray-500">
-                                Since {new Date(member.startDate).toLocaleDateString()}
-                              </span>
-                            )}
+                  {(() => {
+                    // Group staff by user (email/name combination)
+                    const groupedStaff = staff.reduce((acc: any, member: any) => {
+                      const key = `${member.firstName}_${member.lastName}_${member.email}`;
+                      if (!acc[key]) {
+                        acc[key] = {
+                          firstName: member.firstName,
+                          lastName: member.lastName,
+                          email: member.email,
+                          roles: [],
+                          startDate: member.startDate
+                        };
+                      }
+                      acc[key].roles.push({
+                        id: member.id,
+                        role: member.role,
+                        startDate: member.startDate
+                      });
+                      // Use earliest start date
+                      if (!acc[key].startDate || (member.startDate && new Date(member.startDate) < new Date(acc[key].startDate))) {
+                        acc[key].startDate = member.startDate;
+                      }
+                      return acc;
+                    }, {});
+
+                    return Object.values(groupedStaff).map((person: any, index: number) => (
+                      <div key={index} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">{person.firstName} {person.lastName}</h4>
+                            <p className="text-sm text-gray-600">{person.email}</p>
+                            <div className="mt-2 flex items-center space-x-2 flex-wrap">
+                              {person.roles.map((roleInfo: any, roleIndex: number) => (
+                                <Badge key={roleIndex} className={getRoleColor(roleInfo.role)}>
+                                  {formatRole(roleInfo.role)}
+                                </Badge>
+                              ))}
+                              {person.startDate && (
+                                <span className="text-xs text-gray-500 mt-1">
+                                  Since {new Date(person.startDate).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ));
+                  })()}
                   
                   {staff.length === 0 && (
                     <div className="text-center py-8">

@@ -368,6 +368,8 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
     return <div className="p-4">Loading calendar...</div>;
   }
 
+  console.log("AcademicCalendarView render:", { schoolYear, academicCalendar, calendarClosures });
+
   return (
     <div className="space-y-6">
       {/* School Year Overview */}
@@ -449,7 +451,10 @@ function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-lg">Holidays & Closures</CardTitle>
-            <Button size="sm" onClick={() => setAddingClosure(true)} disabled={!academicCalendar}>
+            <Button size="sm" onClick={() => {
+              console.log("Add Holiday clicked, academicCalendar:", academicCalendar);
+              setAddingClosure(true);
+            }} disabled={!academicCalendar}>
               <Plus className="mr-2 h-4 w-4" />
               Add Holiday
             </Button>

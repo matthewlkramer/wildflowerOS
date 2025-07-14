@@ -38,7 +38,7 @@ const roleIcons = {
 };
 
 const roleLabels = {
-  teacher_leader: "Teacher Leader",
+  teacher_leader: "TL",
   teacher: "Teacher",
   assistant: "Assistant",
   aide: "Aide",
@@ -118,15 +118,9 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             <div className="flex items-center">
               <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
                 <SelectTrigger className="w-40 border-gray-300">
-                  <div className="flex items-center space-x-2 truncate">
+                  <div className="flex items-center truncate">
                     {currentUserRole && (
-                      <>
-                        {(() => {
-                          const IconComponent = roleIcons[currentUserRole.role as keyof typeof roleIcons];
-                          return IconComponent ? <IconComponent className="w-4 h-4 flex-shrink-0" /> : null;
-                        })()}
-                        <span className="truncate">{getContextDisplayName()}</span>
-                      </>
+                      <span className="truncate">{getContextDisplayName()}</span>
                     )}
                     {!currentUserRole && <SelectValue placeholder="Select role" />}
                   </div>
@@ -134,14 +128,10 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 <SelectContent>
                   {userRoles.length > 0 ? (
                     userRoles.map((role) => {
-                      const IconComponent = roleIcons[role.role as keyof typeof roleIcons];
                       const roleDisplay = roleLabels[role.role as keyof typeof roleLabels] || role.role;
                       return (
                         <SelectItem key={role.id} value={role.id}>
-                          <div className="flex items-center space-x-2">
-                            {IconComponent && <IconComponent className="w-4 h-4" />}
-                            <span>{roleDisplay}</span>
-                          </div>
+                          {roleDisplay}
                         </SelectItem>
                       );
                     })

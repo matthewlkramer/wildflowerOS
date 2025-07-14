@@ -63,23 +63,11 @@ export const roleDefinitions = pgTable("role_definitions", {
   category: varchar("category", { 
     enum: ["parent", "educator", "board_director", "systems_administrator"] 
   }).notNull(),
-  subCategory: varchar("sub_category", { length: 100 }), // e.g., "school_wide_admin", "classroom"
-  parentRoleId: uuid("parent_role_id"), // For hierarchical roles
-  roleType: varchar("role_type", { 
-    enum: ["group", "subgroup", "role"] 
-  }).notNull().default("role"),
   isSystemRole: boolean("is_system_role").notNull().default(false), // Core roles that can't be modified
-  networkDefault: boolean("network_default").notNull().default(false), // Default roles for all schools
   schoolId: uuid("school_id"), // If null, available network-wide
-  sortOrder: integer("sort_order").default(0), // For ordering within groups
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
-}, (table) => ({
-  parentRoleRef: foreignKey({
-    columns: [table.parentRoleId],
-    foreignColumns: [table.id],
-  }),
-}));
+});
 
 // User role assignments
 export const userRoles = pgTable("user_roles", {
@@ -758,14 +746,6 @@ export const roleDefinitionsRelations = relations(roleDefinitions, ({ one, many 
   school: one(schools, {
     fields: [roleDefinitions.schoolId],
     references: [schools.id],
-  }),
-  parentRole: one(roleDefinitions, {
-    fields: [roleDefinitions.parentRoleId],
-    references: [roleDefinitions.id],
-    relationName: "parentChild",
-  }),
-  childRoles: many(roleDefinitions, {
-    relationName: "parentChild",
   }),
   userRoles: many(userRoles),
 }));

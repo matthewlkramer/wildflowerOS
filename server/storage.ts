@@ -391,15 +391,21 @@ export class DatabaseStorage implements IStorage {
 
   // Role definitions
   async getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]> {
+    const whereClause = schoolId 
+      ? and(
+          eq(roleDefinitions.active, true),
+          or(
+            eq(roleDefinitions.schoolId, schoolId),
+            isNull(roleDefinitions.schoolId)
+          )
+        )
+      : eq(roleDefinitions.active, true);
+
     return await db
       .select()
       .from(roleDefinitions)
-      .where(
-        and(
-          eq(roleDefinitions.active, true),
-          schoolId ? eq(roleDefinitions.schoolId, schoolId) : isNull(roleDefinitions.schoolId)
-        )
-      );
+      .where(whereClause)
+      .orderBy(roleDefinitions.category);
   }
 
   async getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]> {
@@ -408,54 +414,29 @@ export class DatabaseStorage implements IStorage {
           eq(roleDefinitions.active, true),
           or(
             eq(roleDefinitions.schoolId, schoolId),
-            and(
-              isNull(roleDefinitions.schoolId),
-              eq(roleDefinitions.networkDefault, true)
-            )
+            isNull(roleDefinitions.schoolId)
           )
         )
-      : and(
-          eq(roleDefinitions.active, true),
-          or(
-            isNull(roleDefinitions.schoolId),
-            eq(roleDefinitions.networkDefault, true)
-          )
-        );
+      : eq(roleDefinitions.active, true);
 
     return await db
       .select()
       .from(roleDefinitions)
       .where(whereClause)
-      .orderBy(roleDefinitions.category, roleDefinitions.sortOrder);
+      .orderBy(roleDefinitions.category);
   }
 
   async getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]> {
-    const whereClause = schoolId 
-      ? and(
-          eq(roleDefinitions.active, true),
-          eq(roleDefinitions.category, category),
-          or(
-            eq(roleDefinitions.schoolId, schoolId),
-            and(
-              isNull(roleDefinitions.schoolId),
-              eq(roleDefinitions.networkDefault, true)
-            )
-          )
-        )
-      : and(
-          eq(roleDefinitions.active, true),
-          eq(roleDefinitions.category, category),
-          or(
-            isNull(roleDefinitions.schoolId),
-            eq(roleDefinitions.networkDefault, true)
-          )
-        );
-
     return await db
       .select()
       .from(roleDefinitions)
-      .where(whereClause)
-      .orderBy(roleDefinitions.sortOrder);
+      .where(
+        and(
+          eq(roleDefinitions.active, true),
+          eq(roleDefinitions.category, category)
+        )
+      )
+      .orderBy(roleDefinitions.displayName);
   }
 
   async createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition> {
@@ -498,10 +479,6 @@ export class DatabaseStorage implements IStorage {
         roleName: roleDefinitions.name,
         roleDisplayName: roleDefinitions.displayName,
         roleCategory: roleDefinitions.category,
-
-        roleType: roleDefinitions.roleType,
-        parentRoleId: roleDefinitions.parentRoleId,
-        sortOrder: roleDefinitions.sortOrder,
         userFirstName: users.firstName,
         userLastName: users.lastName,
         userEmail: users.email,
@@ -514,7 +491,7 @@ export class DatabaseStorage implements IStorage {
         eq(roleDefinitions.category, "educator"),
         eq(userRoles.active, true)
       ))
-      .orderBy(users.lastName, users.firstName, roleDefinitions.sortOrder);
+      .orderBy(users.lastName, users.firstName, roleDefinitions.displayName);
   }
 
   async assignUserRole(assignment: InsertUserRole): Promise<UserRole> {

@@ -36,8 +36,8 @@ const roleIcons = {
 const roleLabels = {
   parent: "Parent",
   educator: "Educator", 
-  board_director: "Board Director",
-  systems_administrator: "Systems Administrator",
+  board_director: "Board",
+  systems_administrator: "Admin",
 };
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
@@ -115,12 +115,12 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.roleCategory || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-40 border-gray-300">
+                <SelectTrigger className="w-24 border-gray-300">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
                       <span className="truncate">{getContextDisplayName()}</span>
                     )}
-                    {!currentUserRole && <SelectValue placeholder="Select role" />}
+                    {!currentUserRole && <SelectValue placeholder="Role" />}
                   </div>
                 </SelectTrigger>
                 <SelectContent>

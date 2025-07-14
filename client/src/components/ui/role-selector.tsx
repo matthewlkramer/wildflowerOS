@@ -65,6 +65,8 @@ export default function RoleSelector() {
     queryKey: ["/api/user/roles"],
   });
 
+
+
   // Mutation to switch role
   const switchRoleMutation = useMutation({
     mutationFn: async (roleId: string) => {
@@ -136,7 +138,7 @@ export default function RoleSelector() {
 
   if (userRoles.length === 1) {
     const role = userRoles[0];
-    const Icon = roleIcons[role.role];
+    const Icon = roleIcons[role.roleCategory] || Users;
     
     return (
       <Card className="w-full max-w-md">
@@ -150,7 +152,7 @@ export default function RoleSelector() {
           <div className="flex items-center gap-3">
             <Icon className="h-5 w-5 text-blue-600" />
             <div>
-              <div className="font-medium">{roleLabels[role.role]}</div>
+              <div className="font-medium">{roleLabels[role.roleCategory] || role.roleDisplayName}</div>
               {role.schoolId && (
                 <div className="text-sm text-gray-500">School Context</div>
               )}
@@ -184,11 +186,11 @@ export default function RoleSelector() {
             </div>
             <div className="flex items-center gap-2 mt-1">
               {(() => {
-                const Icon = roleIcons[currentRole.roleCategory];
+                const Icon = roleIcons[currentRole.roleCategory] || Users;
                 return <Icon className="h-4 w-4 text-blue-600" />;
               })()}
               <span className="text-blue-900 dark:text-blue-100">
-                {roleLabels[currentRole.roleCategory]}
+                {roleLabels[currentRole.roleCategory] || currentRole.roleDisplayName}
               </span>
               <Badge variant="secondary" size="sm">
                 Active
@@ -214,7 +216,7 @@ export default function RoleSelector() {
             <SelectContent>
               {/* Group roles by category and show only main categories */}
               {Array.from(new Set(userRoles.filter(role => role.active).map(role => role.roleCategory))).map((category) => {
-                const Icon = roleIcons[category];
+                const Icon = roleIcons[category] || Users;
                 const rolesInCategory = userRoles.filter(role => role.roleCategory === category && role.active);
                 const hasSchoolScope = rolesInCategory.some(role => role.schoolId);
                 const hasNetworkScope = rolesInCategory.some(role => !role.schoolId && !role.legalEntityId);
@@ -223,7 +225,7 @@ export default function RoleSelector() {
                   <SelectItem key={category} value={rolesInCategory[0].id}>
                     <div className="flex items-center gap-2">
                       <Icon className="h-4 w-4" />
-                      <span>{roleLabels[category]}</span>
+                      <span>{roleLabels[category] || category}</span>
                       {hasSchoolScope && (
                         <Badge variant="outline" className="ml-auto text-xs">
                           School
@@ -257,7 +259,7 @@ export default function RoleSelector() {
           </div>
           <div className="space-y-2">
             {userRoles.map((role) => {
-              const Icon = roleIcons[role.roleCategory];
+              const Icon = roleIcons[role.roleCategory] || Users;
               const isActive = currentRole?.id === role.id;
               
               return (
@@ -272,10 +274,10 @@ export default function RoleSelector() {
                   <Icon className={`h-4 w-4 ${isActive ? "text-blue-600" : "text-gray-500"}`} />
                   <div className="flex-1">
                     <div className={`text-sm ${isActive ? "font-medium text-blue-900 dark:text-blue-100" : "text-gray-900 dark:text-gray-100"}`}>
-                      {role.roleDisplayName || roleLabels[role.roleCategory]}
+                      {role.roleDisplayName || roleLabels[role.roleCategory] || role.roleCategory}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {roleLabels[role.roleCategory]}
+                      {roleLabels[role.roleCategory] || role.roleCategory}
                       {role.schoolId && " • School-specific"}
                       {!role.schoolId && !role.legalEntityId && " • Network-wide"}
                     </div>

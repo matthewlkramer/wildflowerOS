@@ -1596,7 +1596,7 @@ export default function SchoolSettingsPage() {
       <div className="flex pt-16">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden overflow-y-auto lg:ml-64">
           <div className="max-w-6xl mx-auto pb-20">
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (

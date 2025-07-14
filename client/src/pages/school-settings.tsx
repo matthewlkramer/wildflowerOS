@@ -1003,11 +1003,12 @@ export default function SchoolSettingsPage() {
           <div className="space-y-4">
             {availableEducators.length > 0 ? (
               <div className="space-y-2">
-                {availableEducators.map((educator: any) => (
+                {availableEducators.map((educator: any, index: number) => (
                   <div
-                    key={`${educator.userId}-${educator.schoolId}`}
+                    key={`educator-${index}-${educator.userId}`}
                     className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
                     onClick={() => {
+                      console.log('Selected educator:', educator);
                       setSelectedSchoolId(educator.schoolId);
                       setShowSchoolSelector(false);
                       toast({

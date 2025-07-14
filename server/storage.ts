@@ -670,7 +670,8 @@ export class DatabaseStorage implements IStorage {
   async getEducatorAdminsForEmulation(): Promise<any[]> {
     console.log('Fetching educator admins for emulation...');
     
-    const educators = await db
+    // Get unique users who have educator_admin roles
+    const rawEducators = await db
       .select({
         userId: userRoles.userId,
         schoolId: userRoles.schoolId,
@@ -678,8 +679,6 @@ export class DatabaseStorage implements IStorage {
         lastName: users.lastName,
         email: users.email,
         schoolName: schools.name,
-        roleName: roleDefinitions.name,
-        roleDisplayName: roleDefinitions.displayName,
       })
       .from(userRoles)
       .innerJoin(users, eq(userRoles.userId, users.id))
@@ -691,7 +690,23 @@ export class DatabaseStorage implements IStorage {
         isNotNull(userRoles.schoolId)
       ));
 
-    console.log('Found educators:', educators.length, educators);
+    // Group by user+school to avoid duplicates
+    const uniqueEducators = rawEducators.reduce((acc, educator) => {
+      const key = `${educator.userId}-${educator.schoolId}`;
+      if (!acc[key]) {
+        acc[key] = {
+          ...educator,
+          // Use email prefix as fallback name if firstName/lastName are null
+          firstName: educator.firstName || educator.email?.split('@')[0] || 'Unknown',
+          lastName: educator.lastName || 'User',
+          roleDisplayName: 'Educator Admin'
+        };
+      }
+      return acc;
+    }, {} as Record<string, any>);
+
+    const educators = Object.values(uniqueEducators);
+    console.log('Found unique educators:', educators.length, educators);
     return educators;
   }
 

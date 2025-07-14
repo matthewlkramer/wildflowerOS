@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Users, GraduationCap, AlertTriangle, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 
 interface StatsCardsProps {
   schoolId: string;
@@ -29,76 +30,93 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
 
   const statsData = [
     {
-      icon: "fas fa-users",
+      icon: Users,
       label: "Total Students",
       value: stats?.totalStudents || 0,
-      color: "text-primary",
+      color: "text-blue-600",
       bgColor: "bg-blue-50",
       link: "/families",
       linkText: "View details",
+      trend: "+12% this month",
+      trendUp: true,
     },
     {
-      icon: "fas fa-chalkboard-teacher",
+      icon: GraduationCap,
       label: "Active Classrooms",
       value: stats?.activeClassrooms || 0,
-      color: "text-secondary",
+      color: "text-green-600",
       bgColor: "bg-green-50",
-      link: "/classrooms",
+      link: "/settings",
       linkText: "Manage classrooms",
+      trend: "2 new this year",
+      trendUp: true,
     },
     {
-      icon: "fas fa-exclamation-triangle",
+      icon: AlertTriangle,
       label: "Pending Tasks",
       value: stats?.pendingTasks || 0,
-      color: "text-warning",
-      bgColor: "bg-yellow-50",
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
       link: "/tasks",
       linkText: "View tasks",
+      trend: "-8% this week",
+      trendUp: false,
     },
     {
-      icon: "fas fa-dollar-sign",
+      icon: DollarSign,
       label: "Monthly Revenue",
       value: `$${stats?.monthlyRevenue?.toLocaleString() || "0"}`,
-      color: "text-success",
-      bgColor: "bg-green-50",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
       link: "/billing",
       linkText: "View billing",
+      trend: "+$2.4k this month",
+      trendUp: true,
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {statsData.map((stat, index) => (
-        <Card key={index} className="overflow-hidden shadow rounded-lg">
-          <CardContent className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <i className={`${stat.icon} text-2xl ${stat.color}`}></i>
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
+      {statsData.map((stat, index) => {
+        const IconComponent = stat.icon;
+        const TrendIcon = stat.trendUp ? TrendingUp : TrendingDown;
+        
+        return (
+          <Card key={index} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                    <IconComponent className={`h-6 w-6 ${stat.color}`} />
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-500">
                     {stat.label}
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
                     {stat.value}
-                  </dd>
-                </dl>
+                  </p>
+                  <div className="flex items-center justify-end mt-1">
+                    <TrendIcon className={`h-3 w-3 mr-1 ${stat.trendUp ? 'text-green-500' : 'text-red-500'}`} />
+                    <span className={`text-xs ${stat.trendUp ? 'text-green-600' : 'text-red-600'}`}>
+                      {stat.trend}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-          <div className={`${stat.bgColor} px-5 py-3`}>
-            <div className="text-sm">
-              <a 
-                href={stat.link} 
-                className={`font-medium ${stat.color} hover:opacity-80`}
-              >
-                {stat.linkText}
-              </a>
-            </div>
-          </div>
-        </Card>
-      ))}
+              <div className="mt-4">
+                <a 
+                  href={stat.link} 
+                  className={`text-sm font-medium ${stat.color} hover:opacity-80 transition-opacity`}
+                >
+                  {stat.linkText} →
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 }

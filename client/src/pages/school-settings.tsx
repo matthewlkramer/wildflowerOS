@@ -526,8 +526,10 @@ export default function SchoolSettingsPage() {
   const queryClient = useQueryClient();
 
   // Get current user's school context from the current role
-
   const schoolId = currentRole?.schoolId;
+  
+  // Use the default school ID when currentRole doesn't have one  
+  const effectiveSchoolId = schoolId || '0eb4ca76-8714-4a51-908d-76a157d11961';
 
   // Fetch school data
   const { data: school } = useQuery({
@@ -540,9 +542,6 @@ export default function SchoolSettingsPage() {
     queryKey: ["/api/schools", effectiveSchoolId, "staff"],
     enabled: !!effectiveSchoolId,
   });
-
-  // Use the default school ID when currentRole doesn't have one
-  const effectiveSchoolId = schoolId || '0eb4ca76-8714-4a51-908d-76a157d11961';
 
   // Fetch classrooms
   const { data: classrooms = [] } = useQuery({

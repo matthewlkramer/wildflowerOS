@@ -40,19 +40,26 @@ Preferred communication style: Simple, everyday language.
   - Created API endpoints for role history and role termination
   - New roles automatically get start_date set to current timestamp
   - Role history preserved through soft deletion (setting active=false and end_date)
-- **Implemented complete 5-level hierarchical role system with CSV-based structure**
-  - **Level 1 (Top Categories):** Board Director, Educator, Parent, Systems Admin
-  - **Level 2 (Sub-categories):** Educator splits into Admin and Classroom; others have specific roles
-  - **Level 3 (Phase Categories):** Admin splits into Startup and Ongoing operational phases
-  - **Level 4 (CSV Categories):** Startup has 10 categories (Board/501c3, Marketing/Comm, Finances, etc.); Ongoing has 21 categories (Admissions, Assessment, Communications, etc.)
-  - **Level 5 (Specific Tasks):** Individual roles from CSV files under each category
-  - Added parent_role_id and level fields to role_definitions table for proper nesting
-  - **Startup Categories:** Board/501c3 Formation, Marketing/Communications, Finances, Licensing, Facility, Program Design, Family Engagement, Admissions/Enrollment, Business Insurance/Benefits, Vendors
-  - **Ongoing Categories:** Admissions & Enrollment, Assessment Coordinator, Board, Communications and Marketing, Compliance, Curriculum + Program Design, Data Coordinator, Equity Steward, Facility, Family Engagement, Finance, Food Program, Fundraising, Human Resources, Legal/Risk Management, Licensing, Student Health/Wellness/Safety, Student Support Services, Technology, Ways of Working, Wildflower Network Liaison
-  - **Classroom Roles Under Educator→Classroom:** Lead Guide, Assistant, Aide
-  - **Board Roles:** Chair, Treasurer, Secretary, Member
-  - **Parent Roles:** Billing Contact, Custodian
-  - **Systems Admin Role:** Systems Administrator
+- **Completed 5-level hierarchical role system with embedded naming and CSV integration**
+  - **Level 1 (Top Categories):** educator, parent, board, sysadmin (single word names)
+  - **Level 2 (Sub-categories):** educator_admin, educator_classroom, parent_billing, parent_custodian, board_chair, etc.
+  - **Level 3 (Phase Categories):** educator_admin_startup, educator_admin_ongoing, educator_classroom_lead, etc.
+  - **Level 4 (CSV Categories):** educator_admin_startup_marketing, educator_admin_ongoing_finance, etc.
+  - **Level 5 (Specific Tasks):** educator_admin_startup_marketing_logo, educator_admin_ongoing_finance_budget, etc.
+  - **Hierarchical Naming System:** Full path embedded in role name (e.g., educator_classroom_assistant)
+  - **Three Name Fields:** name (hierarchical), display_name (human readable), simple_name (single word)
+  - **Removed category column** - hierarchy now determined from embedded naming structure
+  - **Renamed isSystemRole to networkDefault** for consistency with other tables
+  - **Example Full Hierarchy:** educator → educator_admin → educator_admin_startup → educator_admin_startup_marketing → educator_admin_startup_marketing_logo
+  - **Startup Categories (10):** board, marketing, finances, licensing, facility, program, family, admissions, insurance, vendors
+  - **Ongoing Categories (21):** admissions, assessment, board, communications, compliance, curriculum, data, equity, facility, family, finance, food, fundraising, hr, legal, licensing, health, support, technology, culture, liaison
+  - **Sample Level 5 Roles:** community engagement, logo design, social media, website design, real estate search, renovation estimates, lease review, bookkeeper oversight, budget monitoring, payroll processing
+  - **Classroom Roles:** educator_classroom_lead, educator_classroom_assistant, educator_classroom_aide
+  - **Board Roles:** board_chair, board_treasurer, board_secretary, board_member
+  - **Parent Roles:** parent_billing, parent_custodian
+  - **Systems Admin Role:** sysadmin_administrator
+  - **Storage Layer Updates:** Replaced category-based filtering with name prefix filtering for role queries
+  - Updated IStorage interface to use getRolesByNamePrefix instead of getRolesByCategory
   - Addressed "Multiple Roles per Person" open issue with flexible role assignment system
   - User can now hold multiple simultaneous roles across different operational areas
 - **Completed functional role switching system with compact navigation**

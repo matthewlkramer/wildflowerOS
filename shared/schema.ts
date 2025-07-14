@@ -57,15 +57,13 @@ export const emailAddresses = pgTable("email_addresses", {
 // Role definitions - hierarchical structure with parent/child relationships
 export const roleDefinitions = pgTable("role_definitions", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 100 }).notNull(),
-  displayName: varchar("display_name", { length: 100 }).notNull(),
+  name: varchar("name", { length: 200 }).notNull(), // Hierarchical name like educator_admin_startup_marketing_logo
+  displayName: varchar("display_name", { length: 100 }).notNull(), // Human readable like "Logo Design"
+  simpleName: varchar("simple_name", { length: 100 }), // Single word like "logo"
   description: text("description"),
-  category: varchar("category", { 
-    enum: ["parent", "educator", "board_director", "systems_admin"] 
-  }).notNull(),
   parentRoleId: uuid("parent_role_id"), // For hierarchical nesting
   level: integer("level").notNull().default(1), // 1=top level, 2=sub-category, 3=specific role
-  isSystemRole: boolean("is_system_role").notNull().default(false), // Core roles that can't be modified
+  networkDefault: boolean("network_default").notNull().default(false), // Core roles that can't be modified
   schoolId: uuid("school_id"), // If null, available network-wide
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),

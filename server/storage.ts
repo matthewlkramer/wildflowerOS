@@ -94,7 +94,7 @@ export interface IStorage {
   // Role definitions
   getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]>;
   getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]>;
-  getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]>;
+  getRolesByNamePrefix(namePrefix: string, schoolId?: string): Promise<RoleDefinition[]>;
   createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition>;
   updateRoleDefinition(id: string, role: Partial<InsertRoleDefinition>): Promise<RoleDefinition>;
   deleteRoleDefinition(id: string): Promise<void>;
@@ -405,7 +405,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(roleDefinitions)
       .where(whereClause)
-      .orderBy(roleDefinitions.category);
+      .orderBy(roleDefinitions.level, roleDefinitions.name);
   }
 
   async getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]> {
@@ -423,14 +423,14 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(roleDefinitions)
       .where(whereClause)
-      .orderBy(roleDefinitions.category);
+      .orderBy(roleDefinitions.level, roleDefinitions.name);
   }
 
-  async getRolesByCategory(category: string, schoolId?: string): Promise<RoleDefinition[]> {
+  async getRolesByNamePrefix(namePrefix: string, schoolId?: string): Promise<RoleDefinition[]> {
     const whereClause = schoolId 
       ? and(
           eq(roleDefinitions.active, true),
-          eq(roleDefinitions.category, category as any),
+          sql`${roleDefinitions.name} LIKE ${namePrefix + '%'}`,
           or(
             eq(roleDefinitions.schoolId, schoolId),
             isNull(roleDefinitions.schoolId)
@@ -438,7 +438,7 @@ export class DatabaseStorage implements IStorage {
         )
       : and(
           eq(roleDefinitions.active, true),
-          eq(roleDefinitions.category, category as any)
+          sql`${roleDefinitions.name} LIKE ${namePrefix + '%'}`
         );
 
     return await db
@@ -487,7 +487,6 @@ export class DatabaseStorage implements IStorage {
         endDate: userRoles.endDate,
         roleName: roleDefinitions.name,
         roleDisplayName: roleDefinitions.displayName,
-        roleCategory: roleDefinitions.category,
         userFirstName: users.firstName,
         userLastName: users.lastName,
         userEmail: users.email,
@@ -497,7 +496,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(users, eq(users.id, userRoles.userId))
       .where(and(
         eq(userRoles.schoolId, schoolId),
-        eq(roleDefinitions.category, "educator"),
+        sql`${roleDefinitions.name} LIKE 'educator%'`,
         eq(userRoles.active, true)
       ))
       .orderBy(users.lastName, users.firstName, roleDefinitions.displayName);
@@ -654,7 +653,7 @@ export class DatabaseStorage implements IStorage {
         role: roleDefinitions.name, // Add role name for compatibility
         roleName: roleDefinitions.name,
         roleDisplayName: roleDefinitions.displayName,
-        roleCategory: roleDefinitions.category,
+
       })
       .from(userRoles)
       .innerJoin(users, eq(userRoles.userId, users.id))
@@ -662,7 +661,7 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(userRoles.schoolId, schoolId),
         eq(userRoles.active, true),
-        eq(roleDefinitions.category, 'educator') // Only show educator roles as staff
+        sql`${roleDefinitions.name} LIKE 'educator%'` // Only show educator roles as staff
       ));
 
     // Process the data to handle role combinations and renaming

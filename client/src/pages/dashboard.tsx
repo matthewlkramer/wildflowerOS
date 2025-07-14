@@ -59,10 +59,11 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
-      <div className="flex pt-16 min-h-screen">
+      <div className="pt-16">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 lg:ml-64">
+        <div className="lg:ml-64">
+          <div className="p-4 lg:p-6 pb-20">
           {/* Dashboard Header */}
           <div className="mb-8">
             <div className="md:flex md:items-center md:justify-between">
@@ -108,7 +109,8 @@ export default function Dashboard() {
 
           {/* Family Management Section */}
           {currentSchool && <FamilyManagement schoolId={currentSchool.id} />}
-        </main>
+          </div>
+        </div>
       </div>
 
       <MobileBottomNav currentRole={currentRole} />

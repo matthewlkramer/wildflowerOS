@@ -136,10 +136,11 @@ export default function FamiliesPage() {
     <div className="min-h-screen bg-gray-50">
       <TopNavigation user={user} currentSchool={null} currentRole={currentRole} />
       
-      <div className="flex pt-16 min-h-screen">
+      <div className="pt-16">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 lg:ml-64">
+        <div className="lg:ml-64">
+          <div className="p-4 lg:p-6 pb-20">
           <div className="max-w-6xl mx-auto">
             {/* Page Header */}
             <div className="mb-8">
@@ -320,7 +321,7 @@ export default function FamiliesPage() {
           )}
         </div>
           </div>
-        </main>
+        </div>
       </div>
 
       <MobileBottomNav currentRole={currentRole} />

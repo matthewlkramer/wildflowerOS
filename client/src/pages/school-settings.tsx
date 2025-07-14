@@ -1598,17 +1598,6 @@ export default function SchoolSettingsPage() {
         
         <div className="lg:ml-64">
           <div className="p-4 lg:p-6 max-w-6xl mx-auto pb-20">
-            {/* FORCE TALL CONTENT FOR TESTING */}
-            <div style={{ height: '3000px', background: 'linear-gradient(to bottom, #f0f0f0, #e0e0e0)', marginBottom: '20px' }}>
-              <h2 style={{ padding: '20px', background: 'yellow' }}>SCROLL TEST - This content is 3000px tall</h2>
-              <div style={{ position: 'absolute', top: '50%', left: '50%', background: 'red', color: 'white', padding: '10px' }}>
-                MIDDLE OF TALL CONTENT
-              </div>
-              <div style={{ position: 'absolute', bottom: '20px', left: '50%', background: 'green', color: 'white', padding: '10px' }}>
-                BOTTOM OF TALL CONTENT
-              </div>
-            </div>
-            
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (
               // System Administrator View

@@ -70,7 +70,7 @@ import {
   type InsertEmailAddress,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, count, sql, isNull, or, lte, gte, gt } from "drizzle-orm";
+import { eq, and, desc, asc, count, sql, isNull, isNotNull, or, lte, gte, gt } from "drizzle-orm";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -107,6 +107,7 @@ export interface IStorage {
   assignUserRole(assignment: InsertUserRole): Promise<UserRole>;
   updateUserRoleAssignment(id: string, assignment: Partial<InsertUserRole>): Promise<UserRole>;
   bulkUpdateRoleAssignments(schoolId: string, assignments: any[]): Promise<void>;
+  getEducatorAdminsForEmulation(): Promise<any[]>;
   
   // Schools
   getSchools(): Promise<School[]>;
@@ -130,6 +131,7 @@ export interface IStorage {
     schoolId: string;
     startDate: Date;
   }): Promise<{ user: User; roles: UserRole[] }>;
+  getEducatorAdminsForEmulation(): Promise<any[]>;
   
   // Tuition plans
   getTuitionPlansByProgramOffering(programOfferingId: string): Promise<TuitionPlan[]>;
@@ -662,6 +664,33 @@ export class DatabaseStorage implements IStorage {
       .update(classrooms)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(classrooms.id, id));
+  }
+
+  // Get educator admins for emulation
+  async getEducatorAdminsForEmulation(): Promise<any[]> {
+    const educators = await db
+      .select({
+        userId: userRoles.userId,
+        schoolId: userRoles.schoolId,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        email: users.email,
+        schoolName: schools.name,
+        roleName: roleDefinitions.name,
+        roleDisplayName: roleDefinitions.displayName,
+      })
+      .from(userRoles)
+      .innerJoin(users, eq(userRoles.userId, users.id))
+      .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
+      .innerJoin(schools, eq(userRoles.schoolId, schools.id))
+      .where(and(
+        eq(userRoles.active, true),
+        sql`${roleDefinitions.name} LIKE 'educator_admin%'`,
+        isNotNull(userRoles.schoolId)
+      ))
+      .groupBy(userRoles.userId, userRoles.schoolId, users.firstName, users.lastName, users.email, schools.name, roleDefinitions.name, roleDefinitions.displayName);
+
+    return educators;
   }
 
   // Staff management 

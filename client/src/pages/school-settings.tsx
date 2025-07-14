@@ -469,6 +469,8 @@ export default function SchoolSettingsPage() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [addingSubsidy, setAddingSubsidy] = useState(false);
   const [showSSJ, setShowSSJ] = useState(true);
+  const [showSchoolSelector, setShowSchoolSelector] = useState(false);
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
   
   const [staffForm, setStaffForm] = useState({
     firstName: "",
@@ -528,8 +530,15 @@ export default function SchoolSettingsPage() {
   // Get current user's school context from the current role
   const schoolId = currentRole?.schoolId;
   
-  // Use the default school ID when currentRole doesn't have one  
-  const effectiveSchoolId = schoolId || '0eb4ca76-8714-4a51-908d-76a157d11961';
+  // Use session-selected school or role's school
+  const effectiveSchoolId = selectedSchoolId || schoolId;
+
+  // Check if we need to show school selector
+  React.useEffect(() => {
+    if (currentRole && currentRole.roleName?.startsWith('educator') && !effectiveSchoolId && !showSchoolSelector) {
+      setShowSchoolSelector(true);
+    }
+  }, [currentRole, effectiveSchoolId, showSchoolSelector]);
 
   // Fetch school data
   const { data: school } = useQuery({
@@ -565,6 +574,12 @@ export default function SchoolSettingsPage() {
   const { data: publicSubsidies = [] } = useQuery({
     queryKey: ["/api/schools", effectiveSchoolId, "public-subsidies"],
     enabled: !!effectiveSchoolId,
+  });
+
+  // Fetch all educator admins for school selection (only when needed)
+  const { data: availableEducators = [] } = useQuery({
+    queryKey: ["/api/educators/admin-roles"],
+    enabled: showSchoolSelector,
   });
 
   // Add staff mutation
@@ -958,6 +973,49 @@ export default function SchoolSettingsPage() {
     <div className="min-h-screen bg-gray-50">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
+      {/* School Selector Dialog for Educators without School ID */}
+      <Dialog open={showSchoolSelector} onOpenChange={setShowSchoolSelector}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Select School to Emulate</DialogTitle>
+            <DialogDescription>
+              You're in educator mode but don't have a specific school assigned. 
+              Choose an educator to emulate and work with their school context.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {availableEducators.length > 0 ? (
+              <div className="space-y-2">
+                {availableEducators.map((educator: any) => (
+                  <div
+                    key={`${educator.userId}-${educator.schoolId}`}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => {
+                      setSelectedSchoolId(educator.schoolId);
+                      setShowSchoolSelector(false);
+                      toast({
+                        title: "School context selected",
+                        description: `Now working with ${educator.schoolName} as ${educator.firstName} ${educator.lastName}`,
+                      });
+                    }}
+                  >
+                    <div>
+                      <div className="font-medium">{educator.firstName} {educator.lastName}</div>
+                      <div className="text-sm text-gray-600">{educator.schoolName}</div>
+                      <div className="text-xs text-gray-500">{educator.roleDisplayName}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                No educator admins found. Contact support to set up school access.
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex pt-16">
         <Sidebar currentRole={currentRole} />
         

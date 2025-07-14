@@ -1268,6 +1268,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all educators with admin roles across all schools for emulation
+  app.get('/api/educators/admin-roles', isAuthenticated, async (req: any, res) => {
+    try {
+      const educators = await storage.getEducatorAdminsForEmulation();
+      res.json(educators);
+    } catch (error) {
+      console.error("Error fetching educator admins for emulation:", error);
+      res.status(500).json({ message: "Failed to fetch educator admins" });
+    }
+  });
+
   app.get('/api/schools/:schoolId/roles/hierarchical', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;

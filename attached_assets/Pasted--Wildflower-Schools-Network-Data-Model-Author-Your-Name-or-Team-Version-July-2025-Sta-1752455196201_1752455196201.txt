@@ -1,0 +1,283 @@
+// Wildflower Schools Network Data Model
+// Author: [Your Name or Team]
+// Version: July 2025
+// Status: Ready for drop-in; see "OPEN ISSUE" comments for any decisions to clarify.
+
+import { pgTable, uuid, varchar, text, integer, boolean, timestamp, decimal, jsonb } from "drizzle-orm/pg-core";
+
+// ======================== USER & ROLE MODELS ========================
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  profileImageUrl: varchar("profile_image_url", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const userRoles = pgTable("user_roles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  role: varchar("role", { enum: [
+    "teacher_leader", "teacher", "assistant", "aide", "parent", 
+    "board_member", "central_staff", "network_admin"
+  ]}).notNull(),
+  schoolId: uuid("school_id"),
+  legalEntityId: uuid("legal_entity_id"),
+  active: boolean("active").notNull().default(true),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+});
+
+// ======================== FAMILY & CHILDREN ========================
+
+export const families = pgTable("families", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 200 }),
+  address: text("address"),
+  phone: varchar("phone", { length: 40 }),
+  email: varchar("email", { length: 255 }),
+  notes: text("notes"),
+  primaryContactId: uuid("primary_contact_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const children = pgTable("children", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  familyId: uuid("family_id").notNull().references(() => families.id),
+  firstName: varchar("first_name", { length: 100 }).notNull(),
+  lastName: varchar("last_name", { length: 100 }).notNull(),
+  birthDate: timestamp("birth_date").notNull(),
+  gender: varchar("gender", { length: 50 }),
+  raceEthnicity: varchar("race_ethnicity", { length: 100 }),
+  primaryLanguage: varchar("primary_language", { length: 100 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const guardians = pgTable("guardians", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  familyId: uuid("family_id").notNull().references(() => families.id),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  relationship: varchar("relationship", { length: 40 }),
+  isPrimary: boolean("is_primary").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ======================== ENROLLMENT & SCHOOL YEARS ========================
+
+export const enrollments = pgTable("enrollments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  childId: uuid("child_id").notNull().references(() => children.id),
+  schoolId: uuid("school_id").notNull(),
+  classroomId: uuid("classroom_id"),
+  schoolYearId: uuid("school_year_id"),
+  status: varchar("status", { enum: ["prospective", "enrolled", "graduated", "withdrawn"] }).notNull(),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const schoolYears = pgTable("school_years", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 20 }).notNull(),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  isActive: boolean("is_active").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ======================== LEGAL ENTITIES & SCHOOLS ========================
+
+export const legalEntities = pgTable("legal_entities", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 200 }).notNull(),
+  entityType: varchar("entity_type", { enum: ["independent", "charter_single", "charter_multi", "partner"] }),
+  membershipStatus: varchar("membership_status", { enum: ["member", "affiliated_non_member", "pre_member", "lapsed_member"] }),
+  EIN: varchar("ein", { length: 20 }),
+  nonprofitStatusSource: varchar("nonprofit_status_source", { enum: ["direct", "group_exemption"] }),
+  address: text("address"),
+  status: varchar("status", { enum: ["active", "closed", "paused"] }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const schools = pgTable("schools", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  legalEntityId: uuid("legal_entity_id").references(() => legalEntities.id),
+  name: varchar("name", { length: 200 }).notNull(),
+  shortName: varchar("short_name", { length: 50 }),
+  address: text("address"),
+  city: varchar("city", { length: 80 }),
+  state: varchar("state", { length: 2 }),
+  zip: varchar("zip", { length: 10 }),
+  phone: varchar("phone", { length: 40 }),
+  email: varchar("email", { length: 255 }),
+  website: varchar("website", { length: 255 }),
+  status: varchar("status", { enum: ["active", "closed", "paused"] }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ======================== CLASSROOMS ========================
+
+export const classrooms = pgTable("classrooms", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  level: varchar("level", { enum: [
+    "infant", "toddler", "primary", "lower_elem", 
+    "upper_elem", "junior_high", "high_school"
+  ]}).notNull(),
+  capacity: integer("capacity"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ======================== BILLING, BUDGET, PAYMENTS ========================
+
+export const billingSetups = pgTable("billing_setups", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  familyId: uuid("family_id").notNull().references(() => families.id),
+  billingSchedule: varchar("billing_schedule", { enum: ["monthly", "yearly"] }).notNull().default("monthly"),
+  autopayEnabled: boolean("autopay_enabled").notNull().default(false),
+  paymentMethod: varchar("payment_method", { enum: ["bank_account", "credit_card", "manual"] }).notNull().default("manual"),
+  billRecipientName: varchar("bill_recipient_name", { length: 100 }),
+  billRecipientEmail: varchar("bill_recipient_email", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const invoices = pgTable("invoices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  familyId: uuid("family_id").notNull().references(() => families.id),
+  billingSetupId: uuid("billing_setup_id").references(() => billingSetups.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  status: varchar("status", { enum: ["pending", "paid", "overdue"] }).notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const payments = pgTable("payments", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  invoiceId: uuid("invoice_id").notNull().references(() => invoices.id),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  paymentDate: timestamp("payment_date").notNull(),
+  paymentMethod: varchar("payment_method", { enum: ["bank_account", "credit_card", "manual"] }),
+  status: varchar("status", { enum: ["pending", "completed", "failed"] }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Budget Categories, Budget by School/Year
+
+export const defaultBudgetCategories = pgTable("default_budget_categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: varchar("type", { length: 50 }),
+  description: text("description"),
+  isVisibleInAddRevenue: boolean("is_visible_in_add_revenue").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const budgets = pgTable("budgets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  schoolId: uuid("school_id").notNull().references(() => schools.id),
+  schoolYearId: uuid("school_year_id").notNull().references(() => schoolYears.id),
+  totalBudget: decimal("total_budget", { precision: 12, scale: 2 }),
+  budgetNotes: text("budget_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ======================== MESSAGING, TASKS, & COMMENTS ========================
+
+// UNIFIED COMMENT SYSTEM: 
+// All comments (tasks, docs, etc.) use channels/messages. 
+// For task comments, system auto-creates a hidden channel (type='task_comments') per task.
+
+export const channels = pgTable("channels", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }),
+  type: varchar("type", { enum: [
+    "public", "private", "board", "advisory", "dm", "task_comments"
+  ]}).notNull(),
+  schoolId: uuid("school_id"),
+  legalEntityId: uuid("legal_entity_id"),
+  taskId: uuid("task_id"), // for task_comments channel
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const channelMembers = pgTable("channel_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  channelId: uuid("channel_id").notNull().references(() => channels.id),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  joinedAt: timestamp("joined_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  channelId: uuid("channel_id").notNull().references(() => channels.id),
+  senderId: uuid("sender_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  attachments: jsonb("attachments"), // Array of file metadata/URLs
+  sentAt: timestamp("sent_at").defaultNow(),
+  readBy: jsonb("read_by"),
+  threadId: uuid("thread_id"),
+  isPinned: boolean("is_pinned"),
+  isUrgent: boolean("is_urgent"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const tasks = pgTable("tasks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  assignedToId: uuid("assigned_to_id").references(() => users.id),
+  dueDate: timestamp("due_date"),
+  status: varchar("status", { enum: ["open", "in_progress", "completed", "overdue", "canceled"] }),
+  createdById: uuid("created_by_id").references(() => users.id),
+  commentChannelId: uuid("comment_channel_id").references(() => channels.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ======================== KNOWLEDGE BASE, ANALYTICS, TEMPLATES ========================
+
+export const knowledgePosts = pgTable("knowledge_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 255 }),
+  body: text("body"),
+  authorId: uuid("author_id").references(() => users.id),
+  isPublished: boolean("is_published").default(false),
+  visibility: varchar("visibility", { enum: ["public", "school", "private"] }),
+  schoolId: uuid("school_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// ... [All other knowledge/analytics/templates tables from above] ...
+
+// ======================== OPEN ISSUES (Example) ========================
+// TODO/OPEN ISSUE: 
+// - Classroom staffing flexibility: Should we allow a user to have multiple roles in the same classroom at once? (e.g., lead & assistant)
+// - Tuition model: Is per-family/classroom/school enough? Is there a sliding scale schema to add now?
+// - Billing: Will some families have both auto-pay and one-off payments? 
+// - Assessments: Do we need links to third-party assessment vendors, or store all data directly?
+// - Lesson plans and progress tracking: See Transparent Classroom for best practices—clarify fields and structure needed.
+// - For policies/templates, do you want versioning or approval flows?
+
+// Agent should flag and discuss these OPEN ISSUE lines before final implementation.

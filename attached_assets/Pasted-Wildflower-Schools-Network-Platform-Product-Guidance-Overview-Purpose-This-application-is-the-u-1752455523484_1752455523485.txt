@@ -1,0 +1,100 @@
+Wildflower Schools Network Platform: Product Guidance
+
+Overview / Purpose
+
+This application is the unified, modern digital platform for the Wildflower Schools Network—a decentralized community of small, Montessori, teacher-led schools embedded in local neighborhoods.
+The app’s purpose is to empower teacher-leaders, staff, and families to operate and grow their schools efficiently, transparently, and in alignment with Wildflower’s values of individualization, equity, and authentic Montessori practice.
+
+Primary Goals
+	•	Reduce administrative and compliance burdens on teacher-leaders and staff, so they can focus on children and community.
+	•	Foster transparent, community-driven governance (teacher-led boards, participatory parent roles, etc.).
+	•	Make essential information and workflows accessible across all device types (desktop, tablet, phone).
+	•	Provide sensible network-wide defaults but allow individual schools to customize almost everything.
+
+⸻
+
+Who Are the Users?
+
+1. Teacher-Leaders & School Staff
+	•	Montessori educators who also manage day-to-day school operations, compliance, parent communication, enrollment, finances, and sometimes governance.
+	•	Key Needs: Simple admin tools, clear visibility into their classrooms, communication with parents and staff, flexible workflow management, compliance.
+
+2. Parents & Guardians
+	•	Families who enroll children in Wildflower schools.
+	•	Key Needs: Easy access to child/family information, messaging with teachers/staff, billing, attendance, parent-teacher conferences, sharing of student progress and school policies.
+
+3. Central Staff & Network Support
+	•	Wildflower Foundation/Network employees who support emerging schools, manage compliance, provide coaching and funding, and coordinate across the network.
+	•	Key Needs: Dashboards, analytics, permissions to help multiple schools, network-wide policies, resource/document management.
+
+4. Board Members
+	•	Can be teacher-leaders, parents, or community volunteers serving governance functions at either the school/legal entity or site level.
+	•	Key Needs: Dashboards with appropriate (limited) access, policy approval workflows, meeting materials, and voting.
+
+⸻
+
+Key Use Cases / Workflows
+	•	Student Enrollment Pipeline: From inquiry to school visit, application, interview, admission, contract signing, and re-enrollment.
+	•	Attendance & Learning: Daily sign-in, learning activity tracking, mastery and progress logs, assessments, and absence notification.
+	•	Billing & Finances: Tuition/billing setup (monthly, annual, sliding scale), payments (auto/manual), financial aid, reporting, and budgeting.
+	•	Parent Communication: Messaging (Slack-like), parent-teacher conferences, document sharing, urgent notifications.
+	•	Task & Action Management: Assign and track administrative or compliance tasks for families, staff, or students.
+	•	Policy, Document, and Knowledge Management: Access to school/network policies, resource library, knowledge base with Q&A, versioned documents.
+	•	Governance: Board meetings, agenda and minutes, resolutions, policy approval tracking.
+	•	Analytics & Forecasting: Dashboards for enrollment, re-enrollment projections, fundraising, finance, and compliance.
+
+⸻
+
+Design Principles
+	•	User-Centered: The interface and flows must be easy for both seasoned and new users (teachers, parents, board) to understand and use without heavy training.
+	•	Modular: Features are grouped into sensible, reusable modules—can add/remove for each school or role.
+	•	Mobile-First, but Device-Responsive: Must work intuitively on phones, tablets, and desktops.
+	•	Secure and Private: FERPA and HIPAA principles for data privacy, strict permissions and row-level security.
+	•	Customizable: Network-wide sensible defaults, but nearly every workflow, form, and document is customizable at the school or legal entity level.
+
+⸻
+
+Critical Architectural Expectations
+	•	Data Model: Use the provided normalized schema. All tables, relationships, and “open issues” are documented—do not introduce additional generic config tables unless approved.
+	•	Validation: Enforce all type, enum, and relational constraints both in the database and in the application.
+	•	Permissions: Implement strict, role-based permissions and context-based access controls in both the backend (API, database) and frontend (UI).
+	•	Workflows: All key flows (enrollment, onboarding, attendance, billing, knowledge, board approval, etc.) must be implemented with clear, visible status and auditability.
+	•	Messaging: Use a unified channel-based messaging system for all comments, discussions, and notifications.
+
+⸻
+
+Open Issues to Clarify with the Team
+
+(See detailed comments in schema and workflow docs.)
+	•	Multiple classroom roles per person.
+	•	Sliding scale tuition system and flexibility.
+	•	Handling of auto-pay vs. manual billing events.
+	•	Third-party assessment vendor integration and data flow.
+	•	Lesson plans and progress tracking (final structure after reviewing best-in-class apps).
+	•	Board approval linkage to policy adoption/resolutions.
+
+⸻
+
+What This App Is Not
+	•	It is not a generic school management system; it is tailored to Wildflower’s teacher-led, decentralized model.
+	•	It is not intended for high-stakes summative assessment, transcript generation, or standardized grading.
+	•	It is not a one-size-fits-all LMS—Montessori-specific workflows and community governance come first.
+
+⸻
+
+What to Do If You Have Questions or Encounter Ambiguity
+	•	Refer to the schema and workflow docs—open issues are clearly marked.
+	•	If unsure, propose a solution or best practice, document the decision, and review with Matt and Wildflower leadership before proceeding.
+
+⸻
+
+Success Criteria
+	•	Teacher-leaders can run their school with minimal admin overhead.
+	•	Families have clarity and transparency for all critical school-home interactions.
+	•	Central staff and board have oversight, compliance, and data they need—without complexity.
+	•	The system is extensible as Wildflower grows, and the code is easy to maintain and iterate.
+
+⸻
+
+For more details, see the provided schema.ts, API spec, and open issues doc.
+If you need additional sample data, wireframes, or mockups, ask Matt or the product owner.

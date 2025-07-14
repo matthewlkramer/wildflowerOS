@@ -1,0 +1,95 @@
+ Wildflower Network Open Issues to Resolve Before Final Implementation
+
+⸻
+
+1. Multiple Roles per Person in Classroom
+
+Current:
+The data model allows a user to be a lead or assistant, but not both at once.
+
+Open Issue:
+Should a person be able to serve as both lead and assistant (or other roles) simultaneously in a single classroom?
+
+Recommendation:
+	•	If yes, implement a join table: classroom_staff_assignments (classroomId, userId, role, startDate, endDate)
+	•	Otherwise, keep mutually exclusive role fields.
+
+⸻
+
+2. Sliding Scale Tuition Model
+
+Current:
+Tuition tables allow for “notes” fields but don’t formalize sliding scales.
+
+Open Issue:
+How should the system define and implement sliding scale tuition?
+
+Recommendation:
+	•	Define a new table: sliding_scale_tiers (schoolId, minIncome, maxIncome, tuitionAmount, description)
+	•	Families are matched to a tier, which then determines their billed amount.
+
+⸻
+
+3. Billing: Auto-Pay vs. One-Off Payments
+
+Current:
+Families have a payment method set, but may want/need both scheduled and manual payments.
+
+Open Issue:
+How should the app handle a family that has both auto-pay and one-off/manual payments (e.g., when auto-pay fails or for special fees)?
+
+Recommendation:
+	•	Allow multiple payment methods per family (family_payment_methods), flag which is default.
+	•	Allow invoice payment by any enabled method, regardless of “setup.”
+
+⸻
+
+4. Third-Party Assessment Vendor Links
+
+Current:
+Assessments are tracked, but linking/importing from outside vendors is not defined.
+
+Open Issue:
+How should the system integrate with third-party assessment providers? (e.g., upload CSV, API integration, or manual entry)
+
+Recommendation:
+	•	Add an external_assessment_results table to store vendor data.
+	•	Clarify which vendors to support and the required data/fields.
+	•	Specify method: direct API integration, CSV upload, or both.
+
+⸻
+
+5. Lesson Plans & Progress Tracking Structure
+
+Current:
+Inspired by Transparent Classroom, but the precise structure for lessons, mastery, and logs is not finalized.
+
+Open Issue:
+What is the best way to structure lesson plans, presentations, mastery, and practice logging?
+
+Recommendation:
+	•	Analyze Transparent Classroom/other best-in-class tools.
+	•	Design tables for lessons, lesson_assignments, lesson_logs, mastery_logs.
+	•	Get feedback from Montessori experts/teachers.
+
+⸻
+
+6. Board Policy Approval & Resolutions
+
+Current:
+Policy docs and board meetings are tracked, but their linkage (for approval and historical record) is not automated.
+
+Open Issue:
+How should policy changes requiring board approval be tracked?
+
+Recommendation:
+	•	Add a board_resolutions table (linked to policy_documents and board_meetings).
+	•	For legacy policies, allow import with “approved on [date]” field as evidence.
+
+⸻
+
+Instructions for Developers/Agents:
+	•	Review these open issues with Matt and other stakeholders.
+	•	Propose options or best practices based on technical constraints and user needs.
+	•	Do not finalize implementation for these areas without further confirmation and/or example data.
+	•	Document all decisions in the repo/spec and update the schema accordingly.

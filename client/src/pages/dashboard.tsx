@@ -62,7 +62,7 @@ export default function Dashboard() {
       <div className="flex pt-16 min-h-screen">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden overflow-y-auto lg:ml-64">
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64" style={{ height: 'calc(100vh - 64px)', overflowY: 'auto' }}>
           {/* Dashboard Header */}
           <div className="mb-8">
             <div className="md:flex md:items-center md:justify-between">

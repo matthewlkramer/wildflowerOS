@@ -2032,7 +2032,23 @@ export default function SchoolSettingsPage() {
                         <Label>Year Name</Label>
                         <Input
                           value={schoolYearForm.name}
-                          onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                          onChange={(e) => {
+                            const newName = e.target.value;
+                            setSchoolYearForm(prev => ({ ...prev, name: newName }));
+                            
+                            // Auto-populate dates based on year name (e.g., "2024-2025" -> July 1, 2024 - June 30, 2025)
+                            const yearMatch = newName.match(/^(\d{4})-(\d{4})$/);
+                            if (yearMatch) {
+                              const startYear = yearMatch[1];
+                              const endYear = yearMatch[2];
+                              setSchoolYearForm(prev => ({
+                                ...prev,
+                                name: newName,
+                                startDate: `${startYear}-07-01`,
+                                endDate: `${endYear}-06-30`
+                              }));
+                            }
+                          }}
                           placeholder="e.g., 2024-2025"
                         />
                       </div>

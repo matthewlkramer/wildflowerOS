@@ -862,11 +862,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createSchoolYear(schoolYearData: any): Promise<any> {
-    // Convert date strings to Date objects if they exist
+    // Convert date strings to Date objects with proper timezone handling
     const processedData = {
       ...schoolYearData,
-      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate) : undefined,
-      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate) : undefined,
+      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate + 'T00:00:00') : undefined,
+      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate + 'T00:00:00') : undefined,
     };
     
     const [schoolYear] = await db.insert(schoolYears).values(processedData).returning();
@@ -879,13 +879,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateSchoolYear(id: string, schoolYearData: Partial<InsertSchoolYear>): Promise<SchoolYear> {
-    // Convert string dates to Date objects if provided
+    // Convert string dates to Date objects with proper timezone handling
     const updateData: any = { ...schoolYearData };
     if (updateData.startDate) {
-      updateData.startDate = new Date(updateData.startDate);
+      updateData.startDate = new Date(updateData.startDate + 'T00:00:00');
     }
     if (updateData.endDate) {
-      updateData.endDate = new Date(updateData.endDate);
+      updateData.endDate = new Date(updateData.endDate + 'T00:00:00');
     }
     
     const [schoolYear] = await db
@@ -925,13 +925,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createNetworkSchoolYear(schoolYearData: any): Promise<SchoolYear> {
-    // Convert date strings to Date objects if they exist and ensure network default
+    // Convert date strings to Date objects with proper timezone handling
     const processedData = {
       ...schoolYearData,
       networkDefault: true,
       schoolId: null, // Network defaults have no specific school
-      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate) : undefined,
-      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate) : undefined,
+      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate + 'T00:00:00') : undefined,
+      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate + 'T00:00:00') : undefined,
     };
     
     const [schoolYear] = await db.insert(schoolYears).values(processedData).returning();
@@ -939,13 +939,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateNetworkSchoolYear(id: string, schoolYearData: Partial<InsertSchoolYear>): Promise<SchoolYear> {
-    // Convert string dates to Date objects if provided
+    // Convert string dates to Date objects with proper timezone handling
     const updateData: any = { ...schoolYearData };
     if (updateData.startDate) {
-      updateData.startDate = new Date(updateData.startDate);
+      updateData.startDate = new Date(updateData.startDate + 'T00:00:00');
     }
     if (updateData.endDate) {
-      updateData.endDate = new Date(updateData.endDate);
+      updateData.endDate = new Date(updateData.endDate + 'T00:00:00');
     }
     
     const [schoolYear] = await db

@@ -1430,7 +1430,7 @@ export default function SchoolSettingsPage() {
 
   // Import system holidays mutation
   const importSystemHolidaysMutation = useMutation({
-    mutationFn: async (data: { schoolYearId: string, academicCalendarId: string }) => {
+    mutationFn: async (data: { schoolYearId: string }) => {
       const promises = systemHolidays.map((holiday: any) => {
         // Convert rules to approximate dates for the school year
         let holidayDate = null;
@@ -1449,7 +1449,7 @@ export default function SchoolSettingsPage() {
           else holidayDate = new Date(startDate.getTime() + Math.random() * 30 * 24 * 60 * 60 * 1000); // Random within 30 days
         }
         
-        return apiRequest('POST', `/api/academic-calendars/${data.academicCalendarId}/closures`, {
+        return apiRequest('POST', `/api/school-years/${data.schoolYearId}/closures`, {
           name: holiday.name,
           description: holiday.description,
           date: holidayDate ? holidayDate.toISOString().split('T')[0] : null,
@@ -1663,11 +1663,10 @@ export default function SchoolSettingsPage() {
         schoolId: schoolId
       });
       
-      // Now import system holidays to the academic calendar
-      if (response.academicCalendarId) {
+      // Now import system holidays to the school year
+      if (response.id) {
         await importSystemHolidaysMutation.mutateAsync({
-          schoolYearId: response.id,
-          academicCalendarId: response.academicCalendarId
+          schoolYearId: response.id
         });
       }
       

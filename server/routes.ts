@@ -660,10 +660,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/academic-calendars/:calendarId/closures', isAuthenticated, async (req: any, res) => {
+  app.post('/api/school-years/:schoolYearId/closures', isAuthenticated, async (req: any, res) => {
     try {
-      const { calendarId } = req.params;
-      const closureData = { ...req.body, academicCalendarId: calendarId };
+      const { schoolYearId } = req.params;
+      const closureData = { ...req.body, schoolYearId };
       const closure = await storage.createCalendarClosure(closureData);
       res.status(201).json(closure);
     } catch (error) {

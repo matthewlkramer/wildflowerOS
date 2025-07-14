@@ -57,13 +57,28 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-  });
+  // Check if user exists by email (since we changed IDs to UUID)
+  const existingUser = await storage.getUserByEmail(claims["email"]);
+  
+  if (existingUser) {
+    // Update existing user
+    await storage.updateUser(existingUser.id, {
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+    return existingUser;
+  } else {
+    // Create new user with generated UUID
+    const newUser = await storage.upsertUser({
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+    return newUser;
+  }
 }
 
 export async function setupAuth(app: Express) {

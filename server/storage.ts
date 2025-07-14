@@ -75,6 +75,8 @@ import { eq, and, desc, asc, count, sql, isNull, or, lte, gte, gt } from "drizzl
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  updateUser(id: string, userData: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Email address operations
@@ -252,14 +254,34 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async updateUser(id: string, userData: Partial<UpsertUser>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...userData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
+    // Remove id from userData if present to let UUID generate automatically
+    const { id, ...userDataWithoutId } = userData;
+    
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values(userDataWithoutId)
       .onConflictDoUpdate({
-        target: users.id,
+        target: users.email,
         set: {
-          ...userData,
+          ...userDataWithoutId,
           updatedAt: new Date(),
         },
       })

@@ -408,9 +408,9 @@ function SystemHolidaysOverview() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="overflow-x-auto max-h-80 overflow-y-auto border rounded-lg">
+          <div className="overflow-x-auto border rounded-lg">
             <table className="w-full border-collapse">
-              <thead className="bg-gray-50 sticky top-0">
+              <thead className="bg-gray-50">
                 <tr className="border-b">
                   <th className="text-left p-3 font-medium">Holiday Name</th>
                   <th className="text-left p-3 font-medium">Rule</th>
@@ -1546,13 +1546,13 @@ export default function SchoolSettingsPage() {
   const currentSchoolForNav = school;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-gray-50">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
-      <div className="flex-1 flex pt-16">
+      <div className="flex">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 bg-gray-50">
+        <main className="flex-1">
           <div className="p-4 lg:p-6 pb-20">
       
       {/* School Selector Dialog for Educators without School ID */}

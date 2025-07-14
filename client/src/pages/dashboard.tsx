@@ -59,7 +59,7 @@ export default function Dashboard() {
     <div className="min-h-screen flex flex-col">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
-      <div className="flex-1 flex pt-16">
+      <div className="flex-1 flex">
         <Sidebar currentRole={currentRole} />
         
         <main className="flex-1 overflow-y-auto bg-gray-50">

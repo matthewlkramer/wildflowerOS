@@ -203,7 +203,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
         </DialogContent>
       </Dialog>
 
-      <nav className="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50 h-16">
+      <nav className="bg-white shadow-sm border-b border-gray-200 h-16">
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">

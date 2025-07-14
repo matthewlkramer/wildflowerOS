@@ -60,10 +60,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   const switchRoleMutation = useMutation({
     mutationFn: async (roleId: string) => {
       console.log("Making API request to switch role:", roleId);
-      const response = await apiRequest(`/api/user/switch-role`, {
-        method: 'POST',
-        body: { roleId },
-      });
+      const response = await apiRequest('POST', `/api/user/switch-role`, { roleId });
       console.log("API response:", response);
       return response;
     },

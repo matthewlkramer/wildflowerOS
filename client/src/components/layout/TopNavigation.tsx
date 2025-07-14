@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UserRole } from "@shared/schema";
-import { Users, GraduationCap, Heart, Building2, Shield, Star } from "lucide-react";
+import { Users, GraduationCap, Heart, Building2, Shield, Star, Bell, MessageCircle, ChevronDown, Settings, LogOut, User } from "lucide-react";
 
 interface TopNavigationProps {
   user: any;
@@ -148,7 +148,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
           <div className="flex items-center space-x-4">
             {/* Notifications */}
             <Button variant="ghost" size="sm" className="relative">
-              <i className="fas fa-bell"></i>
+              <Bell className="h-4 w-4" />
               {notificationCount > 0 && (
                 <Badge 
                   className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center p-0"
@@ -160,7 +160,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             
             {/* Messages */}
             <Button variant="ghost" size="sm" className="relative">
-              <i className="fas fa-comment"></i>
+              <MessageCircle className="h-4 w-4" />
               {messageCount > 0 && (
                 <Badge 
                   className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center p-0"
@@ -188,20 +188,20 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                     </div>
                   )}
                   <span className="text-gray-700 font-medium">{user.firstName}</span>
-                  <i className="fas fa-chevron-down text-gray-400"></i>
+                  <ChevronDown className="h-4 w-4 text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
-                  <i className="fas fa-user mr-2"></i>
+                  <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <i className="fas fa-cog mr-2"></i>
+                  <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>
-                  <i className="fas fa-sign-out-alt mr-2"></i>
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -59,12 +59,16 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   // Role switching mutation
   const switchRoleMutation = useMutation({
     mutationFn: async (roleId: string) => {
-      return apiRequest(`/api/user/switch-role`, {
+      console.log("Making API request to switch role:", roleId);
+      const response = await apiRequest(`/api/user/switch-role`, {
         method: 'POST',
         body: { roleId },
       });
+      console.log("API response:", response);
+      return response;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Role switch success:", data);
       queryClient.invalidateQueries({ queryKey: ['/api/user/current-role'] });
       queryClient.invalidateQueries({ queryKey: ['/api/user/roles'] });
       toast({
@@ -75,6 +79,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
       window.location.reload();
     },
     onError: (error: Error) => {
+      console.error("Role switch error:", error);
       toast({
         title: "Error switching role",
         description: error.message,

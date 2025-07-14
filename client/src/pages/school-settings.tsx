@@ -255,7 +255,129 @@ function RoleTree({ showSSJ, networkDefaultOnly = false }: { showSSJ: boolean, n
   );
 }
 
-// Academic Calendar Component
+// Academic Calendar Overview Component
+function AcademicCalendarOverview({ 
+  schoolYears, 
+  selectedSchoolYear, 
+  onSchoolYearSelect 
+}: { 
+  schoolYears: any[], 
+  selectedSchoolYear: any,
+  onSchoolYearSelect: (year: any) => void 
+}) {
+  // Default to active school year if none selected
+  const displayYear = selectedSchoolYear || schoolYears.find((year: any) => year.isActive) || schoolYears[0];
+
+  // Fetch academic calendar for display year
+  const { data: academicCalendar } = useQuery({
+    queryKey: ["/api/school-years", displayYear?.id, "calendar"],
+    enabled: !!displayYear?.id,
+  });
+
+  const { data: calendarClosures } = useQuery({
+    queryKey: ["/api/academic-calendars", academicCalendar?.id, "closures"],
+    enabled: !!academicCalendar?.id,
+  });
+
+  if (!displayYear) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Academic Calendar Overview</CardTitle>
+          <Select 
+            value={displayYear.id} 
+            onValueChange={(yearId) => {
+              const year = schoolYears.find(y => y.id === yearId);
+              onSchoolYearSelect(year);
+            }}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {schoolYears.map((year: any) => (
+                <SelectItem key={year.id} value={year.id}>
+                  {year.name} {year.isActive && "(Current)"}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* First Day */}
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-800">First Day of School</h4>
+            <p className="text-sm text-blue-600 mt-1">
+              {academicCalendar?.firstDayOfSchool 
+                ? new Date(academicCalendar.firstDayOfSchool).toLocaleDateString()
+                : "Not set"
+              }
+            </p>
+          </div>
+          
+          {/* Last Day */}
+          <div className="p-4 bg-purple-50 rounded-lg">
+            <h4 className="font-medium text-purple-800">Last Day of School</h4>
+            <p className="text-sm text-purple-600 mt-1">
+              {academicCalendar?.lastDayOfSchool 
+                ? new Date(academicCalendar.lastDayOfSchool).toLocaleDateString()
+                : "Not set"
+              }
+            </p>
+          </div>
+
+          {/* Holidays Count */}
+          <div className="p-4 bg-green-50 rounded-lg">
+            <h4 className="font-medium text-green-800">Holidays & Closures</h4>
+            <p className="text-sm text-green-600 mt-1">
+              {calendarClosures?.length || 0} scheduled
+            </p>
+          </div>
+
+          {/* Quick Action */}
+          <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => onSchoolYearSelect(displayYear)}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Calendar
+            </Button>
+          </div>
+        </div>
+
+        {/* Recent Holidays */}
+        {calendarClosures && calendarClosures.length > 0 && (
+          <div className="mt-6">
+            <h4 className="font-medium mb-3">Upcoming Holidays & Closures</h4>
+            <div className="space-y-2">
+              {calendarClosures
+                .filter((closure: any) => new Date(closure.date) >= new Date())
+                .slice(0, 3)
+                .map((closure: any) => (
+                  <div key={closure.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                    <div>
+                      <span className="font-medium">{closure.name}</span>
+                      <span className="text-sm text-gray-600 ml-2">
+                        {new Date(closure.date).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// Academic Calendar Dialog Component
 function AcademicCalendarView({ schoolYear }: { schoolYear: any }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -1027,6 +1149,13 @@ export default function SchoolSettingsPage() {
     setSelectedSchoolYear(year);
     setShowCalendar(true);
   };
+
+  // Update selected school year when clicking Edit Calendar from overview
+  useEffect(() => {
+    if (selectedSchoolYear && !showCalendar) {
+      setShowCalendar(true);
+    }
+  }, [selectedSchoolYear]);
 
   const getRoleColor = (role: string) => {
     switch (role) {
@@ -2273,6 +2402,13 @@ export default function SchoolSettingsPage() {
 
           {/* School Years Tab */}
           <TabsContent value="school-years" className="space-y-6">
+            {/* Academic Calendar Overview */}
+            <AcademicCalendarOverview 
+              schoolYears={schoolYears} 
+              selectedSchoolYear={selectedSchoolYear}
+              onSchoolYearSelect={setSelectedSchoolYear}
+            />
+            
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">

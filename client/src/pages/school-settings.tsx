@@ -57,7 +57,7 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 
 // Role Tree Component
-function RoleTree({ showSSJ }: { showSSJ: boolean }) {
+function RoleTree({ showSSJ, networkDefaultOnly = false }: { showSSJ: boolean, networkDefaultOnly?: boolean }) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
   // Fetch role definitions based on toggle state
@@ -83,6 +83,11 @@ function RoleTree({ showSSJ }: { showSSJ: boolean }) {
     const hierarchy: any = {};
     
     roles.forEach(role => {
+      // Filter to only show network default roles if specified
+      if (networkDefaultOnly && !role.networkDefault) {
+        return;
+      }
+      
       const parts = role.name.split('_');
       
       if (showSSJ) {
@@ -228,11 +233,7 @@ function RoleTree({ showSSJ }: { showSSJ: boolean }) {
             {level > 0 && (
               <Badge variant="outline">{node.count} {node.count === 1 ? 'role' : 'roles'}</Badge>
             )}
-            {node.active !== undefined && (
-              <Badge variant={node.active ? "default" : "secondary"}>
-                {node.active ? "Active" : "Inactive"}
-              </Badge>
-            )}
+
             <Button variant="outline" size="sm">
               <Edit className="h-3 w-3" />
             </Button>
@@ -1158,11 +1159,11 @@ export default function SchoolSettingsPage() {
                           <CardContent>
                             <div className="space-y-4">
                               <div className="text-sm text-gray-600 mb-4">
-                                These role definitions will be automatically available in every new school that joins the network. The "Active" badge indicates roles that are currently enabled and available for assignment.
+                                These role definitions will be automatically available in every new school that joins the network.
                               </div>
                               
                               {/* Role tree structure matching school version */}
-                              <RoleTree showSSJ={false} />
+                              <RoleTree showSSJ={false} networkDefaultOnly={true} />
                             </div>
                           </CardContent>
                         </Card>

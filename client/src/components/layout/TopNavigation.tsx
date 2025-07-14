@@ -117,7 +117,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.id || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-40 border-gray-300">
+                <SelectTrigger className="w-20 border-gray-300">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
                       <span className="truncate">{getContextDisplayName()}</span>

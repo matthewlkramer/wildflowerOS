@@ -86,7 +86,24 @@ function RoleTree() {
       const parts = role.name.split('_');
       let current = hierarchy;
       
-      // Build the nested structure
+      // Special handling for sysadmin - treat as single level
+      if (parts[0] === 'sysadmin') {
+        if (!current['sysadmin']) {
+          current['sysadmin'] = {
+            id: 'sysadmin',
+            name: 'sysadmin',
+            displayName: 'Systems Administrator',
+            description: 'System administration and technical oversight',
+            active: role.networkDefault,
+            children: {},
+            isLeaf: true,
+            level: 1
+          };
+        }
+        return; // Skip building nested structure for sysadmin
+      }
+      
+      // Build the nested structure for other roles
       for (let i = 0; i < parts.length; i++) {
         const part = parts[i];
         const fullPath = parts.slice(0, i + 1).join('_');

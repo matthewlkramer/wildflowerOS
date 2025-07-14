@@ -138,8 +138,8 @@ export default function FamiliesPage() {
         
         <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
           <div className="max-w-6xl mx-auto">
-        {/* Page Header */}
-        <div className="mb-8">
+            {/* Page Header */}
+            <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900 flex items-center">

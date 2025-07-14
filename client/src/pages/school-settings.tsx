@@ -178,6 +178,50 @@ export default function SchoolSettingsPage() {
     },
   });
 
+  // Update classroom mutation
+  const updateClassroomMutation = useMutation({
+    mutationFn: async (classroomData: any) => {
+      return apiRequest('PATCH', `/api/classrooms/${classroomData.id}`, classroomData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "classrooms"] });
+      setEditingClassroom(null);
+      setClassroomForm({ name: "", level: "primary", capacity: "", ageRange: "3-6 years", description: "" });
+      toast({
+        title: "Classroom updated",
+        description: "Classroom has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating classroom",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete classroom mutation
+  const deleteClassroomMutation = useMutation({
+    mutationFn: async (classroomId: string) => {
+      return apiRequest('DELETE', `/api/classrooms/${classroomId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "classrooms"] });
+      toast({
+        title: "Classroom deleted",
+        description: "Classroom has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting classroom",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Add tuition plan mutation
   const addTuitionPlanMutation = useMutation({
     mutationFn: async (tuitionData: any) => {
@@ -252,8 +296,33 @@ export default function SchoolSettingsPage() {
   const handleAddClassroom = () => {
     addClassroomMutation.mutate({
       ...classroomForm,
-      capacity: parseInt(classroomForm.capacity),
+      capacity: parseInt(classroomForm.capacity) || null,
     });
+  };
+
+  const handleEditClassroom = (classroom: any) => {
+    setClassroomForm({
+      name: classroom.name,
+      level: classroom.level,
+      capacity: classroom.capacity?.toString() || "",
+      ageRange: classroom.ageRange || levelAgeRanges[classroom.level as keyof typeof levelAgeRanges] || "",
+      description: classroom.description || ""
+    });
+    setEditingClassroom(classroom);
+  };
+
+  const handleUpdateClassroom = () => {
+    updateClassroomMutation.mutate({
+      id: editingClassroom.id,
+      ...classroomForm,
+      capacity: parseInt(classroomForm.capacity) || null,
+    });
+  };
+
+  const handleDeleteClassroom = (classroomId: string) => {
+    if (confirm("Are you sure you want to delete this classroom? This action cannot be undone.")) {
+      deleteClassroomMutation.mutate(classroomId);
+    }
   };
 
   const handleLevelChange = (level: string) => {
@@ -575,6 +644,78 @@ export default function SchoolSettingsPage() {
                       </div>
                     </DialogContent>
                   </Dialog>
+
+                  {/* Edit Classroom Dialog */}
+                  <Dialog open={editingClassroom !== null} onOpenChange={(open) => !open && setEditingClassroom(null)}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Classroom</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Classroom Name</Label>
+                          <Input
+                            value={classroomForm.name}
+                            onChange={(e) => setClassroomForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Maple Room, Oak Room"
+                          />
+                        </div>
+                        <div>
+                          <Label>Level</Label>
+                          <Select value={classroomForm.level} onValueChange={handleLevelChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="infant">Infant (0-18 months)</SelectItem>
+                              <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
+                              <SelectItem value="primary">Primary (3-6 years)</SelectItem>
+                              <SelectItem value="lower_elem">Lower Elementary (6-9 years)</SelectItem>
+                              <SelectItem value="upper_elem">Upper Elementary (9-12 years)</SelectItem>
+                              <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
+                              <SelectItem value="high_school">High School (15-18 years)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Capacity</Label>
+                            <Input
+                              type="number"
+                              value={classroomForm.capacity}
+                              onChange={(e) => setClassroomForm(prev => ({ ...prev, capacity: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>Age Range</Label>
+                            <Input
+                              value={classroomForm.ageRange}
+                              onChange={(e) => setClassroomForm(prev => ({ ...prev, ageRange: e.target.value }))}
+                              placeholder="e.g., 3-6 years"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Description</Label>
+                          <Textarea
+                            value={classroomForm.description}
+                            onChange={(e) => setClassroomForm(prev => ({ ...prev, description: e.target.value }))}
+                          />
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setEditingClassroom(null)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleUpdateClassroom}
+                            disabled={!classroomForm.name || !classroomForm.level || updateClassroomMutation.isPending}
+                          >
+                            {updateClassroomMutation.isPending ? "Updating..." : "Update Classroom"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardHeader>
               <CardContent>
@@ -605,10 +746,18 @@ export default function SchoolSettingsPage() {
                         )}
                       </div>
                       <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditClassroom(classroom)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteClassroom(classroom.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

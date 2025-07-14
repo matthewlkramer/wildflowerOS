@@ -734,7 +734,7 @@ export default function FamilyDetailsPage() {
 
               {/* Communication Tab */}
               <TabsContent value="communication" className="space-y-6">
-            <Card>
+                <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <MessageCircle className="mr-2 h-5 w-5" />
@@ -751,11 +751,11 @@ export default function FamilyDetailsPage() {
                   </Button>
                 </div>
               </CardContent>
-            </Card>
+                </Card>
               </TabsContent>
             </Tabs>
 
-        {/* Edit Family Dialog */}
+            {/* Edit Family Dialog */}
         <Dialog open={editingFamily} onOpenChange={setEditingFamily}>
           <DialogContent className="max-w-md">
             <DialogHeader>

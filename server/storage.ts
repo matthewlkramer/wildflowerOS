@@ -73,6 +73,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, count, sql, isNull, isNotNull, or, lte, gte, gt, like } from "drizzle-orm";
+import { HolidayService } from "./holidayService";
 
 export interface IStorage {
   // User operations (mandatory for Replit Auth)
@@ -946,80 +947,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async createNetworkDefaultHolidays(schoolYear: SchoolYear): Promise<void> {
-    // Get system holiday rules (templates)
-    const systemHolidays = await this.getSystemHolidays();
+    const holidayService = new HolidayService();
     const startDate = new Date(schoolYear.startDate!);
     const year = startDate.getFullYear();
     
-    // Create network default holidays for this specific year (without academic calendar - those will be created when schools adopt the year)
-    const holidayPromises = systemHolidays.map(async (holiday) => {
-      let holidayDate = null;
-      
-      // Convert rules to specific dates for this school year
-      if (holiday.rule || holiday.name) {
-        if (holiday.name.includes('Labor Day')) {
-          // First Monday in September
-          holidayDate = this.getFirstMondayOfMonth(year, 8);
-        } else if (holiday.name.includes('Indigenous Peoples')) {
-          // Second Monday in October 
-          holidayDate = this.getNthMondayOfMonth(year, 9, 2);
-        } else if (holiday.name.includes('Veterans Day')) {
-          holidayDate = new Date(year, 10, 11); // November 11
-        } else if (holiday.name.includes('Thanksgiving')) {
-          // Fourth Thursday in November
-          holidayDate = this.getNthThursdayOfMonth(year, 10, 4);
-        } else if (holiday.name.includes('Winter Break')) {
-          holidayDate = new Date(year, 11, 23); // December 23
-        } else if (holiday.name.includes('MLK')) {
-          // Third Monday in January (next year)
-          holidayDate = this.getNthMondayOfMonth(year + 1, 0, 3);
-        } else if (holiday.name.includes('Presidents')) {
-          // Third Monday in February (next year)
-          holidayDate = this.getNthMondayOfMonth(year + 1, 1, 3);
-        } else if (holiday.name.includes('Good Friday')) {
-          // Easter calculation - simplified to approximate
-          holidayDate = new Date(year + 1, 3, 15); // Approximate April 15
-        } else if (holiday.name.includes('Memorial Day')) {
-          // Last Monday in May (next year)
-          holidayDate = this.getLastMondayOfMonth(year + 1, 4);
-        } else if (holiday.name.includes('Juneteenth')) {
-          holidayDate = new Date(year + 1, 5, 19); // June 19 (next year)
-        } else if (holiday.name.includes('Rosh Hashanah')) {
-          // Approximate date for Rosh Hashanah (usually September/October)
-          holidayDate = new Date(year, 8, 15); // September 15 (approximate)
-        } else if (holiday.name.includes('Yom Kippur')) {
-          // Approximate date for Yom Kippur (10 days after Rosh Hashanah)
-          holidayDate = new Date(year, 8, 25); // September 25 (approximate)
-        } else if (holiday.name.includes('Eid')) {
-          // Eid can occur twice a year, using approximate spring date
-          holidayDate = new Date(year + 1, 3, 10); // April 10 (approximate)
-        }
-      } else {
-        // For holidays without rules, create approximate dates based on name
-        if (holiday.name.includes('Rosh Hashanah')) {
-          holidayDate = new Date(year, 8, 15); // September 15
-        } else if (holiday.name.includes('Yom Kippur')) {
-          holidayDate = new Date(year, 8, 25); // September 25
-        } else if (holiday.name.includes('Eid')) {
-          holidayDate = new Date(year + 1, 3, 10); // April 10
-        }
-      }
-      
-      if (holidayDate) {
-        return db.insert(calendarClosures).values({
-          name: holiday.name,
-          description: holiday.description,
-          rule: holiday.rule,
-          date: holidayDate,
-          networkDefault: true,
-          schoolId: null, // Network defaults
-          schoolYearId: schoolYear.id, // Link to the network school year
-          active: true
-        });
-      }
+    // Get holiday periods from Google Calendar API with proper durations
+    const holidayPeriods = await holidayService.getHolidaysForYear(year);
+    
+    // Create network default holidays for this specific year
+    const holidayPromises = Array.from(holidayPeriods.values()).map(async (holidayPeriod) => {
+      return db.insert(calendarClosures).values({
+        name: holidayPeriod.name,
+        description: `${holidayPeriod.duration} day${holidayPeriod.duration > 1 ? 's' : ''} holiday`,
+        date: holidayPeriod.startDate, // Backward compatibility
+        startDate: holidayPeriod.startDate,
+        endDate: holidayPeriod.endDate,
+        duration: holidayPeriod.duration,
+        networkDefault: true,
+        schoolId: null, // Network defaults
+        schoolYearId: schoolYear.id, // Link to the network school year
+        active: true
+      });
     });
     
-    await Promise.all(holidayPromises.filter(p => p));
+    await Promise.all(holidayPromises);
   }
 
   // Helper methods for date calculations

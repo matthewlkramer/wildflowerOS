@@ -118,10 +118,7 @@ export default function SchoolSettingsPage() {
   // Add staff mutation
   const addStaffMutation = useMutation({
     mutationFn: async (staffData: any) => {
-      return apiRequest(`/api/schools/${schoolId}/staff`, {
-        method: 'POST',
-        body: staffData,
-      });
+      return apiRequest('POST', `/api/schools/${schoolId}/staff`, staffData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "staff"] });
@@ -144,10 +141,7 @@ export default function SchoolSettingsPage() {
   // Add classroom mutation
   const addClassroomMutation = useMutation({
     mutationFn: async (classroomData: any) => {
-      return apiRequest(`/api/schools/${schoolId}/classrooms`, {
-        method: 'POST',
-        body: { ...classroomData, schoolId },
-      });
+      return apiRequest('POST', `/api/schools/${schoolId}/classrooms`, { ...classroomData, schoolId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "classrooms"] });
@@ -170,10 +164,7 @@ export default function SchoolSettingsPage() {
   // Add tuition plan mutation
   const addTuitionPlanMutation = useMutation({
     mutationFn: async (tuitionData: any) => {
-      return apiRequest(`/api/schools/${schoolId}/tuition-plans`, {
-        method: 'POST',
-        body: { ...tuitionData, schoolId },
-      });
+      return apiRequest('POST', `/api/schools/${schoolId}/tuition-plans`, { ...tuitionData, schoolId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "tuition-plans"] });
@@ -196,10 +187,7 @@ export default function SchoolSettingsPage() {
   // Add school year mutation
   const addSchoolYearMutation = useMutation({
     mutationFn: async (schoolYearData: any) => {
-      return apiRequest(`/api/schools/${schoolId}/school-years`, {
-        method: 'POST',
-        body: schoolYearData,
-      });
+      return apiRequest('POST', `/api/schools/${schoolId}/school-years`, schoolYearData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
@@ -222,9 +210,7 @@ export default function SchoolSettingsPage() {
   // Set active school year mutation
   const setActiveSchoolYearMutation = useMutation({
     mutationFn: async (yearId: string) => {
-      return apiRequest(`/api/school-years/${yearId}/set-active`, {
-        method: 'PATCH',
-      });
+      return apiRequest('PATCH', `/api/school-years/${yearId}/set-active`, {});
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });

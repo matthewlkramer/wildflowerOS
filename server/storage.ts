@@ -1112,7 +1112,13 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(calendarClosures)
-      .where(eq(calendarClosures.schoolYearId, schoolYearId))
+      .where(
+        and(
+          eq(calendarClosures.schoolYearId, schoolYearId),
+          eq(calendarClosures.networkDefault, true),
+          isNull(calendarClosures.schoolId) // Only network defaults, not school-specific
+        )
+      )
       .orderBy(asc(calendarClosures.date));
   }
 

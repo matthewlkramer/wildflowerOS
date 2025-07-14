@@ -536,10 +536,13 @@ export default function SchoolSettingsPage() {
   });
 
   // Fetch staff
-  const { data: staff = [] } = useQuery({
+  const { data: staff = [], isLoading: staffLoading, error: staffError } = useQuery({
     queryKey: ["/api/schools", schoolId, "staff"],
     enabled: !!schoolId,
   });
+
+  // Debug logging
+  console.log('Staff data:', { staff, staffLoading, staffError, schoolId });
 
   // Fetch classrooms
   const { data: classrooms = [] } = useQuery({

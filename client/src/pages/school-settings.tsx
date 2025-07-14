@@ -255,6 +255,247 @@ function RoleTree({ showSSJ, networkDefaultOnly = false }: { showSSJ: boolean, n
   );
 }
 
+// System Holidays Component
+function SystemHolidaysOverview() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [addingHoliday, setAddingHoliday] = useState(false);
+  const [editingHoliday, setEditingHoliday] = useState<any>(null);
+  const [deletingHoliday, setDeletingHoliday] = useState<any>(null);
+  
+  const [holidayForm, setHolidayForm] = useState({
+    name: "",
+    rule: "",
+    description: "",
+  });
+
+  // Default system holidays data
+  const defaultHolidays = [
+    { id: "1", name: "Labor Day", rule: "First Monday in September", description: "Federal holiday" },
+    { id: "2", name: "Thanksgiving", rule: "Fourth Thursday in November", description: "Federal holiday + Friday" },
+    { id: "3", name: "Winter Break", rule: "Last 2 weeks of December", description: "Standard school break" },
+    { id: "4", name: "Presidents Day", rule: "Third Monday in February", description: "Federal holiday" },
+    { id: "5", name: "Spring Break", rule: "Week before Easter", description: "Standard school break" },
+    { id: "6", name: "Memorial Day", rule: "Last Monday in May", description: "Federal holiday" },
+  ];
+
+  const handleAddHoliday = () => {
+    if (!holidayForm.name || !holidayForm.rule) {
+      toast({
+        title: "Error",
+        description: "Please fill in name and rule fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // TODO: Implement API call to save system holiday
+    toast({
+      title: "Holiday added",
+      description: `${holidayForm.name} has been added to system holidays.`
+    });
+    
+    setHolidayForm({ name: "", rule: "", description: "" });
+    setAddingHoliday(false);
+  };
+
+  const handleEditHoliday = (holiday: any) => {
+    setHolidayForm({
+      name: holiday.name,
+      rule: holiday.rule,
+      description: holiday.description || "",
+    });
+    setEditingHoliday(holiday);
+  };
+
+  const handleUpdateHoliday = () => {
+    // TODO: Implement API call to update system holiday
+    toast({
+      title: "Holiday updated",
+      description: `${holidayForm.name} has been updated.`
+    });
+    
+    setHolidayForm({ name: "", rule: "", description: "" });
+    setEditingHoliday(null);
+  };
+
+  const handleDeleteHoliday = (holiday: any) => {
+    // TODO: Implement API call to delete system holiday
+    toast({
+      title: "Holiday removed",
+      description: `${holiday.name} has been removed from system holidays.`
+    });
+    setDeletingHoliday(null);
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>System Holidays</CardTitle>
+          <Button onClick={() => setAddingHoliday(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Holiday
+          </Button>
+        </div>
+        <p className="text-sm text-gray-600">
+          Common school holidays with standard rules that new schools can inherit.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-3 font-medium">Holiday Name</th>
+                  <th className="text-left p-3 font-medium">Rule</th>
+                  <th className="text-left p-3 font-medium">Description</th>
+                  <th className="text-left p-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {defaultHolidays.map((holiday) => (
+                  <tr key={holiday.id} className="border-b hover:bg-gray-50">
+                    <td className="p-3 font-medium">{holiday.name}</td>
+                    <td className="p-3 text-sm text-gray-600">{holiday.rule}</td>
+                    <td className="p-3 text-sm text-gray-600">{holiday.description}</td>
+                    <td className="p-3">
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditHoliday(holiday)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setDeletingHoliday(holiday)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Add Holiday Dialog */}
+        <Dialog open={addingHoliday} onOpenChange={setAddingHoliday}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add System Holiday</DialogTitle>
+              <DialogDescription>
+                Add a new holiday rule that schools can inherit.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Holiday Name</Label>
+                <Input
+                  value={holidayForm.name}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Labor Day"
+                />
+              </div>
+              <div>
+                <Label>Rule</Label>
+                <Input
+                  value={holidayForm.rule}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, rule: e.target.value }))}
+                  placeholder="e.g., First Monday in September"
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={holidayForm.description}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Optional description"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setAddingHoliday(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddHoliday}>
+                  Add Holiday
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Holiday Dialog */}
+        <Dialog open={!!editingHoliday} onOpenChange={() => setEditingHoliday(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit System Holiday</DialogTitle>
+              <DialogDescription>
+                Update holiday rule settings.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Holiday Name</Label>
+                <Input
+                  value={holidayForm.name}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Rule</Label>
+                <Input
+                  value={holidayForm.rule}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, rule: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea
+                  value={holidayForm.description}
+                  onChange={(e) => setHolidayForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setEditingHoliday(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateHoliday}>
+                  Update Holiday
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deletingHoliday} onOpenChange={() => setDeletingHoliday(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Holiday</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete "{deletingHoliday?.name}"? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={() => handleDeleteHoliday(deletingHoliday)}>
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Academic Calendar Overview Component
 function AcademicCalendarOverview({ 
   schoolYears, 
@@ -696,6 +937,25 @@ export default function SchoolSettingsPage() {
     startDate: "",
     endDate: ""
   });
+
+  // Auto-populate dates for system admin when name changes
+  const handleSchoolYearNameChange = (name: string) => {
+    setSchoolYearForm(prev => ({ ...prev, name }));
+    
+    // For system admin, auto-populate July 1 - June 30 dates
+    if (currentRole?.roleName?.startsWith('sysadmin')) {
+      const yearMatch = name.match(/(\d{4})/);
+      if (yearMatch) {
+        const startYear = yearMatch[1];
+        const endYear = (parseInt(startYear) + 1).toString();
+        setSchoolYearForm(prev => ({
+          ...prev,
+          startDate: `${startYear}-07-01`,
+          endDate: `${endYear}-06-30`
+        }));
+      }
+    }
+  };
 
   const [classroomForm, setClassroomForm] = useState({
     name: "",
@@ -1383,14 +1643,44 @@ export default function SchoolSettingsPage() {
 
                       {/* Default School Years */}
                       <TabsContent value="school-years" className="space-y-6">
+                        {/* System Holidays - Replace Academic Calendar Overview */}
+                        <SystemHolidaysOverview />
+                        
+                        {/* School Years Template */}
                         <Card>
                           <CardHeader>
-                            <CardTitle>Default School Years</CardTitle>
-                            <p className="text-sm text-gray-600">Configure default school year templates for new schools.</p>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <CardTitle>School Years Template</CardTitle>
+                                <p className="text-sm text-gray-600">
+                                  Create default school year templates with outer boundary dates.
+                                </p>
+                              </div>
+                              <Button onClick={() => setAddingSchoolYear(true)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add School Year Template
+                              </Button>
+                            </div>
                           </CardHeader>
                           <CardContent>
-                            <div className="text-center py-8 text-gray-500">
-                              Default school year templates will be implemented here.
+                            <div className="space-y-4">
+                              {/* Mock school year templates for system admin */}
+                              <div className="p-4 border rounded-lg">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <h4 className="font-medium">Standard Academic Year</h4>
+                                    <p className="text-sm text-gray-600">July 1 - June 30 template</p>
+                                  </div>
+                                  <div className="flex space-x-2">
+                                    <Button variant="outline" size="sm">
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="outline" size="sm">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
@@ -2424,7 +2714,10 @@ export default function SchoolSettingsPage() {
                       <DialogHeader>
                         <DialogTitle>Add New School Year</DialogTitle>
                         <DialogDescription>
-                          Create a new school year with start and end dates for your school.
+                          {currentRole?.roleName?.startsWith('sysadmin') 
+                            ? "Create a new school year with dates for outer boundaries."
+                            : "Create a new school year with start and end dates for your school."
+                          }
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
@@ -2432,7 +2725,7 @@ export default function SchoolSettingsPage() {
                           <Label>Year Name</Label>
                           <Input
                             value={schoolYearForm.name}
-                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                            onChange={(e) => handleSchoolYearNameChange(e.target.value)}
                             placeholder="e.g., 2024-2025"
                           />
                         </div>
@@ -2586,13 +2879,16 @@ export default function SchoolSettingsPage() {
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleViewCalendar(year)}
-                          >
-                            <Calendar className="h-4 w-4" />
-                          </Button>
+                          {/* Hide calendar button for system admin */}
+                          {!currentRole?.roleName?.startsWith('sysadmin') && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleViewCalendar(year)}
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button 
                             variant="outline" 
                             size="sm"

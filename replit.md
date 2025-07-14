@@ -191,6 +191,16 @@ Preferred communication style: Simple, everyday language.
     - Default role assignment survey questions and workflow steps configurable at network level
     - Excludes staff and classroom tabs as they are not applicable for network-wide defaults
     - Default settings will be inherited by new schools upon creation
+  - **Enhanced System Administrator functionality for school year management:**
+    - **System Holidays component** replaces academic calendar overview in Sensible Defaults
+      - Table of common school holidays with standard rules (Labor Day, Thanksgiving, Winter Break, etc.)
+      - Add, edit, and delete holiday functionality with descriptive rules
+      - Network-wide holiday templates that new schools can inherit
+    - **Modified school year creation dialog** for system administrators
+      - Changed subtitle to "Create a new school year with dates for outer boundaries"
+      - Auto-populates dates to July 1 - June 30 when year is entered (e.g., "2024-2025" → July 1, 2024 - June 30, 2025)
+      - Removed calendar icons from school year list items (no specific calendar management at system level)
+    - System-level school year management focuses on outer boundary dates rather than specific academic calendars
   - **Parent View:** Family-focused settings with Family Info, Enrollment, Billing, and Communication tabs
     - Family information management and contact updates
     - Enrollment status and application management

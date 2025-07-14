@@ -62,6 +62,16 @@ Preferred communication style: Simple, everyday language.
   - Updated IStorage interface to use getRolesByNamePrefix instead of getRolesByCategory
   - Addressed "Multiple Roles per Person" open issue with flexible role assignment system
   - User can now hold multiple simultaneous roles across different operational areas
+- **Fixed role switcher to work with Level 1 hierarchy and made settings always visible in navigation**
+  - Updated role switcher to extract Level 1 categories from hierarchical role names
+  - Fixed role display names to match new Level 1 naming (board, educator, parent, sysadmin)
+  - Made School Settings visible for all roles instead of disappearing on role changes
+  - **Complete Level 5 CSV Integration:** Added all 155 specific tasks from CSV files
+    - **33 startup tasks** covering board formation, marketing, finances, licensing, facility setup
+    - **122 ongoing operational tasks** covering all daily school management responsibilities
+    - **Full CSV mapping** from startup worksheet and ongoing operations spreadsheet
+    - Tasks span from high-level (fundraising efforts) to specific (purchase printer/scanner/copier)
+    - Complete coverage of Wildflower school operational requirements
 - **Completed functional role switching system with compact navigation**
   - Fixed apiRequest function call format to properly handle POST requests for role switching
   - Role switching now works seamlessly between all categories (Parent, Educator, Board Director, Systems Administrator)

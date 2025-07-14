@@ -19,12 +19,8 @@ export default function Sidebar({ currentRole }: SidebarProps) {
     { icon: "fas fa-book", label: "Knowledge Base", href: "/knowledge" },
   ];
 
-  const showSchoolSettings = currentRole?.category === "educator" || 
-                            currentRole?.category === "systems_admin" || 
-                            currentRole?.category === "board_director" ||
-                            currentRole?.name === "school_admin" ||
-                            currentRole?.name === "teacher_leader" ||
-                            currentRole?.name === "operations_manager";
+  // Show settings for all roles - no need to hide based on role type
+  const showSchoolSettings = true;
 
   return (
     <aside className="w-64 bg-white shadow-sm h-screen fixed top-16 left-0 overflow-y-auto hidden lg:block">

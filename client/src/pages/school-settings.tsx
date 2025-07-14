@@ -54,6 +54,12 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function SchoolSettingsPage() {
   const { user } = useAuth();
+  
+  // Get current role from API
+  const { data: currentRole } = useQuery({
+    queryKey: ["/api/user/current-role"],
+    enabled: !!user,
+  });
   const [activeTab, setActiveTab] = useState("staff");
   const [addingStaff, setAddingStaff] = useState(false);
   const [addingClassroom, setAddingClassroom] = useState(false);
@@ -106,10 +112,7 @@ export default function SchoolSettingsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get current user's school context
-  const { data: currentRole } = useQuery({
-    queryKey: ['/api/user/current-role'],
-  });
+  // Get current user's school context from the current role
 
   const schoolId = currentRole?.schoolId;
 
@@ -388,6 +391,7 @@ export default function SchoolSettingsPage() {
   };
 
   const formatRole = (role: string) => {
+    if (!role) return "";
     return role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   };
 
@@ -406,14 +410,13 @@ export default function SchoolSettingsPage() {
 
   // Get current school context for navigation
   const currentSchoolForNav = school;
-  const currentRoleForNav = currentRole;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRoleForNav} />
+      <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
       <div className="flex pt-16">
-        <Sidebar currentRole={currentRoleForNav} />
+        <Sidebar currentRole={currentRole} />
         
         <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
           <div className="max-w-6xl mx-auto">

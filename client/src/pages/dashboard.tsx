@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
@@ -14,6 +15,12 @@ import FamilyManagement from "@/components/families/FamilyManagement";
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  
+  // Get current role from API
+  const { data: currentRole } = useQuery({
+    queryKey: ["/api/user/current-role"],
+    enabled: isAuthenticated,
+  });
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -47,7 +54,6 @@ export default function Dashboard() {
 
   // Get current school context (first school for now)
   const currentSchool = user.schools?.[0];
-  const currentRole = user.roles?.[0];
 
   return (
     <div className="min-h-screen bg-gray-50">

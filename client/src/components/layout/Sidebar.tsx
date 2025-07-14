@@ -25,7 +25,9 @@ export default function Sidebar({ currentRole }: SidebarProps) {
     { icon: "fas fa-chart-bar", label: "Analytics", href: "/analytics" },
   ];
 
-  const showManagement = currentRole?.roleCategory === "educator" || currentRole?.roleCategory === "systems_administrator" || currentRole?.roleName === "school_admin";
+  const showManagement = currentRole?.roleCategory === "educator" || 
+                        currentRole?.roleCategory === "systems_administrator" || 
+                        currentRole?.roleDefinition?.name === "school_admin";
 
   return (
     <aside className="w-64 bg-white shadow-sm h-screen fixed top-16 left-0 overflow-y-auto hidden lg:block">

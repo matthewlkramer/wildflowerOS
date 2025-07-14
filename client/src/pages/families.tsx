@@ -31,14 +31,17 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function FamiliesPage() {
   const { user } = useAuth();
+  
+  // Get current role from API
+  const { data: currentRole } = useQuery({
+    queryKey: ["/api/user/current-role"],
+    enabled: !!user,
+  });
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [classroomFilter, setClassroomFilter] = useState("all");
 
-  // Get current user's school context
-  const { data: currentRole } = useQuery({
-    queryKey: ['/api/user/current-role'],
-  });
+  // Get current user's school context from the current role
 
   const schoolId = currentRole?.schoolId;
 

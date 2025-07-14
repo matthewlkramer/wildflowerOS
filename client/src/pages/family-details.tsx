@@ -63,6 +63,12 @@ export default function FamilyDetailsPage() {
   const { user } = useAuth();
   const [, params] = useRoute("/families/:familyId");
   const familyId = params?.familyId;
+  
+  // Get current role from API
+  const { data: currentRole } = useQuery({
+    queryKey: ["/api/user/current-role"],
+    enabled: !!user,
+  });
   const [editingFamily, setEditingFamily] = useState(false);
   const [addingChild, setAddingChild] = useState(false);
   const [newChildForm, setNewChildForm] = useState({
@@ -83,10 +89,7 @@ export default function FamilyDetailsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Get current user's school context
-  const { data: currentRole } = useQuery({
-    queryKey: ['/api/user/current-role'],
-  });
+  // Get current user's school context from the current role
 
   const schoolId = currentRole?.schoolId;
 

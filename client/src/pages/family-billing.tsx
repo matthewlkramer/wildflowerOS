@@ -46,6 +46,12 @@ export default function FamilyBillingPage() {
   const { user } = useAuth();
   const [, params] = useRoute("/families/:familyId/billing");
   const familyId = params?.familyId;
+  
+  // Get current role from API
+  const { data: currentRole } = useQuery({
+    queryKey: ["/api/user/current-role"],
+    enabled: !!user,
+  });
   const [editingBilling, setEditingBilling] = useState(false);
   const [creatingInvoice, setCreatingInvoice] = useState(false);
   const [billingForm, setBillingForm] = useState({
@@ -209,8 +215,14 @@ export default function FamilyBillingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50">
+      <TopNavigation user={user} currentSchool={null} currentRole={currentRole} />
+      
+      <div className="flex pt-16">
+        <Sidebar currentRole={currentRole} />
+        
+        <main className="flex-1 p-4 lg:p-6 max-w-full overflow-x-hidden lg:ml-64">
+          <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -584,7 +596,11 @@ export default function FamilyBillingPage() {
             </div>
           </DialogContent>
         </Dialog>
+          </div>
+        </main>
       </div>
+      
+      <MobileBottomNav />
     </div>
   );
 }

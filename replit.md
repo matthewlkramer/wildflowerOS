@@ -1,0 +1,126 @@
+# Wildflower Schools Network Platform
+
+## Overview
+
+This is a unified digital platform for the Wildflower Schools Network - a decentralized community of small, Montessori, teacher-led schools. The application serves teacher-leaders, staff, families, and administrators to manage school operations, student enrollment, communication, billing, and governance.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite for fast development and optimized builds
+- **UI Framework**: Tailwind CSS with Radix UI components (shadcn/ui)
+- **Routing**: Wouter for lightweight client-side routing
+- **State Management**: TanStack React Query for server state management
+- **Styling**: CSS-in-JS with CSS variables for theming
+
+### Backend Architecture
+- **Runtime**: Node.js with Express.js
+- **Language**: TypeScript with ES modules
+- **API Pattern**: RESTful API with conventional routes
+- **WebSocket**: Real-time communication support
+- **Session Management**: Express sessions with PostgreSQL store
+
+### Data Storage Solutions
+- **Primary Database**: PostgreSQL (configured for Neon serverless)
+- **ORM**: Drizzle ORM with schema-first approach
+- **Schema Location**: `/shared/schema.ts` for type-safe database operations
+- **Migrations**: Managed through Drizzle Kit
+
+## Key Components
+
+### Authentication & Authorization
+- **Provider**: Replit OpenID Connect (OIDC) integration
+- **Session Storage**: PostgreSQL-backed sessions with connect-pg-simple
+- **User Management**: Role-based access control with multiple roles per user
+- **Roles**: teacher_leader, teacher, assistant, aide, parent, board_member, central_staff, network_admin
+
+### Core Domain Models
+- **Users & Roles**: Flexible role assignment with school/entity context
+- **Schools & Classrooms**: Multi-school support with classroom management
+- **Families & Children**: Family-centric enrollment and management
+- **Tasks & Messages**: Communication and workflow management
+- **Billing & Finance**: Tuition management and payment processing
+
+### User Interface Components
+- **Responsive Design**: Mobile-first with desktop optimization
+- **Component Library**: Comprehensive shadcn/ui component set
+- **Navigation**: Context-aware sidebar and mobile bottom navigation
+- **Dashboard**: Role-specific widgets and quick actions
+- **Real-time Updates**: WebSocket integration for live updates
+
+## Data Flow
+
+### Client-Server Communication
+1. **Authentication Flow**: OIDC redirect → session creation → user context retrieval
+2. **API Requests**: RESTful endpoints with JSON payloads
+3. **Real-time Events**: WebSocket for notifications and live updates
+4. **Error Handling**: Centralized error boundaries with toast notifications
+
+### Data Management
+1. **Schema Definition**: Shared TypeScript types between client and server
+2. **Validation**: Zod schemas for runtime type checking
+3. **Queries**: TanStack Query with automatic caching and revalidation
+4. **Mutations**: Optimistic updates with rollback on failure
+
+## External Dependencies
+
+### Core Infrastructure
+- **Database**: Neon PostgreSQL serverless
+- **Authentication**: Replit OIDC provider
+- **Build Tools**: Vite, TypeScript, PostCSS, Autoprefixer
+
+### UI & Styling
+- **Component Library**: Radix UI primitives with shadcn/ui styling
+- **Icons**: Font Awesome (referenced in components)
+- **Styling**: Tailwind CSS with custom design tokens
+
+### Development Tools
+- **Runtime Error Handling**: Replit error overlay for development
+- **Code Splitting**: Vite-based automatic splitting
+- **Hot Reload**: Vite HMR with React Fast Refresh
+
+## Deployment Strategy
+
+### Development Environment
+- **Local Development**: Vite dev server with Express backend
+- **Hot Reload**: Full-stack hot reload with Vite middleware
+- **Database**: Neon development database with Drizzle migrations
+
+### Production Build
+- **Frontend**: Vite production build to `/dist/public`
+- **Backend**: ESBuild bundling of Express server to `/dist`
+- **Static Assets**: Served from Express in production mode
+- **Environment Variables**: DATABASE_URL, SESSION_SECRET, REPL_ID required
+
+### Deployment Process
+1. **Build Step**: `npm run build` creates optimized client and server bundles
+2. **Database Migration**: `npm run db:push` applies schema changes
+3. **Runtime**: Single Node.js process serving both API and static files
+4. **Session Storage**: PostgreSQL sessions table for user authentication
+
+## Architecture Decisions
+
+### Database Choice
+- **Problem**: Need reliable, scalable database with good TypeScript integration
+- **Solution**: PostgreSQL with Drizzle ORM
+- **Rationale**: Type-safe queries, excellent migration system, serverless-ready
+
+### UI Framework Selection
+- **Problem**: Need consistent, accessible UI components
+- **Solution**: Radix UI with Tailwind CSS and shadcn/ui
+- **Rationale**: Unstyled primitives with full customization, excellent accessibility
+
+### Authentication Strategy
+- **Problem**: Secure authentication for educational platform
+- **Solution**: Replit OIDC with session-based auth
+- **Rationale**: Leverages existing educational accounts, secure by default
+
+### Real-time Communication
+- **Problem**: Need live updates for collaborative features
+- **Solution**: WebSocket integration with fallback to polling
+- **Rationale**: Real-time user experience without complex infrastructure

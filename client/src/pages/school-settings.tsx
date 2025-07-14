@@ -1935,7 +1935,15 @@ export default function SchoolSettingsPage() {
                                     <div>
                                       <h4 className="font-medium">{year.name}</h4>
                                       <p className="text-sm text-gray-600">
-                                        {year.startDate ? new Date(year.startDate).toLocaleDateString() : 'No start date'} - {year.endDate ? new Date(year.endDate).toLocaleDateString() : 'No end date'}
+                                        {year.startDate ? (() => {
+                                          const dateStr = year.startDate.split('T')[0]; // Get just the date part
+                                          const [y, m, d] = dateStr.split('-');
+                                          return `${m}/${d}/${y}`;
+                                        })() : 'No start date'} - {year.endDate ? (() => {
+                                          const dateStr = year.endDate.split('T')[0]; // Get just the date part
+                                          const [y, m, d] = dateStr.split('-');
+                                          return `${m}/${d}/${y}`;
+                                        })() : 'No end date'}
                                       </p>
                                     </div>
                                     <div className="flex space-x-2">

@@ -45,6 +45,12 @@ Preferred communication style: Simple, everyday language.
 - **Families & Children**: Family-centric enrollment and management
 - **Tasks & Messages**: Communication and workflow management
 - **Billing & Finance**: Tuition management and payment processing
+- **Knowledge Base**: Posts, questions, answers, tags, ratings, and views
+- **Onboarding**: Checklists, items, and completion tracking
+- **Templates & Policies**: Document templates and policy management
+- **Board Governance**: Meetings, resolutions, and voting system
+- **Attendance & Assessments**: Student tracking and evaluation
+- **Analytics**: Enrollment projections and fundraising analytics
 
 ### User Interface Components
 - **Responsive Design**: Mobile-first with desktop optimization

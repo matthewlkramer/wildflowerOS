@@ -178,7 +178,17 @@ export class DatabaseStorage implements IStorage {
   // Families
   async getFamiliesBySchool(schoolId: string): Promise<Family[]> {
     return await db
-      .selectDistinct()
+      .selectDistinct({
+        id: families.id,
+        name: families.name,
+        address: families.address,
+        phone: families.phone,
+        email: families.email,
+        notes: families.notes,
+        primaryContactId: families.primaryContactId,
+        createdAt: families.createdAt,
+        updatedAt: families.updatedAt,
+      })
       .from(families)
       .innerJoin(children, eq(children.familyId, families.id))
       .innerJoin(enrollments, eq(enrollments.childId, children.id))
@@ -268,7 +278,18 @@ export class DatabaseStorage implements IStorage {
 
   async getTasksBySchool(schoolId: string): Promise<Task[]> {
     return await db
-      .select()
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        description: tasks.description,
+        status: tasks.status,
+        assignedToId: tasks.assignedToId,
+        dueDate: tasks.dueDate,
+        createdById: tasks.createdById,
+        commentChannelId: tasks.commentChannelId,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+      })
       .from(tasks)
       .innerJoin(userRoles, eq(userRoles.userId, tasks.assignedToId))
       .where(eq(userRoles.schoolId, schoolId))

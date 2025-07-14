@@ -344,9 +344,9 @@ function SystemHolidaysOverview() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-80 overflow-y-auto border rounded-lg">
             <table className="w-full border-collapse">
-              <thead>
+              <thead className="bg-gray-50 sticky top-0">
                 <tr className="border-b">
                   <th className="text-left p-3 font-medium">Holiday Name</th>
                   <th className="text-left p-3 font-medium">Rule</th>

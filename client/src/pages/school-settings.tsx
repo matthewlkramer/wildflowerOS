@@ -57,12 +57,12 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 
 // Role Tree Component
-function RoleTree() {
+function RoleTree({ showSSJ }: { showSSJ: boolean }) {
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
 
-  // Fetch only educator admin role definitions from the database
+  // Fetch role definitions based on toggle state
   const { data: roles = [] } = useQuery({
-    queryKey: ["/api/roles/educator_admin"],
+    queryKey: showSSJ ? ["/api/roles/educator_admin"] : ["/api/roles/educator_admin_ongoing"],
     enabled: true,
   });
 
@@ -78,41 +78,73 @@ function RoleTree() {
     });
   };
 
-  // Build hierarchical structure starting from level 3 (startup, ongoing)
+  // Build hierarchical structure based on toggle state
   const buildHierarchy = (roles: any[]) => {
     const hierarchy: any = {};
     
     roles.forEach(role => {
       const parts = role.name.split('_');
       
-      // Skip if not educator_admin role or if it has less than 3 parts
-      if (parts[0] !== 'educator' || parts[1] !== 'admin' || parts.length < 3) {
-        return;
-      }
-      
-      // Start from level 3 - skip the "educator_admin" prefix
-      const relevantParts = parts.slice(2);
-      let current = hierarchy;
-      
-      // Build the nested structure starting from level 3
-      for (let i = 0; i < relevantParts.length; i++) {
-        const part = relevantParts[i];
-        const fullPath = parts.slice(0, i + 3).join('_'); // Include "educator_admin" in the full path
-        
-        if (!current[part]) {
-          current[part] = {
-            id: fullPath,
-            name: part,
-            displayName: i === relevantParts.length - 1 ? role.displayName : part.charAt(0).toUpperCase() + part.slice(1),
-            description: i === relevantParts.length - 1 ? role.description : '',
-            active: role.networkDefault,
-            children: {},
-            isLeaf: i === relevantParts.length - 1,
-            level: i + 1
-          };
+      if (showSSJ) {
+        // Show all educator_admin roles starting from level 3 (startup, ongoing)
+        if (parts[0] !== 'educator' || parts[1] !== 'admin' || parts.length < 3) {
+          return;
         }
         
-        current = current[part].children;
+        // Start from level 3 - skip the "educator_admin" prefix
+        const relevantParts = parts.slice(2);
+        let current = hierarchy;
+        
+        // Build the nested structure starting from level 3
+        for (let i = 0; i < relevantParts.length; i++) {
+          const part = relevantParts[i];
+          const fullPath = parts.slice(0, i + 3).join('_');
+          
+          if (!current[part]) {
+            current[part] = {
+              id: fullPath,
+              name: part,
+              displayName: i === relevantParts.length - 1 ? role.displayName : part.charAt(0).toUpperCase() + part.slice(1),
+              description: i === relevantParts.length - 1 ? role.description : '',
+              active: role.networkDefault,
+              children: {},
+              isLeaf: i === relevantParts.length - 1,
+              level: i + 1
+            };
+          }
+          
+          current = current[part].children;
+        }
+      } else {
+        // Show only educator_admin_ongoing roles starting from level 4
+        if (parts[0] !== 'educator' || parts[1] !== 'admin' || parts[2] !== 'ongoing' || parts.length < 4) {
+          return;
+        }
+        
+        // Start from level 4 - skip the "educator_admin_ongoing" prefix
+        const relevantParts = parts.slice(3);
+        let current = hierarchy;
+        
+        // Build the nested structure starting from level 4
+        for (let i = 0; i < relevantParts.length; i++) {
+          const part = relevantParts[i];
+          const fullPath = parts.slice(0, i + 4).join('_');
+          
+          if (!current[part]) {
+            current[part] = {
+              id: fullPath,
+              name: part,
+              displayName: i === relevantParts.length - 1 ? role.displayName : part.charAt(0).toUpperCase() + part.slice(1),
+              description: i === relevantParts.length - 1 ? role.description : '',
+              active: role.networkDefault,
+              children: {},
+              isLeaf: i === relevantParts.length - 1,
+              level: i + 1
+            };
+          }
+          
+          current = current[part].children;
+        }
       }
     });
     
@@ -135,12 +167,26 @@ function RoleTree() {
 
   const roleHierarchy = roles.length > 0 ? convertToArray(buildHierarchy(roles)) : [];
 
-  // Add colors for admin subcategories
+  // Add colors for categories based on toggle state
   const getColorForCategory = (name: string) => {
-    switch (name) {
-      case 'startup': return 'bg-blue-100 text-blue-800';
-      case 'ongoing': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+    if (showSSJ) {
+      // Colors for level 3 (startup, ongoing)
+      switch (name) {
+        case 'startup': return 'bg-blue-100 text-blue-800';
+        case 'ongoing': return 'bg-green-100 text-green-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
+    } else {
+      // Colors for level 4 ongoing categories
+      switch (name) {
+        case 'admissions': return 'bg-blue-100 text-blue-800';
+        case 'finance': return 'bg-green-100 text-green-800';
+        case 'board': return 'bg-purple-100 text-purple-800';
+        case 'communications': return 'bg-orange-100 text-orange-800';
+        case 'facility': return 'bg-red-100 text-red-800';
+        case 'family': return 'bg-yellow-100 text-yellow-800';
+        default: return 'bg-gray-100 text-gray-800';
+      }
     }
   };
 
@@ -422,6 +468,7 @@ export default function SchoolSettingsPage() {
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<any>(null);
   const [showCalendar, setShowCalendar] = useState(false);
   const [addingSubsidy, setAddingSubsidy] = useState(false);
+  const [showSSJ, setShowSSJ] = useState(true);
   
   const [staffForm, setStaffForm] = useState({
     firstName: "",
@@ -1127,16 +1174,29 @@ export default function SchoolSettingsPage() {
                       Manage and customize roles available at this school. These roles form the foundation for staff assignments.
                     </p>
                   </div>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Custom Role
-                  </Button>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">Show SSJ</span>
+                      <Button
+                        variant={showSSJ ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowSSJ(!showSSJ)}
+                        className="h-8"
+                      >
+                        {showSSJ ? "ON" : "OFF"}
+                      </Button>
+                    </div>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Custom Role
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {/* Role Categories */}
-                  <RoleTree />
+                  <RoleTree showSSJ={showSSJ} />
                 </div>
               </CardContent>
             </Card>
@@ -1154,10 +1214,23 @@ export default function SchoolSettingsPage() {
                       Staff complete surveys rating their skill/experience, enthusiasm, and growth interest for each role.
                     </p>
                   </div>
-                  <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create Survey
-                  </Button>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-gray-600">Show SSJ</span>
+                      <Button
+                        variant={showSSJ ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setShowSSJ(!showSSJ)}
+                        className="h-8"
+                      >
+                        {showSSJ ? "ON" : "OFF"}
+                      </Button>
+                    </div>
+                    <Button>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Survey
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>

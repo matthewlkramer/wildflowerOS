@@ -1257,6 +1257,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get only educator admin ongoing role definitions
+  app.get('/api/roles/educator_admin_ongoing', isAuthenticated, async (req: any, res) => {
+    try {
+      const roles = await storage.getRolesByNamePrefix('educator_admin_ongoing');
+      res.json(roles);
+    } catch (error) {
+      console.error("Error fetching educator admin ongoing role definitions:", error);
+      res.status(500).json({ message: "Failed to fetch educator admin ongoing role definitions" });
+    }
+  });
+
   app.get('/api/schools/:schoolId/roles/hierarchical', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;

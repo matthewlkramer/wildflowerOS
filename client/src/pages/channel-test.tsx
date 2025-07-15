@@ -34,8 +34,14 @@ function ChannelTest() {
     try {
       const response = await apiRequest('/api/channels/my');
       setChannels(response);
-    } catch (error) {
+      setMessage('');
+    } catch (error: any) {
       console.error('Error fetching channels:', error);
+      if (error?.message?.includes('Unauthorized') || error?.status === 401) {
+        setMessage('Please log in to view channels');
+      } else {
+        setMessage('Error fetching channels');
+      }
     }
   };
 
@@ -91,8 +97,24 @@ function ChannelTest() {
       <h1 className="text-3xl font-bold">Channel Implementation Verification</h1>
       
       {message && (
-        <div className="p-4 bg-blue-100 text-blue-800 rounded">
+        <div className={`p-4 rounded ${
+          message.includes('log in') 
+            ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
+            : message.includes('Error')
+            ? 'bg-red-100 text-red-800 border border-red-300'
+            : 'bg-blue-100 text-blue-800 border border-blue-300'
+        }`}>
           {message}
+          {message.includes('log in') && (
+            <div className="mt-2">
+              <a 
+                href="/auth/login" 
+                className="inline-block px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+              >
+                Log in with Replit
+              </a>
+            </div>
+          )}
         </div>
       )}
 

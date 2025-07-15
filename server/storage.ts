@@ -37,8 +37,7 @@ import {
   type School,
   type SchoolYear,
   type InsertSchoolYear,
-  type AcademicCalendar,
-  type InsertAcademicCalendar,
+
   type CalendarClosure,
   type InsertCalendarClosure,
   type ClassroomSchedule,
@@ -195,14 +194,7 @@ export interface IStorage {
   updateNetworkSchoolYear(id: string, schoolYear: Partial<InsertSchoolYear>): Promise<SchoolYear>;
   deleteNetworkSchoolYear(id: string): Promise<void>;
   
-  // Academic calendars
-  getAcademicCalendarBySchoolYear(schoolYearId: string): Promise<AcademicCalendar | undefined>;
-  createAcademicCalendar(calendar: InsertAcademicCalendar): Promise<AcademicCalendar>;
-  updateAcademicCalendar(id: string, calendar: Partial<InsertAcademicCalendar>): Promise<AcademicCalendar>;
-  deleteAcademicCalendar(id: string): Promise<void>;
-  
   // Calendar closures
-  getCalendarClosuresByCalendar(calendarId: string): Promise<CalendarClosure[]>;
   getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]>;
   createCalendarClosure(closure: InsertCalendarClosure): Promise<CalendarClosure>;
   updateCalendarClosure(id: string, closure: Partial<InsertCalendarClosure>): Promise<CalendarClosure>;
@@ -1032,51 +1024,6 @@ export class DatabaseStorage implements IStorage {
     ));
   }
 
-  // Academic calendars
-  async getAcademicCalendarBySchoolYear(schoolYearId: string): Promise<AcademicCalendar | undefined> {
-    const [calendar] = await db
-      .select()
-      .from(academicCalendars)
-      .where(eq(academicCalendars.schoolYearId, schoolYearId));
-    return calendar;
-  }
-
-  async createAcademicCalendar(calendarData: InsertAcademicCalendar): Promise<AcademicCalendar> {
-    // Convert string dates to Date objects
-    const firstDayOfSchool = calendarData.firstDayOfSchool ? new Date(calendarData.firstDayOfSchool) : null;
-    const lastDayOfSchool = calendarData.lastDayOfSchool ? new Date(calendarData.lastDayOfSchool) : null;
-    
-    const [calendar] = await db
-      .insert(academicCalendars)
-      .values({
-        ...calendarData,
-        firstDayOfSchool,
-        lastDayOfSchool,
-      })
-      .returning();
-    return calendar;
-  }
-
-  async updateAcademicCalendar(id: string, calendarData: Partial<InsertAcademicCalendar>): Promise<AcademicCalendar> {
-    // Convert string dates to Date objects if provided
-    const updateData: any = { ...calendarData };
-    if (updateData.firstDayOfSchool) {
-      updateData.firstDayOfSchool = new Date(updateData.firstDayOfSchool);
-    }
-    if (updateData.lastDayOfSchool) {
-      updateData.lastDayOfSchool = new Date(updateData.lastDayOfSchool);
-    }
-    
-    const [calendar] = await db
-      .update(academicCalendars)
-      .set(updateData)
-      .where(eq(academicCalendars.id, id))
-      .returning();
-    return calendar;
-  }
-
-
-
   // Calendar closures
   async getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]> {
     const holidays = await db
@@ -1402,7 +1349,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(channelMembers.userId, userId))
       .orderBy(desc(channels.updatedAt));
 
-    return results;
+    return results.map(channel => ({
+      ...channel,
+      familyId: null // Add missing field for type compatibility
+    }));
   }
 
   async getMessagesByChannel(channelId: string, limit = 50): Promise<any[]> {

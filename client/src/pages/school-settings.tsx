@@ -3558,7 +3558,6 @@ export default function SchoolSettingsPage() {
                                       >
                                         <div className="text-left">
                                           <div className="font-medium">Add with system default holidays</div>
-                                          <div className="text-sm text-gray-500">Import with standard network holidays</div>
                                         </div>
                                       </Button>
                                       <Button 
@@ -3567,7 +3566,10 @@ export default function SchoolSettingsPage() {
                                         disabled={importWithCurrentYearHolidaysMutation.isPending}
                                         className="justify-start h-auto p-4"
                                       >
-                                        Add with the same holidays we used this year
+                                        <div className="text-left">
+                                          <div className="font-medium">Add with the same holidays we used this year</div>
+                                          <div className="text-sm text-gray-500">Update them to the correct dates for this new year</div>
+                                        </div>
                                       </Button>
                                       <Button 
                                         variant="outline"

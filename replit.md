@@ -11,14 +11,16 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
-- **✅ COMPLETED: Teacher Leader role combination display system**
+- **✅ COMPLETED: Enhanced educator role display system with clean formatting**
   - **Role ID-based detection** - Frontend now uses specific role IDs instead of role names for reliable detection
   - **Dual role combination** - Users with both educator_admin (f438ae38-0c70-4182-9446-54903c001cd1) and educator_classroom_lead (3c208f41-5a1b-44c1-a941-293585f7e8da) roles display as single "Teacher Leader" badge
   - **Staff grouping logic enhanced** - Added roleId field to staff role grouping to enable proper role combination detection
   - **Clean badge display** - Eliminates duplicate role badges and shows consolidated Teacher Leader role for qualified users
+  - **Educator role filtering** - Staff page now only shows roles starting with "educator_" prefix for focused display
+  - **Cleaned role formatting** - Removes "educator_" prefix and formats roles as "Classroom Lead", "Classroom Assistant", "Admin", etc.
   - **Flexible architecture** - System can easily accommodate additional role combinations in the future
   - **Database-driven logic** - Uses actual role definitions from database instead of hardcoded names
-  - **CONFIRMED WORKING** - Emily Rodriguez now displays as "Teacher Leader" instead of separate Admin and Lead Guide badges
+  - **CONFIRMED WORKING** - Emily Rodriguez displays as "Teacher Leader" with clean formatting, non-educator roles filtered out
 - **✅ COMPLETED: Comprehensive role emulation system for system administrators**
   - **Full role emulation API** - `/api/admin/emulate-role` and `/api/admin/clear-emulation` endpoints with proper security controls
   - **System admin-only access** - Role verification ensures only users with `sysadmin` roles can activate emulation

@@ -2981,7 +2981,12 @@ export default function SchoolSettingsPage() {
                 <div className="space-y-4">
                   {(() => {
                     // Group staff by user (email/name combination)
-                    const groupedStaff = staff.reduce((acc: any, member: any) => {
+                    // Filter to only show educator roles
+                    const educatorStaff = staff.filter((member: any) => 
+                      member.role && member.role.startsWith('educator_')
+                    );
+                    
+                    const groupedStaff = educatorStaff.reduce((acc: any, member: any) => {
                       const key = `${member.firstName}_${member.lastName}_${member.email}`;
                       if (!acc[key]) {
                         acc[key] = {

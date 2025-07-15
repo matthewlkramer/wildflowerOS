@@ -2222,5 +2222,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Initialize school channels (no auth for testing)
+  app.post('/api/channel-test/initialize-school/:schoolId', async (req: Request, res: Response) => {
+    try {
+      const { schoolId } = req.params;
+      await storage.initializeSchoolChannels(schoolId);
+      res.json({ message: 'School channels initialized successfully' });
+    } catch (error) {
+      console.error('Error initializing school channels:', error);
+      res.status(500).json({ error: 'Failed to initialize school channels' });
+    }
+  });
+
+  // Initialize classroom channels (no auth for testing)
+  app.post('/api/channel-test/initialize-classroom/:classroomId', async (req: Request, res: Response) => {
+    try {
+      const { classroomId } = req.params;
+      await storage.initializeClassroomChannels(classroomId);
+      res.json({ message: 'Classroom channels initialized successfully' });
+    } catch (error) {
+      console.error('Error initializing classroom channels:', error);
+      res.status(500).json({ error: 'Failed to initialize classroom channels' });
+    }
+  });
+
   return httpServer;
 }

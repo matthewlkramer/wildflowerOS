@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UserRole } from "@shared/schema";
 import { Users, GraduationCap, Heart, Building2, Shield, Star, Bell, MessageCircle, ChevronDown, Settings, LogOut, User } from "lucide-react";
+// Import will be handled by public folder
 
 interface TopNavigationProps {
   user: any;
@@ -211,10 +212,18 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               {/* Mobile logo */}
               <div className="sm:hidden">
                 <img 
-                  src="/generated-icon.png" 
+                  src="/generated-icon.png"
                   alt="Wildflower Schools" 
                   className="w-8 h-8 rounded-lg"
+                  onError={(e) => {
+                    // Fallback to a simple icon if image fails to load
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling!.style.display = 'block';
+                  }}
                 />
+                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center" style={{ display: 'none' }}>
+                  <span className="text-white font-bold text-sm">W</span>
+                </div>
               </div>
               {/* Desktop text */}
               <h1 className="hidden sm:block text-xl lg:text-2xl font-bold text-primary">WildflowerOS</h1>

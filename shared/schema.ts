@@ -36,6 +36,8 @@ export const users = pgTable("users", {
   email: varchar("email", { length: 255 }).unique(), // This remains as the login email
   firstName: varchar("first_name", { length: 100 }),
   lastName: varchar("last_name", { length: 100 }),
+  phone: varchar("phone", { length: 40 }),
+  homeAddress: text("home_address"),
   profileImageUrl: varchar("profile_image_url", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -272,7 +274,6 @@ export const families = pgTable("families", {
   phone: varchar("phone", { length: 40 }),
   email: varchar("email", { length: 255 }),
   notes: text("notes"),
-  primaryContactId: varchar("primary_contact_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -294,9 +295,10 @@ export const children = pgTable("children", {
 export const guardians = pgTable("guardians", {
   id: uuid("id").primaryKey().defaultRandom(),
   familyId: uuid("family_id").notNull().references(() => families.id),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: uuid("user_id").notNull().references(() => users.id),
   relationship: varchar("relationship", { length: 40 }),
-  isPrimary: boolean("is_primary").default(false),
+  homeAddress: text("home_address"),
+  phone: varchar("phone", { length: 40 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1395,6 +1397,8 @@ export type Family = typeof families.$inferSelect;
 export type InsertFamily = typeof families.$inferInsert;
 export type Child = typeof children.$inferSelect;
 export type InsertChild = typeof children.$inferInsert;
+export type Guardian = typeof guardians.$inferSelect;
+export type InsertGuardian = typeof guardians.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
 export type InsertEnrollment = typeof enrollments.$inferInsert;
 export type Task = typeof tasks.$inferSelect;
@@ -1494,6 +1498,7 @@ export const insertSchoolSchema = createInsertSchema(schools);
 export const insertClassroomSchema = createInsertSchema(classrooms);
 export const insertFamilySchema = createInsertSchema(families);
 export const insertChildSchema = createInsertSchema(children);
+export const insertGuardianSchema = createInsertSchema(guardians);
 export const insertEnrollmentSchema = createInsertSchema(enrollments);
 export const insertTaskSchema = createInsertSchema(tasks);
 export const insertMessageSchema = createInsertSchema(messages);

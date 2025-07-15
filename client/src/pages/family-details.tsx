@@ -105,6 +105,12 @@ export default function FamilyDetailsPage() {
     enabled: !!familyId,
   });
 
+  // Fetch guardians (family adults)
+  const { data: guardians = [], isLoading: guardiansLoading } = useQuery({
+    queryKey: ["/api/families", familyId, "guardians"],
+    enabled: !!familyId,
+  });
+
   // Fetch enrollments for this family
   const { data: enrollments = [] } = useQuery({
     queryKey: ["/api/families", familyId, "enrollments"],
@@ -339,6 +345,69 @@ export default function FamilyDetailsPage() {
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Adults */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <Users className="mr-2 h-5 w-5" />
+                      Adults
+                    </div>
+                    <Button size="sm">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Adult
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {guardiansLoading ? (
+                    <div className="space-y-3">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  ) : guardians.length === 0 ? (
+                    <p className="text-gray-500 text-sm">No adults added yet</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {guardians.map((guardian: any) => (
+                        <div key={guardian.id} className="p-3 border rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="font-medium">
+                                {guardian.user.firstName} {guardian.user.lastName}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {guardian.relationship || 'Guardian'}
+                              </div>
+                              {guardian.user.email && (
+                                <div className="flex items-center text-sm text-gray-600 mt-1">
+                                  <Mail className="mr-1 h-3 w-3" />
+                                  {guardian.user.email}
+                                </div>
+                              )}
+                              {guardian.user.phone && (
+                                <div className="flex items-center text-sm text-gray-600 mt-1">
+                                  <Phone className="mr-1 h-3 w-3" />
+                                  {guardian.user.phone}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex space-x-1">
+                              <Button variant="ghost" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Family Information */}
               <Card>
                 <CardHeader>

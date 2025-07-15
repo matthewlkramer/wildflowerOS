@@ -18,6 +18,7 @@ import {
   childSubsidyAssignments,
   families,
   children,
+  guardians,
   enrollments,
   tasks,
   messages,
@@ -59,6 +60,8 @@ import {
   type Classroom,
   type Family,
   type Child,
+  type Guardian,
+  type InsertGuardian,
   type Enrollment,
   type Task,
   type InsertTask,
@@ -1113,11 +1116,11 @@ export class DatabaseStorage implements IStorage {
       .selectDistinct({
         id: families.id,
         name: families.name,
+        lastName: families.lastName,
         address: families.address,
         phone: families.phone,
         email: families.email,
         notes: families.notes,
-        primaryContactId: families.primaryContactId,
         createdAt: families.createdAt,
         updatedAt: families.updatedAt,
       })
@@ -1294,6 +1297,72 @@ export class DatabaseStorage implements IStorage {
   async createEnrollment(enrollmentData: any): Promise<any> {
     const [enrollment] = await db.insert(enrollments).values(enrollmentData).returning();
     return enrollment;
+  }
+
+  // Guardians (Family Adults)
+  async getGuardiansByFamily(familyId: string): Promise<any[]> {
+    return await db
+      .select({
+        id: guardians.id,
+        relationship: guardians.relationship,
+        homeAddress: guardians.homeAddress,
+        phone: guardians.phone,
+        user: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          phone: users.phone,
+          homeAddress: users.homeAddress,
+        },
+      })
+      .from(guardians)
+      .innerJoin(users, eq(users.id, guardians.userId))
+      .where(eq(guardians.familyId, familyId))
+      .orderBy(users.firstName, users.lastName);
+  }
+
+  async createGuardian(guardianData: InsertGuardian): Promise<Guardian> {
+    const [guardian] = await db.insert(guardians).values(guardianData).returning();
+    return guardian;
+  }
+
+  async updateGuardian(id: string, guardianData: Partial<InsertGuardian>): Promise<Guardian> {
+    const [guardian] = await db
+      .update(guardians)
+      .set(guardianData)
+      .where(eq(guardians.id, id))
+      .returning();
+    return guardian;
+  }
+
+  async deleteGuardian(id: string): Promise<void> {
+    await db.delete(guardians).where(eq(guardians.id, id));
+  }
+
+  async getUsersWithParentRole(): Promise<User[]> {
+    return await db
+      .selectDistinct({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        phone: users.phone,
+        homeAddress: users.homeAddress,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .innerJoin(userRoles, eq(userRoles.userId, users.id))
+      .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoles.roleId))
+      .where(
+        and(
+          sql`${roleDefinitions.name} LIKE 'parent%'`,
+          eq(userRoles.active, true)
+        )
+      )
+      .orderBy(users.firstName, users.lastName);
   }
 
   // Tasks

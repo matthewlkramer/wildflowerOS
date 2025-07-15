@@ -107,7 +107,7 @@ export const networkDefaultChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'u
 export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'updatedAt' | 'schoolId' | 'classroomId' | 'familyId'>[] = [
   {
     name: "support-at",
-    description: "Support and assistance for teachers",
+    description: "Support for assistive technology",
     type: "public",
     scope: "network",
     legalEntityId: null,
@@ -118,7 +118,7 @@ export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'u
   },
   {
     name: "new-to-wildflower",
-    description: "Support for new Wildflower teachers",
+    description: "Welcome channel for new educators",
     type: "public",
     scope: "network",
     legalEntityId: null,
@@ -129,7 +129,7 @@ export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'u
   },
   {
     name: "cheers",
-    description: "Celebrating achievements and successes",
+    description: "Network-wide celebrations and achievements",
     type: "public",
     scope: "network",
     legalEntityId: null,
@@ -140,7 +140,7 @@ export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'u
   },
   {
     name: "infants-and-toddlers",
-    description: "Discussions about infant and toddler education",
+    description: "Infant and toddler education discussions",
     type: "public",
     scope: "network",
     legalEntityId: null,
@@ -151,7 +151,7 @@ export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'u
   },
   {
     name: "primary",
-    description: "Primary classroom discussions",
+    description: "Primary education discussions",
     type: "public",
     scope: "network",
     legalEntityId: null,
@@ -206,70 +206,95 @@ export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'u
   },
 ];
 
-// School-specific channel templates (to be created with school msgDisplayName prefix)
-export const schoolChannelTemplates: Array<{
-  suffix: string;
+// School-specific channel templates
+export interface SchoolChannelTemplate {
+  namePattern: string;
   description: string;
   type: "public" | "private";
-  scope: "school" | "classroom";
-}> = [
+  scope: "school";
+  canDelete: boolean;
+  canArchive: boolean;
+}
+
+export const schoolChannelTemplates: SchoolChannelTemplate[] = [
   {
-    suffix: "", // Just the school name (e.g., "wildrose")
-    description: "Main school channel",
+    namePattern: "{schoolPrefix}",
+    description: "Main {schoolName} channel",
     type: "public",
     scope: "school",
+    canDelete: false,
+    canArchive: false,
   },
   {
-    suffix: "-admin",
-    description: "School administration discussions",
+    namePattern: "{schoolPrefix}-admin",
+    description: "{schoolName} administration discussions",
     type: "private",
     scope: "school",
+    canDelete: false,
+    canArchive: false,
   },
   {
-    suffix: "-staff",
-    description: "School staff discussions",
+    namePattern: "{schoolPrefix}-staff",
+    description: "{schoolName} staff discussions",
     type: "private",
     scope: "school",
+    canDelete: false,
+    canArchive: false,
   },
   {
-    suffix: "-families",
-    description: "Communication with families",
+    namePattern: "{schoolPrefix}-families",
+    description: "{schoolName} families channel",
     type: "public",
     scope: "school",
+    canDelete: false,
+    canArchive: false,
   },
   {
-    suffix: "-random",
-    description: "Random school discussions",
+    namePattern: "{schoolPrefix}-random",
+    description: "{schoolName} random discussions",
     type: "public",
     scope: "school",
+    canDelete: true,
+    canArchive: true,
   },
   {
-    suffix: "-cheers",
-    description: "School celebrations and achievements",
+    namePattern: "{schoolPrefix}-cheers",
+    description: "{schoolName} celebration channel",
     type: "public",
     scope: "school",
+    canDelete: true,
+    canArchive: true,
   },
 ];
 
-// Classroom channel templates (to be created with school msgDisplayName prefix + classroom level)
-export const classroomChannelTemplates: Array<{
-  levelSuffix: string;
+// Classroom channel templates
+export interface ClassroomChannelTemplate {
+  namePattern: string;
   description: string;
-}> = [
+  type: "public" | "private";
+  scope: "classroom";
+  levels: string[];
+  canDelete: boolean;
+  canArchive: boolean;
+}
+
+export const classroomChannelTemplates: ClassroomChannelTemplate[] = [
   {
-    levelSuffix: "-primary",
+    namePattern: "{schoolPrefix}-primary",
     description: "Primary classroom discussions",
+    type: "public",
+    scope: "classroom",
+    levels: ["primary"],
+    canDelete: false,
+    canArchive: false,
   },
   {
-    levelSuffix: "-elementary",
-    description: "Elementary classroom discussions", 
-  },
-  {
-    levelSuffix: "-infant",
-    description: "Infant classroom discussions",
-  },
-  {
-    levelSuffix: "-toddler", 
-    description: "Toddler classroom discussions",
+    namePattern: "{schoolPrefix}-elementary",
+    description: "Elementary classroom discussions",
+    type: "public",
+    scope: "classroom",
+    levels: ["lower_elem", "upper_elem"],
+    canDelete: false,
+    canArchive: false,
   },
 ];

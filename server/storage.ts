@@ -1477,6 +1477,169 @@ export class DatabaseStorage implements IStorage {
   async initializeSchoolChannels(schoolId: string): Promise<void> {
     const { schoolChannelTemplates } = await import('./channelDefaults');
     
+    // Get school info to create proper channel names
+    const schoolInfo = await db
+      .select({ shortName: schools.shortName, name: schools.name })
+      .from(schools)
+      .where(eq(schools.id, schoolId))
+      .limit(1);
+    
+    if (schoolInfo.length === 0) return;
+    
+    const school = schoolInfo[0];
+    const schoolPrefix = school.shortName || school.name.toLowerCase().replace(/\s+/g, '');
+    
+    for (const template of schoolChannelTemplates) {
+      const channelName = template.namePattern.replace('{schoolPrefix}', schoolPrefix);
+      
+      const existingChannel = await db
+        .select()
+        .from(channels)
+        .where(
+          and(
+            eq(channels.name, channelName),
+            eq(channels.schoolId, schoolId),
+            eq(channels.scope, "school")
+          )
+        );
+      
+      if (existingChannel.length === 0) {
+        await db.insert(channels).values({
+          name: channelName,
+          description: template.description.replace('{schoolName}', school.name),
+          type: template.type,
+          scope: "school",
+          schoolId: schoolId,
+          classroomId: null,
+          familyId: null,
+          legalEntityId: null,
+          taskId: null,
+          isArchived: false,
+          canDelete: template.canDelete,
+          canArchive: template.canArchive,
+        });
+      }
+    }
+  }
+
+  async initializeClassroomChannels(classroomId: string): Promise<void> {
+    const { classroomChannelTemplates } = await import('./channelDefaults');
+    
+    // Get classroom and school info
+    const classroomInfo = await db
+      .select({ 
+        level: classrooms.level,
+        schoolId: classrooms.schoolId,
+        schoolShortName: schools.shortName,
+        schoolName: schools.name 
+      })
+      .from(classrooms)
+      .leftJoin(schools, eq(schools.id, classrooms.schoolId))
+      .where(eq(classrooms.id, classroomId))
+      .limit(1);
+    
+    if (classroomInfo.length === 0) return;
+    
+    const classroom = classroomInfo[0];
+    const schoolPrefix = classroom.schoolShortName || classroom.schoolName.toLowerCase().replace(/\s+/g, '');
+    
+    for (const template of classroomChannelTemplates) {
+      if (template.levels.includes(classroom.level)) {
+        const channelName = template.namePattern
+          .replace('{schoolPrefix}', schoolPrefix)
+          .replace('{level}', classroom.level);
+        
+        const existingChannel = await db
+          .select()
+          .from(channels)
+          .where(
+            and(
+              eq(channels.name, channelName),
+              eq(channels.classroomId, classroomId),
+              eq(channels.scope, "classroom")
+            )
+          );
+        
+        if (existingChannel.length === 0) {
+          await db.insert(channels).values({
+            name: channelName,
+            description: template.description.replace('{level}', classroom.level),
+            type: template.type,
+            scope: "classroom",
+            schoolId: classroom.schoolId,
+            classroomId: classroomId,
+            familyId: null,
+            legalEntityId: null,
+            taskId: null,
+            isArchived: false,
+            canDelete: template.canDelete,
+            canArchive: template.canArchive,
+          });
+        }
+      }
+    }
+  }
+
+  async createFamilyChannel(familyId: string): Promise<void> {
+    // Get family info with children names
+    const familyInfo = await db
+      .select({
+        familyLastName: families.lastName,
+        schoolId: families.primarySchoolId,
+        schoolShortName: schools.shortName,
+        schoolName: schools.name
+      })
+      .from(families)
+      .leftJoin(schools, eq(schools.id, families.primarySchoolId))
+      .where(eq(families.id, familyId))
+      .limit(1);
+    
+    if (familyInfo.length === 0) return;
+    
+    const family = familyInfo[0];
+    const schoolPrefix = family.schoolShortName || family.schoolName?.toLowerCase().replace(/\s+/g, '') || 'unknown';
+    
+    // Get children's first names
+    const children = await db
+      .select({ firstName: children.firstName })
+      .from(children)
+      .where(eq(children.familyId, familyId))
+      .orderBy(children.firstName);
+    
+    const childrenNames = children.map(c => c.firstName?.toLowerCase()).filter(Boolean).join('');
+    const channelName = `${schoolPrefix}-families-${family.familyLastName?.toLowerCase() || 'family'}${childrenNames}`;
+    
+    const existingChannel = await db
+      .select()
+      .from(channels)
+      .where(
+        and(
+          eq(channels.familyId, familyId),
+          eq(channels.scope, "family")
+        )
+      );
+    
+    if (existingChannel.length === 0) {
+      await db.insert(channels).values({
+        name: channelName,
+        description: `Private family channel for ${family.familyLastName || 'Family'}`,
+        type: "private",
+        scope: "family",
+        schoolId: family.schoolId,
+        classroomId: null,
+        familyId: familyId,
+        legalEntityId: null,
+        taskId: null,
+        isArchived: false,
+        canDelete: false,
+        canArchive: true,
+      });
+    }
+  }
+
+  async initializeSchoolChannels(schoolId: string): Promise<void> {
+    const { schoolChannelTemplates } = await import('./channelDefaults');
+    
     const [school] = await db.select().from(schools).where(eq(schools.id, schoolId));
     if (!school) return;
     

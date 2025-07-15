@@ -108,6 +108,7 @@ export const schools = pgTable("schools", {
   legalEntityId: uuid("legal_entity_id").references(() => legalEntities.id),
   name: varchar("name", { length: 200 }).notNull(),
   shortName: varchar("short_name", { length: 50 }),
+  msgDisplayName: varchar("msg_display_name", { length: 50 }), // Short name for channels like "wildrose"
   address: text("address"),
   city: varchar("city", { length: 80 }),
   state: varchar("state", { length: 2 }),
@@ -372,15 +373,23 @@ export const budgets = pgTable("budgets", {
 
 export const channels = pgTable("channels", {
   id: uuid("id").primaryKey().defaultRandom(),
-  name: varchar("name", { length: 100 }),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
   type: varchar("type", { 
     enum: [
       "public", "private", "board", "advisory", "dm", "task_comments"
     ]
   }).notNull(),
-  schoolId: uuid("school_id").references(() => schools.id),
+  scope: varchar("scope", {
+    enum: ["network", "school", "classroom", "family"]
+  }).notNull().default("school"),
+  schoolId: uuid("school_id").references(() => schools.id), // null for network channels
+  classroomId: uuid("classroom_id").references(() => classrooms.id), // for classroom channels
   legalEntityId: uuid("legal_entity_id").references(() => legalEntities.id),
   taskId: uuid("task_id"), // for task_comments channel
+  isArchived: boolean("is_archived").notNull().default(false),
+  canDelete: boolean("can_delete").notNull().default(true), // false for required channels
+  canArchive: boolean("can_archive").notNull().default(true), // false for required channels
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -403,6 +412,36 @@ export const messages = pgTable("messages", {
   threadId: uuid("thread_id"),
   isPinned: boolean("is_pinned"),
   isUrgent: boolean("is_urgent"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Channel template definitions for auto-generation
+export const channelTemplates = pgTable("channel_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { 
+    enum: [
+      "public", "private", "board", "advisory", "dm", "task_comments"
+    ]
+  }).notNull(),
+  scope: varchar("scope", {
+    enum: ["network", "school", "classroom"]
+  }).notNull(),
+  namePattern: varchar("name_pattern", { length: 200 }).notNull(), // e.g., "{school_short}-admin", "general"
+  isRequired: boolean("is_required").notNull().default(true), // cannot be deleted
+  autoCreate: boolean("auto_create").notNull().default(true), // auto-create for new entities
+  triggerEvent: varchar("trigger_event", {
+    enum: ["school_created", "classroom_created", "always_exists"]
+  }).notNull(),
+  classroomLevel: varchar("classroom_level", { 
+    enum: [
+      "infant", "toddler", "primary", "lower_elem", 
+      "upper_elem", "junior_high", "high_school"
+    ]
+  }), // for classroom-specific templates
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1359,6 +1398,8 @@ export type Message = typeof messages.$inferSelect;
 export type InsertMessage = typeof messages.$inferInsert;
 export type Channel = typeof channels.$inferSelect;
 export type InsertChannel = typeof channels.$inferInsert;
+export type ChannelTemplate = typeof channelTemplates.$inferSelect;
+export type InsertChannelTemplate = typeof channelTemplates.$inferInsert;
 
 // Knowledge Base types
 export type KnowledgePost = typeof knowledgePosts.$inferSelect;
@@ -1452,6 +1493,7 @@ export const insertEnrollmentSchema = createInsertSchema(enrollments);
 export const insertTaskSchema = createInsertSchema(tasks);
 export const insertMessageSchema = createInsertSchema(messages);
 export const insertChannelSchema = createInsertSchema(channels);
+export const insertChannelTemplateSchema = createInsertSchema(channelTemplates);
 export const insertKnowledgePostSchema = createInsertSchema(knowledgePosts);
 export const insertKnowledgeTagSchema = createInsertSchema(knowledgeTags);
 export const insertOnboardingChecklistSchema = createInsertSchema(onboardingChecklists);

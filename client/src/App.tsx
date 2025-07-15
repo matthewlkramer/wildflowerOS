@@ -14,6 +14,7 @@ import FamilyBillingPage from "@/pages/family-billing";
 import SchoolSettingsPage from "@/pages/school-settings";
 import MessagesPage from "@/pages/messages";
 import TasksPage from "@/pages/tasks";
+import EnhancedMessagesPage from "@/pages/enhanced-messages";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -29,6 +30,7 @@ function Router() {
           <Route path="/families/:familyId" component={FamilyDetailsPage} />
           <Route path="/families/:familyId/billing" component={FamilyBillingPage} />
           <Route path="/messages" component={MessagesPage} />
+          <Route path="/enhanced-messages" component={EnhancedMessagesPage} />
           <Route path="/tasks" component={TasksPage} />
           <Route path="/settings" component={SchoolSettingsPage} />
           {/* Add more authenticated routes here */}

@@ -1941,5 +1941,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Channel and Message routes
+  app.get('/api/channels/my', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const channels = await storage.getChannelsByUser(user.id);
+      res.json(channels);
+    } catch (error) {
+      console.error('Error fetching user channels:', error);
+      res.status(500).json({ message: 'Failed to fetch user channels' });
+    }
+  });
+
+  app.get('/api/channels/:channelId/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const { channelId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const messages = await storage.getMessagesByChannel(channelId, limit);
+      res.json(messages);
+    } catch (error) {
+      console.error('Error fetching channel messages:', error);
+      res.status(500).json({ message: 'Failed to fetch channel messages' });
+    }
+  });
+
+  app.post('/api/channels', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const channelData = {
+        ...req.body,
+        createdById: user.id,
+      };
+      
+      const parsed = insertChannelSchema.parse(channelData);
+      const channel = await storage.createChannel(parsed);
+      res.status(201).json(channel);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid channel data', errors: error.errors });
+      }
+      console.error('Error creating channel:', error);
+      res.status(500).json({ message: 'Failed to create channel' });
+    }
+  });
+
+  app.post('/api/channels/:channelId/archive', isAuthenticated, async (req: any, res) => {
+    try {
+      const { channelId } = req.params;
+      const channel = await storage.archiveChannel(channelId);
+      res.json(channel);
+    } catch (error) {
+      console.error('Error archiving channel:', error);
+      res.status(500).json({ message: 'Failed to archive channel' });
+    }
+  });
+
+  app.delete('/api/channels/:channelId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { channelId } = req.params;
+      await storage.deleteChannel(channelId);
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting channel:', error);
+      res.status(500).json({ message: 'Failed to delete channel' });
+    }
+  });
+
+  app.post('/api/messages', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      const messageData = {
+        ...req.body,
+        senderId: user.id,
+        sentAt: new Date(),
+      };
+      
+      const parsed = insertMessageSchema.parse(messageData);
+      const message = await storage.createMessage(parsed);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: 'Invalid message data', errors: error.errors });
+      }
+      console.error('Error creating message:', error);
+      res.status(500).json({ message: 'Failed to create message' });
+    }
+  });
+
   return httpServer;
 }

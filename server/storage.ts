@@ -1380,14 +1380,20 @@ export class DatabaseStorage implements IStorage {
 
   // Messages and Channels
   async getChannelsByUser(userId: string): Promise<Channel[]> {
-    return await db
+    const results = await db
       .select({
         id: channels.id,
         name: channels.name,
+        description: channels.description,
         type: channels.type,
+        scope: channels.scope,
         schoolId: channels.schoolId,
+        classroomId: channels.classroomId,
         legalEntityId: channels.legalEntityId,
         taskId: channels.taskId,
+        isArchived: channels.isArchived,
+        canDelete: channels.canDelete,
+        canArchive: channels.canArchive,
         createdAt: channels.createdAt,
         updatedAt: channels.updatedAt,
       })
@@ -1395,6 +1401,8 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(channelMembers, eq(channelMembers.channelId, channels.id))
       .where(eq(channelMembers.userId, userId))
       .orderBy(desc(channels.updatedAt));
+
+    return results;
   }
 
   async getMessagesByChannel(channelId: string, limit = 50): Promise<any[]> {
@@ -1420,6 +1428,24 @@ export class DatabaseStorage implements IStorage {
       .where(eq(messages.channelId, channelId))
       .orderBy(messages.sentAt)
       .limit(limit);
+  }
+
+  async createChannel(channel: InsertChannel): Promise<Channel> {
+    const [newChannel] = await db.insert(channels).values(channel).returning();
+    return newChannel;
+  }
+
+  async archiveChannel(channelId: string): Promise<Channel> {
+    const [updatedChannel] = await db
+      .update(channels)
+      .set({ isArchived: true })
+      .where(eq(channels.id, channelId))
+      .returning();
+    return updatedChannel;
+  }
+
+  async deleteChannel(channelId: string): Promise<void> {
+    await db.delete(channels).where(eq(channels.id, channelId));
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {

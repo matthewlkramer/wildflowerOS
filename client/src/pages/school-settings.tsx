@@ -2982,6 +2982,7 @@ export default function SchoolSettingsPage() {
                       acc[key].roles.push({
                         id: member.id,
                         role: member.role,
+                        roleId: member.roleId,
                         startDate: member.startDate
                       });
                       // Use earliest start date
@@ -2991,36 +2992,66 @@ export default function SchoolSettingsPage() {
                       return acc;
                     }, {});
 
-                    return Object.values(groupedStaff).map((person: any, index: number) => (
-                      <div key={index} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">{person.firstName} {person.lastName}</h4>
-                            <p className="text-sm text-gray-600">{person.email}</p>
-                            {person.startDate && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                Since {new Date(person.startDate).toLocaleDateString()}
-                              </p>
-                            )}
-                            <div className="mt-2 flex items-center space-x-2 flex-wrap">
-                              {person.roles.map((roleInfo: any, roleIndex: number) => (
-                                <Badge key={roleIndex} className={getRoleColor(roleInfo.role)}>
-                                  {formatRole(roleInfo.role)}
-                                </Badge>
-                              ))}
+                    return Object.values(groupedStaff).map((person: any, index: number) => {
+                      // Role IDs for Teacher Leader combination
+                      const EDUCATOR_ADMIN_ROLE_ID = 'f438ae38-0c70-4182-9446-54903c001cd1';
+                      const EDUCATOR_CLASSROOM_LEAD_ROLE_ID = '3c208f41-5a1b-44c1-a941-293585f7e8da';
+                      
+                      // Check if user has both educator_admin and educator_classroom_lead roles by roleId
+                      const hasEducatorAdmin = person.roles.some((role: any) => role.roleId === EDUCATOR_ADMIN_ROLE_ID);
+                      const hasEducatorClassroomLead = person.roles.some((role: any) => role.roleId === EDUCATOR_CLASSROOM_LEAD_ROLE_ID);
+                      
+                      let displayRoles = person.roles;
+                      
+                      // If user has both roles, replace them with single Teacher Leader role
+                      if (hasEducatorAdmin && hasEducatorClassroomLead) {
+                        // Filter out the two specific roles by roleId
+                        const otherRoles = person.roles.filter((role: any) => 
+                          role.roleId !== EDUCATOR_ADMIN_ROLE_ID && role.roleId !== EDUCATOR_CLASSROOM_LEAD_ROLE_ID
+                        );
+                        
+                        // Add Teacher Leader role
+                        displayRoles = [
+                          {
+                            id: 'teacher_leader',
+                            role: 'teacher_leader',
+                            startDate: person.startDate
+                          },
+                          ...otherRoles
+                        ];
+                      }
+                      
+                      return (
+                        <div key={index} className="p-4 border rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium">{person.firstName} {person.lastName}</h4>
+                              <p className="text-sm text-gray-600">{person.email}</p>
+                              {person.startDate && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Since {new Date(person.startDate).toLocaleDateString()}
+                                </p>
+                              )}
+                              <div className="mt-2 flex items-center space-x-2 flex-wrap">
+                                {displayRoles.map((roleInfo: any, roleIndex: number) => (
+                                  <Badge key={roleIndex} className={getRoleColor(roleInfo.role)}>
+                                    {formatRole(roleInfo.role)}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
                         </div>
-                      </div>
-                    ));
+                      );
+                    });
                   })()}
                   
                   {staff.length === 0 && (

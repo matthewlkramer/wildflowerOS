@@ -1158,31 +1158,66 @@ export class DatabaseStorage implements IStorage {
     const schoolYear = await this.getSchoolYearById(schoolYearId);
     if (!schoolYear) return;
 
-    // Get network default holidays (these are templates without dates)
+    // First, try to find the matching network school year to get its holidays
+    const networkSchoolYear = await db
+      .select()
+      .from(schoolYears)
+      .where(and(
+        eq(schoolYears.name, schoolYear.name),
+        eq(schoolYears.networkDefault, true)
+      ))
+      .limit(1);
+
+    if (networkSchoolYear.length === 0) {
+      console.log(`No network school year found for ${schoolYear.name}`);
+      return;
+    }
+
+    // Get network default holidays for this specific school year
     const networkHolidays = await db
       .select()
       .from(calendarClosures)
       .where(and(
         eq(calendarClosures.networkDefault, true),
-        isNull(calendarClosures.schoolId),
-        isNull(calendarClosures.schoolYearId)
+        eq(calendarClosures.schoolYearId, networkSchoolYear[0].id),
+        isNull(calendarClosures.schoolId)
       ));
 
-    // Since network holidays don't have dates, we need to generate them for this school year
-    // For now, we'll import all network holidays and let the school manage the dates
-    const schoolHolidays = networkHolidays.map(holiday => ({
-      schoolId: schoolYear.schoolId,
-      schoolYearId: schoolYearId,
-      name: holiday.name,
-      description: holiday.description,
-      // Import without dates - school can set these later
-      startDate: null,
-      endDate: null,
-      date: null,
-      duration: holiday.duration || 1,
-      networkDefault: false,
-      active: true
-    }));
+    // Create school-specific holidays for this school year, filtering out those outside school year dates
+    const schoolHolidays = networkHolidays
+      .filter(holiday => {
+        // Check if holiday falls within school year dates
+        const holidayDate = holiday.startDate || holiday.date;
+        if (!holidayDate) return false;
+        
+        const holidayDateObj = new Date(holidayDate);
+        const schoolStartDate = new Date(schoolYear.startDate);
+        const schoolEndDate = new Date(schoolYear.endDate);
+        
+        return holidayDateObj >= schoolStartDate && holidayDateObj <= schoolEndDate;
+      })
+      .map(holiday => {
+        // Safely handle date conversion with validation
+        const safeDate = (dateValue: any) => {
+          if (!dateValue) return null;
+          const date = new Date(dateValue);
+          return isNaN(date.getTime()) ? null : date;
+        };
+
+        return {
+          schoolId: schoolYear.schoolId,
+          schoolYearId: schoolYearId,
+          name: holiday.name,
+          description: holiday.description,
+          // Handle date conversion properly with validation
+          startDate: safeDate(holiday.startDate),
+          endDate: safeDate(holiday.endDate),
+          date: safeDate(holiday.date),
+          duration: holiday.duration || 1,
+          networkDefault: false,
+          active: true
+        };
+      });
 
     if (schoolHolidays.length > 0) {
       await db.insert(calendarClosures).values(schoolHolidays);

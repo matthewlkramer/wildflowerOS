@@ -1182,12 +1182,17 @@ export class DatabaseStorage implements IStorage {
         eq(calendarClosures.schoolYearId, networkSchoolYear[0].id),
         isNull(calendarClosures.schoolId)
       ));
+      
+    console.log(`Found ${networkHolidays.length} network holidays for school year ${schoolYear.name}`);
+    networkHolidays.forEach(holiday => {
+      console.log(`Holiday ${holiday.name}: startDate=${holiday.startDate}, endDate=${holiday.endDate}, date=${holiday.date}`);
+    });
 
     // Create school-specific holidays for this school year, filtering out those outside school year dates
     const schoolHolidays = networkHolidays
       .filter(holiday => {
         // Check if holiday falls within school year dates
-        const holidayDate = holiday.startDate || holiday.date;
+        const holidayDate = holiday.startDate;
         if (!holidayDate) return false;
         
         const holidayDateObj = new Date(holidayDate);
@@ -1201,7 +1206,11 @@ export class DatabaseStorage implements IStorage {
         const safeDate = (dateValue: any) => {
           if (!dateValue) return null;
           const date = new Date(dateValue);
-          return isNaN(date.getTime()) ? null : date;
+          if (isNaN(date.getTime())) {
+            console.log(`Invalid date value: ${dateValue} for holiday ${holiday.name}`);
+            return null;
+          }
+          return date;
         };
 
         return {
@@ -1212,7 +1221,6 @@ export class DatabaseStorage implements IStorage {
           // Handle date conversion properly with validation
           startDate: safeDate(holiday.startDate),
           endDate: safeDate(holiday.endDate),
-          date: safeDate(holiday.date),
           duration: holiday.duration || 1,
           networkDefault: false,
           active: true
@@ -1220,9 +1228,9 @@ export class DatabaseStorage implements IStorage {
       })
       .filter(holiday => {
         // Filter out holidays with invalid dates to prevent database errors
-        const hasValidDate = holiday.startDate || holiday.date;
+        const hasValidDate = holiday.startDate;
         if (!hasValidDate) {
-          console.log(`Filtering out holiday ${holiday.name} - no valid dates`);
+          console.log(`Filtering out holiday ${holiday.name} - no valid startDate`);
         }
         return hasValidDate;
       });
@@ -1285,7 +1293,11 @@ export class DatabaseStorage implements IStorage {
         const safeDate = (dateValue: any) => {
           if (!dateValue) return null;
           const date = new Date(dateValue);
-          return isNaN(date.getTime()) ? null : date;
+          if (isNaN(date.getTime())) {
+            console.log(`Invalid date value: ${dateValue} for holiday ${holiday.name} in copyHolidays`);
+            return null;
+          }
+          return date;
         };
 
         return {
@@ -1298,8 +1310,6 @@ export class DatabaseStorage implements IStorage {
                      safeDate(holiday.startDate),
           endDate: networkHoliday?.endDate ? safeDate(networkHoliday.endDate) : 
                    safeDate(holiday.endDate),
-          date: networkHoliday?.date ? safeDate(networkHoliday.date) : 
-                safeDate(holiday.date),
           duration: networkHoliday?.duration || holiday.duration || 1,
           networkDefault: false,
           active: true
@@ -1307,9 +1317,9 @@ export class DatabaseStorage implements IStorage {
       })
       .filter(holiday => {
         // Check if holiday falls within school year dates and has valid date
-        const holidayDate = holiday.startDate || holiday.date;
+        const holidayDate = holiday.startDate;
         if (!holidayDate) {
-          console.log(`Filtering out holiday ${holiday.name} in copyHolidays - no valid dates`);
+          console.log(`Filtering out holiday ${holiday.name} in copyHolidays - no valid startDate`);
           return false;
         }
         

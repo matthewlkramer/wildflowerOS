@@ -71,9 +71,29 @@ export class HolidayService {
     const holidays = new Map<string, HolidayPeriod>();
 
     for (const event of events) {
-      const startDate = new Date(event.start.date);
-      const endDate = new Date(event.end.date);
+      // Parse dates using local timezone to avoid timezone conversion issues
+      const startDateStr = event.start.date;
+      const endDateStr = event.end.date;
       const summary = event.summary.toLowerCase();
+      
+      // Create dates in local timezone by parsing YYYY-MM-DD format directly
+      const [startYear, startMonth, startDay] = startDateStr.split('-').map(Number);
+      const [endYear, endMonth, endDay] = endDateStr.split('-').map(Number);
+      
+      const startDate = new Date(startYear, startMonth - 1, startDay, 0, 0, 0, 0);
+      let endDate = new Date(endYear, endMonth - 1, endDay, 0, 0, 0, 0);
+      
+      // Google Calendar's end date is exclusive, so we need to adjust
+      if (startDate.getTime() === endDate.getTime()) {
+        // Single-day holiday: set end to 23:59:59 of the same day
+        endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+      } else {
+        // Multi-day holiday: set end to 23:59:59 of the day before Google's end date
+        endDate = new Date(endDate);
+        endDate.setDate(endDate.getDate() - 1);
+        endDate.setHours(23, 59, 59, 999);
+      }
       
       // Calculate duration in days
       const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
@@ -96,10 +116,13 @@ export class HolidayService {
         // Calculate Good Friday from Easter Sunday (2 days before)
         const goodFridayDate = new Date(startDate);
         goodFridayDate.setDate(goodFridayDate.getDate() - 2);
+        goodFridayDate.setHours(0, 0, 0, 0);
+        const goodFridayEndDate = new Date(goodFridayDate);
+        goodFridayEndDate.setHours(23, 59, 59, 999);
         holidays.set('Good Friday', { 
           name: 'Good Friday', 
           startDate: goodFridayDate, 
-          endDate: goodFridayDate, 
+          endDate: goodFridayEndDate, 
           duration: 1 
         });
       } else if (summary.includes('memorial day')) {
@@ -116,9 +139,9 @@ export class HolidayService {
     }
     
     // Add missing holidays that aren't well-represented in US federal calendar
-    // Winter Break: December 24 to January 1 (9 days) - using UTC to avoid timezone issues
-    const winterBreakStart = new Date(Date.UTC(year, 11, 24)); // December 24
-    const winterBreakEnd = new Date(Date.UTC(year + 1, 0, 1)); // January 1 next year
+    // Winter Break: December 24 to January 1 (9 days) - using local timezone
+    const winterBreakStart = new Date(year, 11, 24, 0, 0, 0, 0); // December 24
+    const winterBreakEnd = new Date(year + 1, 0, 1, 23, 59, 59, 999); // January 1 next year
     holidays.set('Winter Break', { 
       name: 'Winter Break', 
       startDate: winterBreakStart, 
@@ -130,14 +153,15 @@ export class HolidayService {
     if (!holidays.has('Rosh Hashanah')) {
       // Rosh Hashanah 2024: Sept 15-17, 2025: Sept 5-7, 2026: Sept 25-27, 2027: Sept 13-15
       const roshDates = {
-        2024: new Date(Date.UTC(2024, 8, 15)), // Sept 15
-        2025: new Date(Date.UTC(2025, 8, 5)),  // Sept 5  
-        2026: new Date(Date.UTC(2026, 8, 25)), // Sept 25
-        2027: new Date(Date.UTC(2027, 8, 13))  // Sept 13
+        2024: new Date(2024, 8, 15, 0, 0, 0, 0), // Sept 15
+        2025: new Date(2025, 8, 5, 0, 0, 0, 0),  // Sept 5  
+        2026: new Date(2026, 8, 25, 0, 0, 0, 0), // Sept 25
+        2027: new Date(2027, 8, 13, 0, 0, 0, 0)  // Sept 13
       };
       if (roshDates[year]) {
         const roshEnd = new Date(roshDates[year]);
         roshEnd.setDate(roshEnd.getDate() + 1); // 2-day holiday
+        roshEnd.setHours(23, 59, 59, 999);
         holidays.set('Rosh Hashanah', {
           name: 'Rosh Hashanah',
           startDate: roshDates[year],
@@ -150,16 +174,18 @@ export class HolidayService {
     if (!holidays.has('Yom Kippur')) {
       // Yom Kippur is 10 days after Rosh Hashanah
       const yomKippurDates = {
-        2024: new Date(Date.UTC(2024, 8, 24)), // Sept 24
-        2025: new Date(Date.UTC(2025, 8, 14)), // Sept 14
-        2026: new Date(Date.UTC(2026, 9, 4)),  // Oct 4
-        2027: new Date(Date.UTC(2027, 8, 22))  // Sept 22
+        2024: new Date(2024, 8, 24, 0, 0, 0, 0), // Sept 24
+        2025: new Date(2025, 8, 14, 0, 0, 0, 0), // Sept 14
+        2026: new Date(2026, 9, 4, 0, 0, 0, 0),  // Oct 4
+        2027: new Date(2027, 8, 22, 0, 0, 0, 0)  // Sept 22
       };
       if (yomKippurDates[year]) {
+        const yomKippurEnd = new Date(yomKippurDates[year]);
+        yomKippurEnd.setHours(23, 59, 59, 999);
         holidays.set('Yom Kippur', {
           name: 'Yom Kippur',
           startDate: yomKippurDates[year],
-          endDate: yomKippurDates[year],
+          endDate: yomKippurEnd,
           duration: 1
         });
       }
@@ -168,16 +194,18 @@ export class HolidayService {
     if (!holidays.has('Eid')) {
       // Eid al-Fitr approximate dates (lunar calendar varies)
       const eidDates = {
-        2024: new Date(Date.UTC(2024, 3, 10)), // April 10
-        2025: new Date(Date.UTC(2025, 2, 30)), // March 30
-        2026: new Date(Date.UTC(2026, 2, 20)), // March 20
-        2027: new Date(Date.UTC(2027, 2, 9))   // March 9
+        2024: new Date(2024, 3, 10, 0, 0, 0, 0), // April 10
+        2025: new Date(2025, 2, 30, 0, 0, 0, 0), // March 30
+        2026: new Date(2026, 2, 20, 0, 0, 0, 0), // March 20
+        2027: new Date(2027, 2, 9, 0, 0, 0, 0)   // March 9
       };
       if (eidDates[year]) {
+        const eidEnd = new Date(eidDates[year]);
+        eidEnd.setHours(23, 59, 59, 999);
         holidays.set('Eid', {
           name: 'Eid',
           startDate: eidDates[year],
-          endDate: eidDates[year],
+          endDate: eidEnd,
           duration: 1
         });
       }

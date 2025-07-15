@@ -147,9 +147,8 @@ export const calendarClosures = pgTable("calendar_closures", {
   id: uuid("id").primaryKey().defaultRandom(),
   schoolId: uuid("school_id").references(() => schools.id, { onDelete: "cascade" }),
   schoolYearId: uuid("school_year_id").references(() => schoolYears.id, { onDelete: "cascade" }),
-  date: timestamp("date"), // For backward compatibility and single-day holidays
-  startDate: timestamp("start_date"), // For multi-day holidays
-  endDate: timestamp("end_date"), // For multi-day holidays  
+  startDate: timestamp("start_date").notNull(), // Start date of holiday
+  endDate: timestamp("end_date").notNull(), // End date of holiday (same as start for single-day holidays)
   duration: integer("duration").default(1), // Number of days
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),

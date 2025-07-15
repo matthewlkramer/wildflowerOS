@@ -1204,12 +1204,16 @@ export class DatabaseStorage implements IStorage {
       .map(holiday => {
         // Safely handle date conversion with validation
         const safeDate = (dateValue: any) => {
-          if (!dateValue) return null;
-          const date = new Date(dateValue);
-          if (isNaN(date.getTime())) {
-            console.log(`Invalid date value: ${dateValue} for holiday ${holiday.name}`);
+          if (!dateValue) {
+            console.log(`Null date value for holiday ${holiday.name}`);
             return null;
           }
+          const date = new Date(dateValue);
+          if (isNaN(date.getTime())) {
+            console.log(`Invalid date value: ${dateValue} (type: ${typeof dateValue}) for holiday ${holiday.name}`);
+            return null;
+          }
+          console.log(`Valid date converted: ${dateValue} -> ${date.toISOString()} for holiday ${holiday.name}`);
           return date;
         };
 
@@ -1236,6 +1240,15 @@ export class DatabaseStorage implements IStorage {
       });
 
     if (schoolHolidays.length > 0) {
+      console.log('About to insert holidays:', schoolHolidays.map(h => ({
+        name: h.name,
+        startDate: h.startDate,
+        endDate: h.endDate,
+        startDateType: typeof h.startDate,
+        endDateType: typeof h.endDate,
+        startDateValid: h.startDate && !isNaN(h.startDate.getTime()),
+        endDateValid: h.endDate && !isNaN(h.endDate.getTime())
+      })));
       await db.insert(calendarClosures).values(schoolHolidays);
     }
   }

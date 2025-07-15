@@ -2058,5 +2058,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Channel initialization routes
+  app.post('/api/channels/initialize-network', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.initializeNetworkChannels();
+      res.status(200).json({ message: 'Network channels initialized' });
+    } catch (error) {
+      console.error('Error initializing network channels:', error);
+      res.status(500).json({ message: 'Failed to initialize network channels' });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/channels/initialize', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      await storage.initializeSchoolChannels(schoolId);
+      res.status(200).json({ message: 'School channels initialized' });
+    } catch (error) {
+      console.error('Error initializing school channels:', error);
+      res.status(500).json({ message: 'Failed to initialize school channels' });
+    }
+  });
+
+  app.post('/api/classrooms/:classroomId/channels/initialize', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { schoolId, level } = req.body;
+      
+      if (!schoolId || !level) {
+        return res.status(400).json({ message: 'schoolId and level are required' });
+      }
+
+      await storage.initializeClassroomChannels(schoolId, classroomId, level);
+      res.status(200).json({ message: 'Classroom channels initialized' });
+    } catch (error) {
+      console.error('Error initializing classroom channels:', error);
+      res.status(500).json({ message: 'Failed to initialize classroom channels' });
+    }
+  });
+
+  // Family channel management routes
+  app.post('/api/families/:familyId/channel', isAuthenticated, async (req: any, res) => {
+    try {
+      const { familyId } = req.params;
+      const { schoolId } = req.body;
+      
+      if (!schoolId) {
+        return res.status(400).json({ message: 'schoolId is required' });
+      }
+
+      const channel = await storage.createFamilyChannel(familyId, schoolId);
+      res.status(201).json(channel);
+    } catch (error) {
+      console.error('Error creating family channel:', error);
+      res.status(500).json({ message: 'Failed to create family channel' });
+    }
+  });
+
+  app.post('/api/families/:familyId/channel/archive', isAuthenticated, async (req: any, res) => {
+    try {
+      const { familyId } = req.params;
+      await storage.archiveFamilyChannel(familyId);
+      res.status(200).json({ message: 'Family channel archived' });
+    } catch (error) {
+      console.error('Error archiving family channel:', error);
+      res.status(500).json({ message: 'Failed to archive family channel' });
+    }
+  });
+
+  app.post('/api/families/:familyId/channel/update-access', isAuthenticated, async (req: any, res) => {
+    try {
+      const { familyId } = req.params;
+      const { schoolId } = req.body;
+      
+      if (!schoolId) {
+        return res.status(400).json({ message: 'schoolId is required' });
+      }
+
+      await storage.updateFamilyChannelAccess(familyId, schoolId);
+      res.status(200).json({ message: 'Family channel access updated' });
+    } catch (error) {
+      console.error('Error updating family channel access:', error);
+      res.status(500).json({ message: 'Failed to update family channel access' });
+    }
+  });
+
+  // Auto-archive family channels when no active enrollments
+  app.post('/api/families/:familyId/check-enrollment', isAuthenticated, async (req: any, res) => {
+    try {
+      const { familyId } = req.params;
+      const hasActiveEnrollments = await storage.checkFamilyEnrollmentStatus(familyId);
+      
+      if (!hasActiveEnrollments) {
+        await storage.archiveFamilyChannel(familyId);
+        res.json({ archived: true, message: 'Family channel archived due to no active enrollments' });
+      } else {
+        res.json({ archived: false, message: 'Family has active enrollments' });
+      }
+    } catch (error) {
+      console.error('Error checking family enrollment:', error);
+      res.status(500).json({ message: 'Failed to check family enrollment status' });
+    }
+  });
+
   return httpServer;
 }

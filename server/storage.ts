@@ -1453,6 +1453,282 @@ export class DatabaseStorage implements IStorage {
     return newMessage;
   }
 
+  // Channel initialization and management
+  async initializeNetworkChannels(): Promise<void> {
+    const { networkDefaultChannels, networkTeacherChannels } = await import('./channelDefaults');
+    
+    for (const channelData of [...networkDefaultChannels, ...networkTeacherChannels]) {
+      const existingChannel = await db
+        .select()
+        .from(channels)
+        .where(
+          and(
+            eq(channels.name, channelData.name),
+            eq(channels.scope, "network")
+          )
+        );
+      
+      if (existingChannel.length === 0) {
+        await db.insert(channels).values(channelData);
+      }
+    }
+  }
+
+  async initializeSchoolChannels(schoolId: string): Promise<void> {
+    const { schoolChannelTemplates } = await import('./channelDefaults');
+    
+    const [school] = await db.select().from(schools).where(eq(schools.id, schoolId));
+    if (!school) return;
+    
+    const schoolPrefix = school.msgDisplayName || school.shortName || school.name.toLowerCase().replace(/\s+/g, '');
+    
+    for (const template of schoolChannelTemplates) {
+      const channelName = template.suffix ? `${schoolPrefix}${template.suffix}` : schoolPrefix;
+      
+      const existingChannel = await db
+        .select()
+        .from(channels)
+        .where(
+          and(
+            eq(channels.name, channelName),
+            eq(channels.schoolId, schoolId)
+          )
+        );
+      
+      if (existingChannel.length === 0) {
+        await db.insert(channels).values({
+          name: channelName,
+          description: template.description,
+          type: template.type,
+          scope: template.scope,
+          schoolId: schoolId,
+          legalEntityId: null,
+          taskId: null,
+          isArchived: false,
+          canDelete: true,
+          canArchive: true,
+        });
+      }
+    }
+  }
+
+  async initializeClassroomChannels(schoolId: string, classroomId: string, level: string): Promise<void> {
+    const { classroomChannelTemplates } = await import('./channelDefaults');
+    
+    const [school] = await db.select().from(schools).where(eq(schools.id, schoolId));
+    if (!school) return;
+    
+    const schoolPrefix = school.msgDisplayName || school.shortName || school.name.toLowerCase().replace(/\s+/g, '');
+    
+    // Find matching template based on classroom level
+    const template = classroomChannelTemplates.find(t => 
+      t.levelSuffix.includes(level) || level.includes(t.levelSuffix.replace('-', ''))
+    );
+    
+    if (template) {
+      const channelName = `${schoolPrefix}${template.levelSuffix}`;
+      
+      const existingChannel = await db
+        .select()
+        .from(channels)
+        .where(
+          and(
+            eq(channels.name, channelName),
+            eq(channels.classroomId, classroomId)
+          )
+        );
+      
+      if (existingChannel.length === 0) {
+        await db.insert(channels).values({
+          name: channelName,
+          description: template.description,
+          type: "public",
+          scope: "classroom",
+          schoolId: schoolId,
+          classroomId: classroomId,
+          legalEntityId: null,
+          taskId: null,
+          isArchived: false,
+          canDelete: true,
+          canArchive: true,
+        });
+      }
+    }
+  }
+
+  // Family Channel Management
+  async createFamilyChannel(familyId: string, schoolId: string): Promise<Channel> {
+    // Get family details to create channel name
+    const [family] = await db.select().from(families).where(eq(families.id, familyId));
+    if (!family) {
+      throw new Error("Family not found");
+    }
+
+    // Get school display name for channel prefix
+    const [school] = await db.select().from(schools).where(eq(schools.id, schoolId));
+    if (!school) {
+      throw new Error("School not found");
+    }
+
+    // Create channel name: {school_msgDisplayName}-families-{lastname}{firstnames}
+    const schoolPrefix = school.msgDisplayName || school.shortName || school.name.toLowerCase().replace(/\s+/g, '');
+    
+    // Get parent names for channel suffix
+    const parents = await this.getParentsByFamily(familyId);
+    const parentNames = parents.map(p => {
+      const firstName = p.firstName?.toLowerCase().replace(/[^a-z]/g, '') || '';
+      return firstName;
+    }).join('');
+    
+    const familyLastName = family.lastName?.toLowerCase().replace(/[^a-z]/g, '') || 'family';
+    const channelName = `${schoolPrefix}-families-${familyLastName}${parentNames}`;
+
+    // Create the channel
+    const channelData = {
+      name: channelName,
+      description: `Private family communication channel for ${family.lastName} family`,
+      type: "private" as const,
+      scope: "family" as const,
+      schoolId: schoolId,
+      familyId: familyId,
+      isArchived: false,
+      canDelete: true,
+      canArchive: true,
+    };
+
+    const [newChannel] = await db.insert(channels).values(channelData).returning();
+
+    // Add family members and school educators to the channel
+    await this.addFamilyChannelMembers(newChannel.id, familyId, schoolId);
+
+    return newChannel;
+  }
+
+  async addFamilyChannelMembers(channelId: string, familyId: string, schoolId: string): Promise<void> {
+    // Get all parents/guardians for this family
+    const parents = await this.getParentsByFamily(familyId);
+    
+    // Get all educators at this school
+    const educators = await this.getEducatorsBySchool(schoolId);
+
+    // Add all members to the channel
+    const memberData = [
+      ...parents.map(parent => ({
+        channelId,
+        userId: parent.id,
+        joinedAt: new Date(),
+      })),
+      ...educators.map(educator => ({
+        channelId,
+        userId: educator.id,
+        joinedAt: new Date(),
+      })),
+    ];
+
+    if (memberData.length > 0) {
+      await db.insert(channelMembers).values(memberData);
+    }
+  }
+
+  async getParentsByFamily(familyId: string): Promise<User[]> {
+    const result = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .innerJoin(userRoles, eq(userRoles.userId, users.id))
+      .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoles.roleId))
+      .where(
+        and(
+          like(roleDefinitions.name, 'parent%'),
+          eq(userRoles.active, true),
+          eq(userRoles.familyId, familyId)
+        )
+      );
+    return result;
+  }
+
+  async getEducatorsBySchool(schoolId: string): Promise<User[]> {
+    const result = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .innerJoin(userRoles, eq(userRoles.userId, users.id))
+      .innerJoin(roleDefinitions, eq(roleDefinitions.id, userRoles.roleId))
+      .where(
+        and(
+          like(roleDefinitions.name, 'educator%'),
+          eq(userRoles.schoolId, schoolId),
+          eq(userRoles.active, true)
+        )
+      );
+    return result;
+  }
+
+  async archiveFamilyChannel(familyId: string): Promise<void> {
+    await db
+      .update(channels)
+      .set({ isArchived: true })
+      .where(
+        and(
+          eq(channels.familyId, familyId),
+          eq(channels.scope, "family")
+        )
+      );
+  }
+
+  async updateFamilyChannelAccess(familyId: string, schoolId: string): Promise<void> {
+    // Get the family channel
+    const [familyChannel] = await db
+      .select()
+      .from(channels)
+      .where(
+        and(
+          eq(channels.familyId, familyId),
+          eq(channels.scope, "family"),
+          eq(channels.isArchived, false)
+        )
+      );
+
+    if (!familyChannel) {
+      return; // No active family channel found
+    }
+
+    // Remove all existing members
+    await db.delete(channelMembers).where(eq(channelMembers.channelId, familyChannel.id));
+
+    // Re-add current family members and school educators
+    await this.addFamilyChannelMembers(familyChannel.id, familyId, schoolId);
+  }
+
+  async checkFamilyEnrollmentStatus(familyId: string): Promise<boolean> {
+    const activeEnrollments = await db
+      .select()
+      .from(enrollments)
+      .innerJoin(children, eq(children.id, enrollments.childId))
+      .where(
+        and(
+          eq(children.familyId, familyId),
+          eq(enrollments.status, "enrolled")
+        )
+      );
+    
+    return activeEnrollments.length > 0;
+  }
+
   async createChannel(channel: InsertChannel): Promise<Channel> {
     const [newChannel] = await db.insert(channels).values(channel).returning();
     return newChannel;

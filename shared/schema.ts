@@ -10,6 +10,7 @@ import {
   jsonb,
   index,
   unique,
+  uniqueIndex,
   foreignKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -266,6 +267,7 @@ export const classrooms = pgTable("classrooms", {
 export const families = pgTable("families", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 200 }),
+  lastName: varchar("last_name", { length: 100 }), // Family last name for channel naming
   address: text("address"),
   phone: varchar("phone", { length: 40 }),
   email: varchar("email", { length: 255 }),
@@ -385,6 +387,7 @@ export const channels = pgTable("channels", {
   }).notNull().default("school"),
   schoolId: uuid("school_id").references(() => schools.id), // null for network channels
   classroomId: uuid("classroom_id").references(() => classrooms.id), // for classroom channels
+  familyId: uuid("family_id").references(() => families.id), // for family channels
   legalEntityId: uuid("legal_entity_id").references(() => legalEntities.id),
   taskId: uuid("task_id"), // for task_comments channel
   isArchived: boolean("is_archived").notNull().default(false),
@@ -394,11 +397,13 @@ export const channels = pgTable("channels", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Channel membership table
 export const channelMembers = pgTable("channel_members", {
   id: uuid("id").primaryKey().defaultRandom(),
-  channelId: uuid("channel_id").notNull().references(() => channels.id),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  channelId: uuid("channel_id").references(() => channels.id, { onDelete: "cascade" }).notNull(),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
   joinedAt: timestamp("joined_at").defaultNow(),
+  lastReadAt: timestamp("last_read_at"),
 });
 
 export const messages = pgTable("messages", {

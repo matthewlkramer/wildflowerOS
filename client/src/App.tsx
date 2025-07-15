@@ -15,6 +15,7 @@ import SchoolSettingsPage from "@/pages/school-settings";
 import MessagesPage from "@/pages/messages";
 import TasksPage from "@/pages/tasks";
 import EnhancedMessagesPage from "@/pages/enhanced-messages";
+import { ChannelTest } from "@/pages/channel-test";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -31,6 +32,7 @@ function Router() {
           <Route path="/families/:familyId/billing" component={FamilyBillingPage} />
           <Route path="/messages" component={MessagesPage} />
           <Route path="/enhanced-messages" component={EnhancedMessagesPage} />
+          <Route path="/channel-test" component={ChannelTest} />
           <Route path="/tasks" component={TasksPage} />
           <Route path="/settings" component={SchoolSettingsPage} />
           {/* Add more authenticated routes here */}

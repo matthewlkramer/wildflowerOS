@@ -1,0 +1,275 @@
+import { InsertChannel } from "@shared/schema";
+
+// Network default channels (foundation channels)
+export const networkDefaultChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'updatedAt' | 'schoolId' | 'classroomId' | 'familyId'>[] = [
+  {
+    name: "general",
+    description: "General network-wide discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-ops",
+    description: "Foundation operations discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-mktgcomms",
+    description: "Foundation marketing and communications",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-tech",
+    description: "Foundation technology discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-radicle",
+    description: "Foundation radicle discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-chartergrowth",
+    description: "Foundation charter growth discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation",
+    description: "Main foundation channel",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-partners",
+    description: "Foundation partners discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "foundation-random",
+    description: "Foundation random discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+];
+
+// Network teacher channels
+export const networkTeacherChannels: Omit<InsertChannel, 'id' | 'createdAt' | 'updatedAt' | 'schoolId' | 'classroomId' | 'familyId'>[] = [
+  {
+    name: "support-at",
+    description: "Support and assistance for teachers",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "new-to-wildflower",
+    description: "Support for new Wildflower teachers",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "cheers",
+    description: "Celebrating achievements and successes",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "infants-and-toddlers",
+    description: "Discussions about infant and toddler education",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "primary",
+    description: "Primary classroom discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "lower-elementary",
+    description: "Lower elementary discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "upper-elementary",
+    description: "Upper elementary discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "adolescent",
+    description: "Adolescent education discussions",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+  {
+    name: "wildflower-principles",
+    description: "Discussions about Wildflower principles",
+    type: "public",
+    scope: "network",
+    legalEntityId: null,
+    taskId: null,
+    isArchived: false,
+    canDelete: false,
+    canArchive: false,
+  },
+];
+
+// School-specific channel templates (to be created with school msgDisplayName prefix)
+export const schoolChannelTemplates: Array<{
+  suffix: string;
+  description: string;
+  type: "public" | "private";
+  scope: "school" | "classroom";
+}> = [
+  {
+    suffix: "", // Just the school name (e.g., "wildrose")
+    description: "Main school channel",
+    type: "public",
+    scope: "school",
+  },
+  {
+    suffix: "-admin",
+    description: "School administration discussions",
+    type: "private",
+    scope: "school",
+  },
+  {
+    suffix: "-staff",
+    description: "School staff discussions",
+    type: "private",
+    scope: "school",
+  },
+  {
+    suffix: "-families",
+    description: "Communication with families",
+    type: "public",
+    scope: "school",
+  },
+  {
+    suffix: "-random",
+    description: "Random school discussions",
+    type: "public",
+    scope: "school",
+  },
+  {
+    suffix: "-cheers",
+    description: "School celebrations and achievements",
+    type: "public",
+    scope: "school",
+  },
+];
+
+// Classroom channel templates (to be created with school msgDisplayName prefix + classroom level)
+export const classroomChannelTemplates: Array<{
+  levelSuffix: string;
+  description: string;
+}> = [
+  {
+    levelSuffix: "-primary",
+    description: "Primary classroom discussions",
+  },
+  {
+    levelSuffix: "-elementary",
+    description: "Elementary classroom discussions", 
+  },
+  {
+    levelSuffix: "-infant",
+    description: "Infant classroom discussions",
+  },
+  {
+    levelSuffix: "-toddler", 
+    description: "Toddler classroom discussions",
+  },
+];

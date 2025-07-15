@@ -1748,6 +1748,8 @@ export default function SchoolSettingsPage() {
   // Schedule form state
   const [scheduleForm, setScheduleForm] = useState({
     name: "",
+    startDate: "",
+    endDate: "",
     startTime: "",
     endTime: "",
     mondayOpen: false,
@@ -2255,6 +2257,8 @@ export default function SchoolSettingsPage() {
       setAddingSchedule(false);
       setScheduleForm({
         name: "",
+        startDate: "",
+        endDate: "",
         startTime: "",
         endTime: "",
         mondayOpen: false,
@@ -2288,6 +2292,8 @@ export default function SchoolSettingsPage() {
       setEditingSchedule(null);
       setScheduleForm({
         name: "",
+        startDate: "",
+        endDate: "",
         startTime: "",
         endTime: "",
         mondayOpen: false,
@@ -2648,6 +2654,8 @@ export default function SchoolSettingsPage() {
   const handleEditSchedule = (schedule: any) => {
     setScheduleForm({
       name: schedule.name,
+      startDate: schedule.startDate ? new Date(schedule.startDate).toISOString().split('T')[0] : "",
+      endDate: schedule.endDate ? new Date(schedule.endDate).toISOString().split('T')[0] : "",
       startTime: schedule.startTime,
       endTime: schedule.endTime,
       mondayOpen: schedule.mondayOpen,
@@ -4178,6 +4186,24 @@ export default function SchoolSettingsPage() {
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
+                                    <Label>Start Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={scheduleForm.startDate}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End Date (Optional)</Label>
+                                    <Input
+                                      type="date"
+                                      value={scheduleForm.endDate}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, endDate: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
                                     <Label>Start Time</Label>
                                     <Input
                                       type="time"
@@ -4253,6 +4279,24 @@ export default function SchoolSettingsPage() {
                                     onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
                                     placeholder="e.g., Primary Full Day, Elementary Extended"
                                   />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Start Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={scheduleForm.startDate}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End Date (Optional)</Label>
+                                    <Input
+                                      type="date"
+                                      value={scheduleForm.endDate}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, endDate: e.target.value }))}
+                                    />
+                                  </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
@@ -4382,8 +4426,14 @@ export default function SchoolSettingsPage() {
                                     </div>
                                   </div>
                                 </div>
-                                <div className="text-xs text-gray-500 mt-2">
-                                  Created: {new Date(schedule.createdAt).toLocaleDateString()}
+                                <div className="text-xs text-gray-500 mt-2 space-y-1">
+                                  {schedule.startDate && (
+                                    <div>Start: {new Date(schedule.startDate).toLocaleDateString()}</div>
+                                  )}
+                                  {schedule.endDate && (
+                                    <div>End: {new Date(schedule.endDate).toLocaleDateString()}</div>
+                                  )}
+                                  <div>Created: {new Date(schedule.createdAt).toLocaleDateString()}</div>
                                 </div>
                               </div>
                             </div>

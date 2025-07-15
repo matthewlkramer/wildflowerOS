@@ -1603,12 +1603,160 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(tuitionPlans.name));
   }
 
-  async createTuitionPlan(data: InsertTuitionPlan): Promise<TuitionPlan> {
-    const [plan] = await db
-      .insert(tuitionPlans)
-      .values(data)
-      .returning();
+  async createTuitionPlan(data: any): Promise<TuitionPlan> {
+    // Calculate pricing metrics based on schedule and school year
+    const calculatedData = await this.calculateTuitionMetrics(data);
+    const [plan] = await db.insert(tuitionPlans).values(calculatedData).returning();
     return plan;
+  }
+
+  private async calculateTuitionMetrics(tuitionData: any): Promise<any> {
+    const { classroomScheduleId, schoolYearId, fullPrice, billingFrequency } = tuitionData;
+    
+    // Get schedule details
+    const [schedule] = await db
+      .select()
+      .from(classroomSchedules)
+      .where(eq(classroomSchedules.id, classroomScheduleId));
+    
+    if (!schedule) {
+      throw new Error('Schedule not found');
+    }
+
+    // Calculate hours per week from schedule
+    const daysPerWeek = [
+      schedule.mondayOpen,
+      schedule.tuesdayOpen,
+      schedule.wednesdayOpen,
+      schedule.thursdayOpen,
+      schedule.fridayOpen,
+      schedule.saturdayOpen,
+      schedule.sundayOpen
+    ].filter(Boolean).length;
+
+    const startTime = schedule.startTime || '08:00:00';
+    const endTime = schedule.endTime || '15:00:00';
+    
+    // Calculate hours per day
+    const startHour = parseInt(startTime.split(':')[0]) + parseInt(startTime.split(':')[1]) / 60;
+    const endHour = parseInt(endTime.split(':')[0]) + parseInt(endTime.split(':')[1]) / 60;
+    const hoursPerDay = endHour - startHour;
+    const hoursPerWeek = hoursPerDay * daysPerWeek;
+
+    // Calculate weeks per year from school year if provided
+    let weeksPerYear = 52; // default for continuous programs
+    let totalHoursPerYear = hoursPerWeek * weeksPerYear;
+
+    if (schoolYearId) {
+      const [schoolYear] = await db
+        .select()
+        .from(schoolYears)
+        .where(eq(schoolYears.id, schoolYearId));
+      
+      if (schoolYear && schoolYear.startDate && schoolYear.endDate) {
+        // Get holidays for this school year
+        const holidays = await db
+          .select()
+          .from(calendarClosures)
+          .where(eq(calendarClosures.schoolYearId, schoolYearId));
+        
+        // Calculate total days in school year
+        const startDate = new Date(schoolYear.startDate);
+        const endDate = new Date(schoolYear.endDate);
+        const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Calculate holiday days
+        const holidayDays = holidays.reduce((total, holiday) => {
+          return total + (holiday.duration || 1);
+        }, 0);
+        
+        // Calculate school days (weekdays only, minus holidays)
+        const schoolDays = Math.floor(totalDays * (5/7)) - holidayDays; // rough estimate of weekdays
+        weeksPerYear = Math.floor(schoolDays / 5); // convert to weeks
+        totalHoursPerYear = hoursPerWeek * weeksPerYear;
+      }
+    }
+
+    // Calculate price per hour based on billing frequency
+    let pricePerHour = 0;
+    const fullPriceNum = parseFloat(fullPrice.toString());
+    
+    switch (billingFrequency) {
+      case 'weekly':
+        pricePerHour = fullPriceNum / hoursPerWeek;
+        break;
+      case 'monthly':
+        pricePerHour = (fullPriceNum * 12) / totalHoursPerYear;
+        break;
+      case 'annually':
+        pricePerHour = fullPriceNum / totalHoursPerYear;
+        break;
+    }
+
+    return {
+      ...tuitionData,
+      hoursPerWeek: hoursPerWeek.toFixed(2),
+      weeksPerYear,
+      totalHoursPerYear: totalHoursPerYear.toFixed(2),
+      pricePerHour: pricePerHour.toFixed(4)
+    };
+  }
+
+  async getTuitionPlansWithCalculations(schoolId: string): Promise<any[]> {
+    const plans = await db
+      .select({
+        plan: tuitionPlans,
+        classroom: classrooms,
+        schedule: classroomSchedules,
+        schoolYear: schoolYears
+      })
+      .from(tuitionPlans)
+      .leftJoin(classrooms, eq(tuitionPlans.classroomId, classrooms.id))
+      .leftJoin(classroomSchedules, eq(tuitionPlans.classroomScheduleId, classroomSchedules.id))
+      .leftJoin(schoolYears, eq(tuitionPlans.schoolYearId, schoolYears.id))
+      .where(eq(classrooms.schoolId, schoolId))
+      .orderBy(asc(classrooms.name), asc(classroomSchedules.name));
+
+    return plans;
+  }
+
+  async getClassroomsWithSchedulesForTuition(schoolId: string): Promise<any[]> {
+    const classrooms = await db
+      .select({
+        classroom: classrooms,
+        schedules: classroomSchedules
+      })
+      .from(classrooms)
+      .leftJoin(classroomSchedules, and(
+        eq(classroomSchedules.classroomId, classrooms.id),
+        eq(classroomSchedules.isActive, true),
+        eq(classroomSchedules.networkDefault, false)
+      ))
+      .where(and(
+        eq(classrooms.schoolId, schoolId),
+        eq(classrooms.isActive, true)
+      ))
+      .orderBy(asc(classrooms.name));
+
+    // Group schedules by classroom
+    const groupedData = classrooms.reduce((acc: any, row) => {
+      const classroomId = row.classroom.id;
+      
+      if (!acc[classroomId]) {
+        acc[classroomId] = {
+          ...row.classroom,
+          schedules: []
+        };
+      }
+      
+      if (row.schedules) {
+        acc[classroomId].schedules.push(row.schedules);
+      }
+      
+      return acc;
+    }, {});
+
+    return Object.values(groupedData);
   }
 
   async updateTuitionPlan(id: string, data: Partial<InsertTuitionPlan>): Promise<TuitionPlan> {
@@ -1822,6 +1970,139 @@ export class DatabaseStorage implements IStorage {
 
   async deletePublicSubsidyProgram(id: string): Promise<void> {
     await db.delete(publicSubsidyPrograms).where(eq(publicSubsidyPrograms.id, id));
+  }
+
+  // ======================== CLASSROOM SCHEDULES ========================
+  
+  async getClassroomSchedulesBySchool(schoolId: string): Promise<ClassroomSchedule[]> {
+    return await db
+      .select()
+      .from(classroomSchedules)
+      .where(and(
+        eq(classroomSchedules.schoolId, schoolId),
+        eq(classroomSchedules.networkDefault, false)
+      ))
+      .orderBy(asc(classroomSchedules.name));
+  }
+
+  async getNetworkDefaultSchedules(): Promise<ClassroomSchedule[]> {
+    return await db
+      .select()
+      .from(classroomSchedules)
+      .where(eq(classroomSchedules.networkDefault, true))
+      .orderBy(asc(classroomSchedules.level), asc(classroomSchedules.name));
+  }
+
+  async getNetworkDefaultSchedulesByLevel(level: string): Promise<ClassroomSchedule[]> {
+    return await db
+      .select()
+      .from(classroomSchedules)
+      .where(and(
+        eq(classroomSchedules.networkDefault, true),
+        eq(classroomSchedules.level, level)
+      ))
+      .orderBy(asc(classroomSchedules.name));
+  }
+
+  async createClassroomSchedule(data: any): Promise<ClassroomSchedule> {
+    const insertData = {
+      ...data,
+      startDate: data.startDate ? new Date(data.startDate) : null,
+      endDate: data.endDate ? new Date(data.endDate) : null,
+    };
+
+    const [schedule] = await db
+      .insert(classroomSchedules)
+      .values(insertData)
+      .returning();
+    return schedule;
+  }
+
+  async createNetworkDefaultSchedule(data: any): Promise<ClassroomSchedule> {
+    const insertData = {
+      ...data,
+      networkDefault: true,
+      schoolId: null,
+      classroomId: null,
+      startDate: null,
+      endDate: null,
+    };
+
+    const [schedule] = await db
+      .insert(classroomSchedules)
+      .values(insertData)
+      .returning();
+    return schedule;
+  }
+
+  async updateClassroomSchedule(id: string, data: any): Promise<ClassroomSchedule> {
+    const updateData = {
+      ...data,
+      updatedAt: new Date(),
+      startDate: data.startDate ? new Date(data.startDate) : undefined,
+      endDate: data.endDate ? new Date(data.endDate) : undefined,
+    };
+
+    const [schedule] = await db
+      .update(classroomSchedules)
+      .set(updateData)
+      .where(eq(classroomSchedules.id, id))
+      .returning();
+    return schedule;
+  }
+
+  async deleteClassroomSchedule(id: string): Promise<void> {
+    await db.delete(classroomSchedules).where(eq(classroomSchedules.id, id));
+  }
+
+  async importNetworkSchedulesToSchool(schoolId: string): Promise<{ schedules: ClassroomSchedule[], classroomAssignments: any[] }> {
+    // Get all classrooms for this school
+    const schoolClassrooms = await db
+      .select()
+      .from(classrooms)
+      .where(and(
+        eq(classrooms.schoolId, schoolId),
+        eq(classrooms.isActive, true)
+      ));
+
+    const importedSchedules: ClassroomSchedule[] = [];
+    const classroomAssignments: any[] = [];
+
+    // For each classroom, import matching network default schedules
+    for (const classroom of schoolClassrooms) {
+      const networkSchedules = await this.getNetworkDefaultSchedulesByLevel(classroom.level);
+      
+      for (const networkSchedule of networkSchedules) {
+        // Create school-specific version of the network schedule
+        const schoolSchedule = await this.createClassroomSchedule({
+          classroomId: classroom.id,
+          schoolId: schoolId,
+          name: networkSchedule.name,
+          level: networkSchedule.level,
+          networkDefault: false,
+          mondayOpen: networkSchedule.mondayOpen,
+          tuesdayOpen: networkSchedule.tuesdayOpen,
+          wednesdayOpen: networkSchedule.wednesdayOpen,
+          thursdayOpen: networkSchedule.thursdayOpen,
+          fridayOpen: networkSchedule.fridayOpen,
+          saturdayOpen: networkSchedule.saturdayOpen,
+          sundayOpen: networkSchedule.sundayOpen,
+          startTime: networkSchedule.startTime,
+          endTime: networkSchedule.endTime,
+          isActive: true
+        });
+
+        importedSchedules.push(schoolSchedule);
+        classroomAssignments.push({
+          classroomId: classroom.id,
+          classroomName: classroom.name,
+          scheduleId: schoolSchedule.id,
+          scheduleName: schoolSchedule.name
+        });
+      }
+    }
+
+    return { schedules: importedSchedules, classroomAssignments };
   }
 
   // ======================== SUBSIDY RATES ========================

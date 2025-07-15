@@ -1237,6 +1237,10 @@ export default function SchoolSettingsPage() {
   // Schedule management state
   const [addingSchedule, setAddingSchedule] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState<any>(null);
+  
+  // Tuition management state
+  const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
+  const [calculatedPricePerHour, setCalculatedPricePerHour] = useState<string>("0.00");
   const [deletingSchedule, setDeletingSchedule] = useState<any>(null);
   
   // System administrator tab state
@@ -1296,10 +1300,12 @@ export default function SchoolSettingsPage() {
 
   const [tuitionForm, setTuitionForm] = useState({
     name: "",
-    level: "primary",
-    amount: "",
-    schedule: "monthly",
-    description: ""
+    classroomId: "",
+    classroomScheduleId: "",
+    schoolYearId: "",
+    fullPrice: "",
+    billingFrequency: "monthly",
+    slidingScalePolicyId: ""
   });
   
   // Schedule form state
@@ -1384,11 +1390,14 @@ export default function SchoolSettingsPage() {
     enabled: !!effectiveSchoolId,
   });
 
-  // Fetch tuition plans
-  const { data: tuitionPlans = [] } = useQuery({
-    queryKey: ["/api/schools", effectiveSchoolId, "tuition-plans"],
+  // Fetch tuition overview (classrooms with schedules and plans)
+  const { data: tuitionOverview = { classrooms: [], plans: [] } } = useQuery({
+    queryKey: ["/api/schools", effectiveSchoolId, "tuition-overview"],
     enabled: !!effectiveSchoolId,
   });
+  
+  const classroomsWithSchedules = tuitionOverview.classrooms || [];
+  const tuitionPlans = tuitionOverview.plans || [];
 
   // Fetch public subsidies
   const { data: publicSubsidies = [] } = useQuery({
@@ -1513,12 +1522,21 @@ export default function SchoolSettingsPage() {
   // Add tuition plan mutation
   const addTuitionPlanMutation = useMutation({
     mutationFn: async (tuitionData: any) => {
-      return apiRequest('POST', `/api/schools/${schoolId}/tuition-plans`, { ...tuitionData, schoolId });
+      return apiRequest('POST', `/api/tuition-plans`, tuitionData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "tuition-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", effectiveSchoolId, "tuition-overview"] });
       setAddingTuitionPlan(false);
-      setTuitionForm({ name: "", level: "primary", amount: "", schedule: "monthly", description: "" });
+      setTuitionForm({ 
+        name: "", 
+        classroomId: "", 
+        classroomScheduleId: "", 
+        schoolYearId: "", 
+        fullPrice: "", 
+        billingFrequency: "monthly", 
+        slidingScalePolicyId: "" 
+      });
+      setCalculatedPricePerHour("0.00");
       toast({
         title: "Tuition plan added",
         description: "New tuition plan has been created successfully.",
@@ -1751,6 +1769,81 @@ export default function SchoolSettingsPage() {
     },
   });
 
+  const handleAddTuitionPlan = () => {
+    if (!tuitionForm.name || !tuitionForm.fullPrice || !selectedSchedule) {
+      toast({
+        title: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    addTuitionPlanMutation.mutate({
+      ...tuitionForm,
+      classroomId: selectedSchedule.classroom.id,
+      classroomScheduleId: selectedSchedule.schedule.id
+    });
+  };
+
+  // Helper function to calculate hours per week from schedule
+  const calculateHoursPerWeek = (schedule: any) => {
+    const daysPerWeek = [
+      schedule.mondayOpen,
+      schedule.tuesdayOpen,
+      schedule.wednesdayOpen,
+      schedule.thursdayOpen,
+      schedule.fridayOpen,
+      schedule.saturdayOpen,
+      schedule.sundayOpen
+    ].filter(Boolean).length;
+
+    const startTime = schedule.startTime || '08:00:00';
+    const endTime = schedule.endTime || '15:00:00';
+    
+    const startHour = parseInt(startTime.split(':')[0]) + parseInt(startTime.split(':')[1]) / 60;
+    const endHour = parseInt(endTime.split(':')[0]) + parseInt(endTime.split(':')[1]) / 60;
+    const hoursPerDay = endHour - startHour;
+    
+    return (hoursPerDay * daysPerWeek).toFixed(1);
+  };
+
+  // Helper function to calculate price per hour
+  const calculatePricePerHour = (price: string, frequency: string) => {
+    if (!price || !frequency || !selectedSchedule) return;
+    
+    const fullPrice = parseFloat(price);
+    const hoursPerWeek = parseFloat(calculateHoursPerWeek(selectedSchedule.schedule));
+    const weeksPerYear = selectedSchedule.classroom.programType === 'continuous' ? 52 : 36;
+    const totalHoursPerYear = hoursPerWeek * weeksPerYear;
+    
+    let pricePerHour = 0;
+    switch (frequency) {
+      case 'weekly':
+        pricePerHour = fullPrice / hoursPerWeek;
+        break;
+      case 'monthly':
+        pricePerHour = (fullPrice * 12) / totalHoursPerYear;
+        break;
+      case 'annually':
+        pricePerHour = fullPrice / totalHoursPerYear;
+        break;
+    }
+    
+    setCalculatedPricePerHour(pricePerHour.toFixed(2));
+  };
+
+  const handleEditTuitionPlan = (plan: any) => {
+    // Implementation for editing tuition plans
+    console.log('Edit tuition plan:', plan);
+  };
+
+  const handleDeleteTuitionPlan = (plan: any) => {
+    if (confirm("Are you sure you want to delete this tuition plan?")) {
+      // Implementation for deleting tuition plans
+      console.log('Delete tuition plan:', plan);
+    }
+  };
+
   // Set active school year mutation
   const setActiveSchoolYearMutation = useMutation({
     mutationFn: async (yearId: string) => {
@@ -1910,12 +2003,7 @@ export default function SchoolSettingsPage() {
     }));
   };
 
-  const handleAddTuitionPlan = () => {
-    addTuitionPlanMutation.mutate({
-      ...tuitionForm,
-      amount: parseFloat(tuitionForm.amount),
-    });
-  };
+
 
   const handleAddSchoolYear = () => {
     // Handle network default school year creation for system admin
@@ -2762,37 +2850,37 @@ export default function SchoolSettingsPage() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="staff" className="flex items-center">
-              <Users className="mr-2 h-4 w-4" />
-              Staff
+            <TabsTrigger value="staff" className="flex items-center px-1 sm:px-3">
+              <Users className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="text-xs sm:text-sm">Staff</span>
             </TabsTrigger>
-            <TabsTrigger value="roles" className="flex items-center">
-              <Settings className="mr-2 h-4 w-4" />
-              Roles
+            <TabsTrigger value="roles" className="flex items-center px-1 sm:px-3">
+              <Settings className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="text-xs sm:text-sm">Roles</span>
             </TabsTrigger>
-            <TabsTrigger value="assignments" className="flex items-center">
-              <Users className="mr-2 h-4 w-4" />
-              Assignments
+            <TabsTrigger value="assignments" className="flex items-center px-1 sm:px-3">
+              <Users className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="text-xs sm:text-sm">Assign</span>
             </TabsTrigger>
-            <TabsTrigger value="classrooms" className="flex items-center">
-              <Home className="mr-2 h-4 w-4" />
-              Classrooms
+            <TabsTrigger value="classrooms" className="flex items-center px-1 sm:px-3">
+              <Home className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="text-xs sm:text-sm">Rooms</span>
             </TabsTrigger>
-            <TabsTrigger value="school-years" className="flex items-center">
+            <TabsTrigger value="school-years" className="flex items-center px-1 sm:px-3">
               <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">School </span>Years
+              <span className="text-xs sm:text-sm">Years</span>
             </TabsTrigger>
-            <TabsTrigger value="schedules" className="flex items-center">
+            <TabsTrigger value="schedules" className="flex items-center px-1 sm:px-3">
               <Clock className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Sched</span><span className="sm:hidden">Sched</span><span className="hidden sm:inline">ules</span>
+              <span className="text-xs sm:text-sm">Schedule</span>
             </TabsTrigger>
-            <TabsTrigger value="tuition" className="flex items-center">
+            <TabsTrigger value="tuition" className="flex items-center px-1 sm:px-3">
               <DollarSign className="mr-1 sm:mr-2 h-4 w-4" />
-              Tuition<span className="hidden sm:inline"> Plans</span>
+              <span className="text-xs sm:text-sm">Tuition</span>
             </TabsTrigger>
-            <TabsTrigger value="subsidies" className="flex items-center">
+            <TabsTrigger value="subsidies" className="flex items-center px-1 sm:px-3">
               <School className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Public </span>Subsidies
+              <span className="text-xs sm:text-sm">Subsidy</span>
             </TabsTrigger>
           </TabsList>
 
@@ -4054,139 +4142,308 @@ export default function SchoolSettingsPage() {
 
           {/* Tuition Plans Tab */}
           <TabsContent value="tuition" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Tuition Plans</CardTitle>
-                  <Dialog open={addingTuitionPlan} onOpenChange={setAddingTuitionPlan}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Tuition Plan
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Tuition Plan</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Side: Classrooms and Schedules */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Classrooms & Schedules</CardTitle>
+                  <p className="text-sm text-gray-600">
+                    Select a classroom schedule to set pricing
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {classroomsWithSchedules.map((classroom: any) => (
+                    <div key={classroom.id} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
                         <div>
-                          <Label>Plan Name</Label>
-                          <Input
-                            value={tuitionForm.name}
-                            onChange={(e) => setTuitionForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Full Day Primary, Half Day Toddler"
-                          />
+                          <h4 className="font-medium">{classroom.name}</h4>
+                          <p className="text-sm text-gray-500 capitalize">
+                            {classroom.level.replace('_', ' ')} • {classroom.capacity} students
+                          </p>
                         </div>
-                        <div>
-                          <Label>Level</Label>
-                          <Select onValueChange={(value) => setTuitionForm(prev => ({ ...prev, level: value }))}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="infant">Infant</SelectItem>
-                              <SelectItem value="toddler">Toddler</SelectItem>
-                              <SelectItem value="primary">Primary</SelectItem>
-                              <SelectItem value="lower_elem">Lower Elementary</SelectItem>
-                              <SelectItem value="upper_elem">Upper Elementary</SelectItem>
-                              <SelectItem value="junior_high">Junior High</SelectItem>
-                              <SelectItem value="high_school">High School</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Amount ($)</Label>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              value={tuitionForm.amount}
-                              onChange={(e) => setTuitionForm(prev => ({ ...prev, amount: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>Schedule</Label>
-                            <Select onValueChange={(value) => setTuitionForm(prev => ({ ...prev, schedule: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select schedule" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                                <SelectItem value="yearly">Yearly</SelectItem>
-                                <SelectItem value="semester">Semester</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={tuitionForm.description}
-                            onChange={(e) => setTuitionForm(prev => ({ ...prev, description: e.target.value }))}
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setAddingTuitionPlan(false)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleAddTuitionPlan}
-                            disabled={!tuitionForm.name || !tuitionForm.amount}
-                          >
-                            Add Tuition Plan
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {tuitionPlans.map((plan: any) => (
-                    <div key={plan.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">{plan.name}</h4>
-                        <Badge className={getLevelColor(plan.level)}>
-                          {formatLevel(plan.level)}
+                        <Badge variant="outline">
+                          {classroom.programType === 'continuous' ? 'Year-round' : 'School Year'}
                         </Badge>
                       </div>
-                      <div className="space-y-2">
-                        <div className="text-2xl font-bold text-green-600">
-                          ${plan.amount}
-                          <span className="text-sm font-normal text-gray-600">
-                            /{plan.schedule}
-                          </span>
+                      
+                      {classroom.schedules.length > 0 ? (
+                        <div className="space-y-2">
+                          {classroom.schedules.map((schedule: any) => (
+                            <div 
+                              key={schedule.id} 
+                              className="p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                              onClick={() => setSelectedSchedule({ classroom, schedule })}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium text-sm">{schedule.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {schedule.startTime} - {schedule.endTime}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-xs font-medium">
+                                    {[
+                                      schedule.mondayOpen && 'M',
+                                      schedule.tuesdayOpen && 'T', 
+                                      schedule.wednesdayOpen && 'W',
+                                      schedule.thursdayOpen && 'Th',
+                                      schedule.fridayOpen && 'F',
+                                      schedule.saturdayOpen && 'S',
+                                      schedule.sundayOpen && 'Su'
+                                    ].filter(Boolean).join(', ')}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {calculateHoursPerWeek(schedule)} hrs/week
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
-                        {plan.description && (
-                          <p className="text-sm text-gray-600">{plan.description}</p>
-                        )}
-                      </div>
-                      <div className="flex justify-end space-x-2 mt-4">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <Clock className="mx-auto h-8 w-8 mb-2 text-gray-400" />
+                          <p className="text-sm">No schedules configured</p>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2"
+                            onClick={() => setActiveTab('schedules')}
+                          >
+                            Add Schedule
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))}
-
-                  {tuitionPlans.length === 0 && (
-                    <div className="col-span-full text-center py-8">
-                      <DollarSign className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600">No tuition plans configured yet</p>
-                      <Button className="mt-2" onClick={() => setAddingTuitionPlan(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add First Tuition Plan
+                  
+                  {classroomsWithSchedules.length === 0 && (
+                    <div className="text-center py-8">
+                      <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-gray-600">No classrooms found</p>
+                      <Button 
+                        variant="outline" 
+                        className="mt-2"
+                        onClick={() => setActiveTab('classrooms')}
+                      >
+                        Add Classroom
                       </Button>
                     </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Right Side: Tuition Pricing */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Tuition Pricing</CardTitle>
+                      <p className="text-sm text-gray-600">
+                        {selectedSchedule ? 
+                          `Set pricing for ${selectedSchedule.classroom.name} - ${selectedSchedule.schedule.name}` :
+                          'Select a schedule to set pricing'
+                        }
+                      </p>
+                    </div>
+                    {selectedSchedule && (
+                      <Dialog open={addingTuitionPlan} onOpenChange={setAddingTuitionPlan}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Pricing
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Set Tuition Pricing</DialogTitle>
+                            <DialogDescription>
+                              {selectedSchedule.classroom.name} - {selectedSchedule.schedule.name}
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <Label>Plan Name</Label>
+                              <Input
+                                value={tuitionForm.name}
+                                onChange={(e) => setTuitionForm(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder={`${selectedSchedule.classroom.name} - ${selectedSchedule.schedule.name}`}
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label>Full Price</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={tuitionForm.fullPrice}
+                                  onChange={(e) => {
+                                    setTuitionForm(prev => ({ ...prev, fullPrice: e.target.value }));
+                                    calculatePricePerHour(e.target.value, tuitionForm.billingFrequency);
+                                  }}
+                                  placeholder="0.00"
+                                />
+                              </div>
+                              <div>
+                                <Label>Billing Frequency</Label>
+                                <Select onValueChange={(value) => {
+                                  setTuitionForm(prev => ({ ...prev, billingFrequency: value }));
+                                  calculatePricePerHour(tuitionForm.fullPrice, value);
+                                }}>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select frequency" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="weekly">Weekly</SelectItem>
+                                    <SelectItem value="monthly">Monthly</SelectItem>
+                                    <SelectItem value="annually">Annually</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            
+                            {/* Pricing Calculation Display */}
+                            {tuitionForm.fullPrice && tuitionForm.billingFrequency && (
+                              <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+                                <h4 className="font-medium text-blue-900">Price Calculation</h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-gray-600">Hours per week:</p>
+                                    <p className="font-medium">{calculateHoursPerWeek(selectedSchedule.schedule)} hours</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-600">Weeks per year:</p>
+                                    <p className="font-medium">{selectedSchedule.classroom.programType === 'continuous' ? '52' : '36'} weeks</p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-600">Total hours/year:</p>
+                                    <p className="font-medium">
+                                      {(parseFloat(calculateHoursPerWeek(selectedSchedule.schedule)) * 
+                                        (selectedSchedule.classroom.programType === 'continuous' ? 52 : 36)).toFixed(0)} hours
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-gray-600">Price per hour:</p>
+                                    <p className="font-medium text-blue-600">
+                                      ${calculatedPricePerHour}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            <div>
+                              <Label>School Year (for annual pricing)</Label>
+                              <Select onValueChange={(value) => setTuitionForm(prev => ({ ...prev, schoolYearId: value }))}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select school year (optional)" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="">No specific year</SelectItem>
+                                  {schoolYears.map((year: any) => (
+                                    <SelectItem key={year.id} value={year.id}>
+                                      {year.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+
+                            <div className="flex justify-end space-x-2">
+                              <Button variant="outline" onClick={() => setAddingTuitionPlan(false)}>
+                                Cancel
+                              </Button>
+                              <Button 
+                                onClick={handleAddTuitionPlan}
+                                disabled={addTuitionPlanMutation.isPending || !tuitionForm.fullPrice || !tuitionForm.billingFrequency}
+                              >
+                                {addTuitionPlanMutation.isPending ? "Adding..." : "Add Pricing"}
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {selectedSchedule ? (
+                    <div className="space-y-4">
+                      {/* Current Pricing Plans */}
+                      {tuitionPlans
+                        .filter((plan: any) => 
+                          plan.plan?.classroomId === selectedSchedule.classroom.id && 
+                          plan.plan?.classroomScheduleId === selectedSchedule.schedule.id
+                        )
+                        .map((planData: any) => {
+                          const plan = planData.plan;
+                          return (
+                            <Card key={plan.id} className="border-l-4 border-l-green-500">
+                              <CardHeader>
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <h4 className="font-medium">{plan.name}</h4>
+                                    <p className="text-sm text-gray-600">
+                                      ${plan.fullPrice} per {plan.billingFrequency}
+                                    </p>
+                                    {plan.pricePerHour && (
+                                      <p className="text-xs text-blue-600">
+                                        ${plan.pricePerHour}/hour • {plan.hoursPerWeek} hrs/week • {plan.totalHoursPerYear} hrs/year
+                                      </p>
+                                    )}
+                                  </div>
+                                  <div className="flex space-x-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleEditTuitionPlan(plan)}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleDeleteTuitionPlan(plan)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                            </Card>
+                          );
+                        })}
+                      
+                      {tuitionPlans.filter((plan: any) => 
+                        plan.plan?.classroomId === selectedSchedule.classroom.id && 
+                        plan.plan?.classroomScheduleId === selectedSchedule.schedule.id
+                      ).length === 0 && (
+                        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                          <DollarSign className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                          <p className="text-gray-600">No pricing set for this schedule</p>
+                          <Button 
+                            className="mt-2" 
+                            onClick={() => setAddingTuitionPlan(true)}
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Set Pricing
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <DollarSign className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                      <p className="text-lg font-medium mb-2">Select a Schedule</p>
+                      <p className="text-sm">
+                        Choose a classroom schedule from the left to set tuition pricing
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Public Subsidies Tab */}

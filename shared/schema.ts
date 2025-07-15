@@ -151,10 +151,19 @@ export const calendarClosures = pgTable("calendar_closures", {
 
 export const classroomSchedules = pgTable("classroom_schedules", {
   id: uuid("id").primaryKey().defaultRandom(),
-  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id, { onDelete: "cascade" }),
+  classroomId: uuid("classroom_id").references(() => classrooms.id, { onDelete: "cascade" }), // null for network defaults
+  schoolId: uuid("school_id").references(() => schools.id, { onDelete: "cascade" }), // null for network defaults
   schoolYearId: uuid("school_year_id").references(() => schoolYears.id), // null for continuous programs
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date"), // optional for continuous programs
+  name: varchar("name", { length: 100 }).notNull(), // e.g., "Primary Full Day", "Toddler Extended"
+  level: varchar("level", { 
+    enum: [
+      "infant", "toddler", "primary", "lower_elem", 
+      "upper_elem", "junior_high", "high_school"
+    ]
+  }), // null for school-specific schedules, required for network defaults
+  networkDefault: boolean("network_default").notNull().default(false), // true for network-wide templates
+  startDate: timestamp("start_date"), // optional for network defaults
+  endDate: timestamp("end_date"), // optional for continuous programs and network defaults
   isActive: boolean("is_active").notNull().default(true),
   mondayOpen: boolean("monday_open").notNull().default(false),
   tuesdayOpen: boolean("tuesday_open").notNull().default(false),
@@ -191,13 +200,19 @@ export const programOfferings = pgTable("program_offerings", {
 
 export const tuitionPlans = pgTable("tuition_plans", {
   id: uuid("id").primaryKey().defaultRandom(),
-  programOfferingId: uuid("program_offering_id").notNull().references(() => programOfferings.id, { onDelete: "cascade" }),
+  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id, { onDelete: "cascade" }),
+  classroomScheduleId: uuid("classroom_schedule_id").notNull().references(() => classroomSchedules.id, { onDelete: "cascade" }),
+  schoolYearId: uuid("school_year_id").references(() => schoolYears.id), // for annual pricing
   slidingScalePolicyId: uuid("sliding_scale_policy_id").references(() => slidingScalePolicies.id), // optional, null means no sliding scale
-  name: varchar("name", { length: 100 }).notNull(), // e.g., "Full Day Montessori - Monthly"
+  name: varchar("name", { length: 100 }).notNull(), // e.g., "Primary Full Day - Monthly"
   fullPrice: decimal("full_price", { precision: 10, scale: 2 }).notNull(),
   billingFrequency: varchar("billing_frequency", { 
-    enum: ["monthly", "quarterly", "annually", "weekly"] 
+    enum: ["weekly", "monthly", "annually"] 
   }).notNull().default("monthly"),
+  pricePerHour: decimal("price_per_hour", { precision: 10, scale: 4 }), // calculated field
+  hoursPerWeek: decimal("hours_per_week", { precision: 5, scale: 2 }), // calculated from schedule
+  weeksPerYear: integer("weeks_per_year"), // calculated from school year calendar
+  totalHoursPerYear: decimal("total_hours_per_year", { precision: 8, scale: 2 }), // calculated field
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -823,9 +838,17 @@ export const programOfferingsRelations = relations(programOfferings, ({ one, man
 }));
 
 export const tuitionPlansRelations = relations(tuitionPlans, ({ one }) => ({
-  programOffering: one(programOfferings, {
-    fields: [tuitionPlans.programOfferingId],
-    references: [programOfferings.id],
+  classroom: one(classrooms, {
+    fields: [tuitionPlans.classroomId],
+    references: [classrooms.id],
+  }),
+  classroomSchedule: one(classroomSchedules, {
+    fields: [tuitionPlans.classroomScheduleId],
+    references: [classroomSchedules.id],
+  }),
+  schoolYear: one(schoolYears, {
+    fields: [tuitionPlans.schoolYearId],
+    references: [schoolYears.id],
   }),
   slidingScalePolicy: one(slidingScalePolicies, {
     fields: [tuitionPlans.slidingScalePolicyId],

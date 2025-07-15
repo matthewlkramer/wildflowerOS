@@ -706,6 +706,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Classroom Schedules
+  app.get('/api/schools/:schoolId/schedules', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const schedules = await storage.getClassroomSchedulesBySchool(schoolId);
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error fetching school schedules:", error);
+      res.status(500).json({ message: "Failed to fetch school schedules" });
+    }
+  });
+
+  app.get('/api/network/schedules', isAuthenticated, async (req: any, res) => {
+    try {
+      const schedules = await storage.getNetworkDefaultSchedules();
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error fetching network default schedules:", error);
+      res.status(500).json({ message: "Failed to fetch network default schedules" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/schedules', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const scheduleData = { ...req.body, schoolId, networkDefault: false };
+      const schedule = await storage.createClassroomSchedule(scheduleData);
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error("Error creating school schedule:", error);
+      res.status(500).json({ message: "Failed to create school schedule" });
+    }
+  });
+
+  app.post('/api/network/schedules', isAuthenticated, async (req: any, res) => {
+    try {
+      const schedule = await storage.createNetworkDefaultSchedule(req.body);
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error("Error creating network default schedule:", error);
+      res.status(500).json({ message: "Failed to create network default schedule" });
+    }
+  });
+
+  app.patch('/api/schedules/:scheduleId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scheduleId } = req.params;
+      const schedule = await storage.updateClassroomSchedule(scheduleId, req.body);
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error updating schedule:", error);
+      res.status(500).json({ message: "Failed to update schedule" });
+    }
+  });
+
+  app.delete('/api/schedules/:scheduleId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scheduleId } = req.params;
+      await storage.deleteClassroomSchedule(scheduleId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting schedule:", error);
+      res.status(500).json({ message: "Failed to delete schedule" });
+    }
+  });
+
+  app.post('/api/schools/:schoolId/schedules/import-network-defaults', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const result = await storage.importNetworkSchedulesToSchool(schoolId);
+      res.status(201).json(result);
+    } catch (error) {
+      console.error("Error importing network schedules:", error);
+      res.status(500).json({ message: "Failed to import network schedules" });
+    }
+  });
+
   app.get('/api/classrooms/:classroomId/schedules', isAuthenticated, async (req: any, res) => {
     try {
       const { classroomId } = req.params;
@@ -836,6 +912,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching classroom tuition plans:", error);
       res.status(500).json({ message: "Failed to fetch classroom tuition plans" });
+    }
+  });
+
+  app.get('/api/schools/:schoolId/tuition-overview', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const classrooms = await storage.getClassroomsWithSchedulesForTuition(schoolId);
+      const plans = await storage.getTuitionPlansWithCalculations(schoolId);
+      res.json({ classrooms, plans });
+    } catch (error) {
+      console.error("Error fetching tuition overview:", error);
+      res.status(500).json({ message: "Failed to fetch tuition overview" });
     }
   });
 

@@ -4523,7 +4523,7 @@ export default function SchoolSettingsPage() {
                                         <SelectValue placeholder="Select a schedule..." />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {classroom.schedules?.filter((schedule: any) => schedule?.id).map((schedule: any) => (
+                                        {classroom.schedules?.filter((schedule: any) => schedule?.id && schedule.id.trim() !== '').map((schedule: any) => (
                                           <SelectItem key={schedule.id} value={schedule.id}>
                                             <div className="flex items-center justify-between w-full">
                                               <span className="font-medium">{schedule.name || 'Unnamed Schedule'}</span>

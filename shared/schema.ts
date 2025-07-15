@@ -264,6 +264,35 @@ export const classrooms = pgTable("classrooms", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ======================== DEMOGRAPHIC REFERENCE TABLES ========================
+
+export const genders = pgTable("genders", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 20 }).notNull().unique(), // male, female, non_binary, other
+  name: varchar("name", { length: 50 }).notNull(), // Male, Female, Non-binary, Other
+  active: boolean("active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const raceEthnicities = pgTable("race_ethnicities", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 30 }).notNull().unique(), // black, latino, asian, etc.
+  name: varchar("name", { length: 100 }).notNull(), // Short name
+  description: varchar("description", { length: 200 }).notNull(), // Full description
+  active: boolean("active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const languages = pgTable("languages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: varchar("code", { length: 10 }).notNull().unique(), // ISO 639-1 codes like 'en', 'es'
+  nameEnglish: varchar("name_english", { length: 100 }).notNull(), // English name
+  nameNative: varchar("name_native", { length: 100 }).notNull(), // Native name
+  displayName: varchar("display_name", { length: 200 }).notNull(), // "English - English", "Spanish - Español"
+  active: boolean("active").notNull().default(true),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
 // ======================== FAMILY & CHILDREN ========================
 
 export const families = pgTable("families", {
@@ -281,9 +310,12 @@ export const children = pgTable("children", {
   firstName: varchar("first_name", { length: 100 }).notNull(),
   lastName: varchar("last_name", { length: 100 }).notNull(),
   birthDate: timestamp("birth_date").notNull(),
-  gender: varchar("gender", { length: 50 }),
-  raceEthnicity: varchar("race_ethnicity", { length: 100 }),
-  primaryLanguage: varchar("primary_language", { length: 100 }),
+  genderId: uuid("gender_id").references(() => genders.id),
+  genderOther: varchar("gender_other", { length: 100 }),
+  raceEthnicityIds: uuid("race_ethnicity_ids").array(),
+  raceEthnicityOther: varchar("race_ethnicity_other", { length: 100 }),
+  primaryLanguageIds: uuid("primary_language_ids").array(),
+  primaryLanguageOther: varchar("primary_language_other", { length: 100 }),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1078,7 +1110,12 @@ export const childrenRelations = relations(children, ({ one, many }) => ({
     fields: [children.familyId],
     references: [families.id],
   }),
+  gender: one(genders, {
+    fields: [children.genderId],
+    references: [genders.id],
+  }),
   enrollments: many(enrollments),
+  subsidyAssignments: many(childSubsidyAssignments),
 }));
 
 export const guardiansRelations = relations(guardians, ({ one }) => ({
@@ -1386,6 +1423,15 @@ export type UserRole = typeof userRoles.$inferSelect;
 export type InsertUserRole = typeof userRoles.$inferInsert;
 export type RoleDefinition = typeof roleDefinitions.$inferSelect;
 export type InsertRoleDefinition = typeof roleDefinitions.$inferInsert;
+
+// Demographic reference types
+export type Gender = typeof genders.$inferSelect;
+export type InsertGender = typeof genders.$inferInsert;
+export type RaceEthnicity = typeof raceEthnicities.$inferSelect;
+export type InsertRaceEthnicity = typeof raceEthnicities.$inferInsert;
+export type Language = typeof languages.$inferSelect;
+export type InsertLanguage = typeof languages.$inferInsert;
+
 export type School = typeof schools.$inferSelect;
 export type InsertSchool = typeof schools.$inferInsert;
 export type Classroom = typeof classrooms.$inferSelect;
@@ -1491,6 +1537,9 @@ export type InsertFinalRoleAssignment = typeof finalRoleAssignments.$inferInsert
 
 export const insertUserRoleSchema = createInsertSchema(userRoles);
 export const insertRoleDefinitionSchema = createInsertSchema(roleDefinitions);
+export const insertGenderSchema = createInsertSchema(genders);
+export const insertRaceEthnicitySchema = createInsertSchema(raceEthnicities);
+export const insertLanguageSchema = createInsertSchema(languages);
 export const insertSchoolSchema = createInsertSchema(schools);
 export const insertClassroomSchema = createInsertSchema(classrooms);
 export const insertFamilySchema = createInsertSchema(families);

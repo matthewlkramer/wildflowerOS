@@ -28,6 +28,9 @@ import {
   invoices,
   payments,
   emailAddresses,
+  genders,
+  raceEthnicities,
+  languages,
 
   type User,
   type UpsertUser,
@@ -71,6 +74,9 @@ import {
   type InsertChannel,
   type EmailAddress,
   type InsertEmailAddress,
+  type Gender,
+  type RaceEthnicity,
+  type Language,
 
 } from "@shared/schema";
 import { db } from "./db";
@@ -226,6 +232,12 @@ export interface IStorage {
   // Children
   getChildrenByFamily(familyId: string): Promise<Child[]>;
   createChild(child: any): Promise<Child>;
+  updateChild(id: string, child: any): Promise<Child>;
+  
+  // Demographic reference data
+  getGenders(): Promise<Gender[]>;
+  getRaceEthnicities(): Promise<RaceEthnicity[]>;
+  getLanguages(): Promise<Language[]>;
   
   // Enrollments
   getEnrollmentsBySchool(schoolId: string): Promise<any[]>;
@@ -1159,6 +1171,43 @@ export class DatabaseStorage implements IStorage {
     return child;
   }
 
+  async updateChild(id: string, childData: any): Promise<Child> {
+    const [child] = await db
+      .update(children)
+      .set({
+        ...childData,
+        updatedAt: new Date(),
+      })
+      .where(eq(children.id, id))
+      .returning();
+    return child;
+  }
+
+  // Demographic reference data
+  async getGenders(): Promise<Gender[]> {
+    return await db
+      .select()
+      .from(genders)
+      .where(eq(genders.active, true))
+      .orderBy(genders.sortOrder, genders.name);
+  }
+
+  async getRaceEthnicities(): Promise<RaceEthnicity[]> {
+    return await db
+      .select()
+      .from(raceEthnicities)
+      .where(eq(raceEthnicities.active, true))
+      .orderBy(raceEthnicities.sortOrder, raceEthnicities.name);
+  }
+
+  async getLanguages(): Promise<Language[]> {
+    return await db
+      .select()
+      .from(languages)
+      .where(eq(languages.active, true))
+      .orderBy(languages.sortOrder, languages.nameEnglish);
+  }
+
   // Enrollments
   async getEnrollmentsBySchool(schoolId: string): Promise<any[]> {
     return await db
@@ -1176,7 +1225,6 @@ export class DatabaseStorage implements IStorage {
         family: {
           id: families.id,
           name: families.name,
-          email: families.email,
         },
         classroom: {
           id: classrooms.id,
@@ -1278,8 +1326,6 @@ export class DatabaseStorage implements IStorage {
         family: {
           id: families.id,
           name: families.name,
-          email: families.email,
-          phone: families.phone,
         },
         classroom: {
           id: classrooms.id,

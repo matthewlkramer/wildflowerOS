@@ -1583,6 +1583,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.patch("/api/children/:childId", isAuthenticated, async (req, res) => {
+    try {
+      const child = await storage.updateChild(req.params.childId, req.body);
+      res.json(child);
+    } catch (error) {
+      console.error("Error updating child:", error);
+      res.status(500).json({ message: "Failed to update child" });
+    }
+  });
+
+  // Demographic reference data endpoints
+  app.get("/api/genders", isAuthenticated, async (req, res) => {
+    try {
+      const genders = await storage.getGenders();
+      res.json(genders);
+    } catch (error) {
+      console.error("Error fetching genders:", error);
+      res.status(500).json({ message: "Failed to fetch genders" });
+    }
+  });
+
+  app.get("/api/race-ethnicities", isAuthenticated, async (req, res) => {
+    try {
+      const raceEthnicities = await storage.getRaceEthnicities();
+      res.json(raceEthnicities);
+    } catch (error) {
+      console.error("Error fetching race/ethnicities:", error);
+      res.status(500).json({ message: "Failed to fetch race/ethnicities" });
+    }
+  });
+
+  app.get("/api/languages", isAuthenticated, async (req, res) => {
+    try {
+      const languages = await storage.getLanguages();
+      res.json(languages);
+    } catch (error) {
+      console.error("Error fetching languages:", error);
+      res.status(500).json({ message: "Failed to fetch languages" });
+    }
+  });
+
   app.get("/api/families/:familyId/enrollments", isAuthenticated, async (req, res) => {
     try {
       const enrollments = await storage.getEnrollmentsByFamily(req.params.familyId);

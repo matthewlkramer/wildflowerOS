@@ -75,7 +75,26 @@ export default function FamilyDetailsPage() {
     firstName: "",
     lastName: "",
     birthDate: "",
-    gender: "",
+    genderId: "",
+    genderOther: "",
+    raceEthnicityIds: [] as string[],
+    raceEthnicityOther: "",
+    primaryLanguageIds: [] as string[],
+    primaryLanguageOther: "",
+    notes: ""
+  });
+
+  const [editingChild, setEditingChild] = useState<any>(null);
+  const [editChildForm, setEditChildForm] = useState({
+    firstName: "",
+    lastName: "",
+    birthDate: "",
+    genderId: "",
+    genderOther: "",
+    raceEthnicityIds: [] as string[],
+    raceEthnicityOther: "",
+    primaryLanguageIds: [] as string[],
+    primaryLanguageOther: "",
     notes: ""
   });
   const [familyEditForm, setFamilyEditForm] = useState({
@@ -134,6 +153,19 @@ export default function FamilyDetailsPage() {
     enabled: !!familyId,
   });
 
+  // Fetch demographic reference data
+  const { data: genders = [] } = useQuery({
+    queryKey: ["/api/genders"],
+  });
+
+  const { data: raceEthnicities = [] } = useQuery({
+    queryKey: ["/api/race-ethnicities"],
+  });
+
+  const { data: languages = [] } = useQuery({
+    queryKey: ["/api/languages"],
+  });
+
   // Update family mutation
   const updateFamilyMutation = useMutation({
     mutationFn: async (familyData: any) => {
@@ -170,7 +202,18 @@ export default function FamilyDetailsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/families", familyId, "children"] });
       setAddingChild(false);
-      setNewChildForm({ firstName: "", lastName: "", birthDate: "", gender: "", notes: "" });
+      setNewChildForm({ 
+        firstName: "", 
+        lastName: "", 
+        birthDate: "", 
+        genderId: "",
+        genderOther: "",
+        raceEthnicityIds: [],
+        raceEthnicityOther: "",
+        primaryLanguageIds: [],
+        primaryLanguageOther: "",
+        notes: "" 
+      });
       toast({
         title: "Child added",
         description: "New child has been added to the family.",
@@ -179,6 +222,31 @@ export default function FamilyDetailsPage() {
     onError: (error: Error) => {
       toast({
         title: "Error adding child",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update child mutation
+  const updateChildMutation = useMutation({
+    mutationFn: async ({ childId, childData }: { childId: string; childData: any }) => {
+      return apiRequest(`/api/children/${childId}`, {
+        method: 'PATCH',
+        body: childData,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/families", familyId, "children"] });
+      setEditingChild(null);
+      toast({
+        title: "Child updated",
+        description: "Child information has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating child",
         description: error.message,
         variant: "destructive",
       });
@@ -225,6 +293,49 @@ export default function FamilyDetailsPage() {
 
   const handleAddChild = () => {
     addChildMutation.mutate(newChildForm);
+  };
+
+  const handleEditChild = (child: any) => {
+    setEditChildForm({
+      firstName: child.firstName || "",
+      lastName: child.lastName || "",
+      birthDate: child.birthDate ? new Date(child.birthDate).toISOString().split('T')[0] : "",
+      genderId: child.genderId || "",
+      genderOther: child.genderOther || "",
+      raceEthnicityIds: child.raceEthnicityIds || [],
+      raceEthnicityOther: child.raceEthnicityOther || "",
+      primaryLanguageIds: child.primaryLanguageIds || [],
+      primaryLanguageOther: child.primaryLanguageOther || "",
+      notes: child.notes || ""
+    });
+    setEditingChild(child);
+  };
+
+  const handleUpdateChild = () => {
+    if (editingChild) {
+      updateChildMutation.mutate({
+        childId: editingChild.id,
+        childData: editChildForm
+      });
+    }
+  };
+
+  // Helper functions for multiple selections
+  const toggleSelection = (id: string, currentIds: string[], setter: (ids: string[]) => void) => {
+    if (currentIds.includes(id)) {
+      setter(currentIds.filter(existingId => existingId !== id));
+    } else {
+      setter([...currentIds, id]);
+    }
+  };
+
+  const getLabelForIds = (ids: string[], items: any[], field: string) => {
+    if (!ids || ids.length === 0) return "";
+    const labels = ids.map(id => {
+      const item = items.find(i => i.id === id);
+      return item ? item[field] : "";
+    }).filter(Boolean);
+    return labels.join(", ");
   };
 
   const handleCreateEnrollment = (childId: string, classroomId: string) => {
@@ -481,19 +592,96 @@ export default function FamilyDetailsPage() {
                               onChange={(e) => setNewChildForm(prev => ({ ...prev, birthDate: e.target.value }))}
                             />
                           </div>
+                          {/* Gender Selection */}
                           <div>
                             <Label htmlFor="gender">Gender</Label>
-                            <Select onValueChange={(value) => setNewChildForm(prev => ({ ...prev, gender: value }))}>
+                            <Select onValueChange={(value) => setNewChildForm(prev => ({ ...prev, genderId: value }))}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select gender" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="male">Male</SelectItem>
-                                <SelectItem value="female">Female</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                                <SelectItem value="prefer_not_to_say">Prefer not to say</SelectItem>
+                                {genders.map((gender: any) => (
+                                  <SelectItem key={gender.id} value={gender.id}>
+                                    {gender.name}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
+                            {newChildForm.genderId && genders.find((g: any) => g.id === newChildForm.genderId)?.name === "Other" && (
+                              <div className="mt-2">
+                                <Input
+                                  placeholder="Please specify"
+                                  value={newChildForm.genderOther}
+                                  onChange={(e) => setNewChildForm(prev => ({ ...prev, genderOther: e.target.value }))}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Race/Ethnicity Selection */}
+                          <div>
+                            <Label>Race/Ethnicity (select all that apply)</Label>
+                            <div className="border rounded-md p-3 max-h-32 overflow-y-auto">
+                              {raceEthnicities.map((race: any) => (
+                                <div key={race.id} className="flex items-center space-x-2 mb-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`race-${race.id}`}
+                                    checked={newChildForm.raceEthnicityIds.includes(race.id)}
+                                    onChange={() => toggleSelection(race.id, newChildForm.raceEthnicityIds, 
+                                      (ids) => setNewChildForm(prev => ({ ...prev, raceEthnicityIds: ids })))}
+                                    className="rounded"
+                                  />
+                                  <label htmlFor={`race-${race.id}`} className="text-sm">
+                                    {race.name}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                            {newChildForm.raceEthnicityIds.some(id => 
+                              raceEthnicities.find((r: any) => r.id === id)?.name.includes("Other")
+                            ) && (
+                              <div className="mt-2">
+                                <Input
+                                  placeholder="Please specify other race/ethnicity"
+                                  value={newChildForm.raceEthnicityOther}
+                                  onChange={(e) => setNewChildForm(prev => ({ ...prev, raceEthnicityOther: e.target.value }))}
+                                />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Primary Language Selection */}
+                          <div>
+                            <Label>Primary Language(s) (select all that apply)</Label>
+                            <div className="border rounded-md p-3 max-h-32 overflow-y-auto">
+                              {languages.map((language: any) => (
+                                <div key={language.id} className="flex items-center space-x-2 mb-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`lang-${language.id}`}
+                                    checked={newChildForm.primaryLanguageIds.includes(language.id)}
+                                    onChange={() => toggleSelection(language.id, newChildForm.primaryLanguageIds, 
+                                      (ids) => setNewChildForm(prev => ({ ...prev, primaryLanguageIds: ids })))}
+                                    className="rounded"
+                                  />
+                                  <label htmlFor={`lang-${language.id}`} className="text-sm">
+                                    {language.nameEnglish} - {language.nameNative}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                            {newChildForm.primaryLanguageIds.some(id => 
+                              languages.find((l: any) => l.id === id)?.nameEnglish.includes("Other")
+                            ) && (
+                              <div className="mt-2">
+                                <Input
+                                  placeholder="Please specify other language"
+                                  value={newChildForm.primaryLanguageOther}
+                                  onChange={(e) => setNewChildForm(prev => ({ ...prev, primaryLanguageOther: e.target.value }))}
+                                />
+                              </div>
+                            )}
                           </div>
                           <div>
                             <Label htmlFor="notes">Notes</Label>
@@ -531,6 +719,24 @@ export default function FamilyDetailsPage() {
                               <p className="text-sm text-gray-600">
                                 Born: {new Date(child.birthDate).toLocaleDateString()}
                               </p>
+                              {child.genderId && (
+                                <p className="text-sm text-gray-600">
+                                  Gender: {genders.find((g: any) => g.id === child.genderId)?.name || "Unknown"}
+                                  {child.genderOther && ` (${child.genderOther})`}
+                                </p>
+                              )}
+                              {child.raceEthnicityIds && child.raceEthnicityIds.length > 0 && (
+                                <p className="text-sm text-gray-600">
+                                  Race/Ethnicity: {getLabelForIds(child.raceEthnicityIds, raceEthnicities, "name")}
+                                  {child.raceEthnicityOther && ` (${child.raceEthnicityOther})`}
+                                </p>
+                              )}
+                              {child.primaryLanguageIds && child.primaryLanguageIds.length > 0 && (
+                                <p className="text-sm text-gray-600">
+                                  Languages: {getLabelForIds(child.primaryLanguageIds, languages, "nameEnglish")}
+                                  {child.primaryLanguageOther && ` (${child.primaryLanguageOther})`}
+                                </p>
+                              )}
                               {enrollment && (
                                 <div className="mt-2 flex items-center space-x-2">
                                   <Badge className={getStatusColor(enrollment.status)}>
@@ -545,7 +751,7 @@ export default function FamilyDetailsPage() {
                               )}
                             </div>
                             <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => handleEditChild(child)}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <AlertDialog>
@@ -806,6 +1012,156 @@ export default function FamilyDetailsPage() {
             </Tabs>
           </div>
             </div>
+
+            {/* Edit Child Dialog */}
+            <Dialog open={!!editingChild} onOpenChange={(open) => !open && setEditingChild(null)}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Edit Child Information</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editFirstName">First Name</Label>
+                      <Input
+                        id="editFirstName"
+                        value={editChildForm.firstName}
+                        onChange={(e) => setEditChildForm(prev => ({ ...prev, firstName: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editLastName">Last Name</Label>
+                      <Input
+                        id="editLastName"
+                        value={editChildForm.lastName}
+                        onChange={(e) => setEditChildForm(prev => ({ ...prev, lastName: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="editBirthDate">Birth Date</Label>
+                    <Input
+                      id="editBirthDate"
+                      type="date"
+                      value={editChildForm.birthDate}
+                      onChange={(e) => setEditChildForm(prev => ({ ...prev, birthDate: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* Gender Selection */}
+                  <div>
+                    <Label htmlFor="editGender">Gender</Label>
+                    <Select value={editChildForm.genderId} onValueChange={(value) => setEditChildForm(prev => ({ ...prev, genderId: value }))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {genders.map((gender: any) => (
+                          <SelectItem key={gender.id} value={gender.id}>
+                            {gender.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {editChildForm.genderId && genders.find((g: any) => g.id === editChildForm.genderId)?.name === "Other" && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Please specify"
+                          value={editChildForm.genderOther}
+                          onChange={(e) => setEditChildForm(prev => ({ ...prev, genderOther: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Race/Ethnicity Selection */}
+                  <div>
+                    <Label>Race/Ethnicity (select all that apply)</Label>
+                    <div className="border rounded-md p-3 max-h-32 overflow-y-auto">
+                      {raceEthnicities.map((race: any) => (
+                        <div key={race.id} className="flex items-center space-x-2 mb-2">
+                          <input
+                            type="checkbox"
+                            id={`edit-race-${race.id}`}
+                            checked={editChildForm.raceEthnicityIds.includes(race.id)}
+                            onChange={() => toggleSelection(race.id, editChildForm.raceEthnicityIds, 
+                              (ids) => setEditChildForm(prev => ({ ...prev, raceEthnicityIds: ids })))}
+                            className="rounded"
+                          />
+                          <label htmlFor={`edit-race-${race.id}`} className="text-sm">
+                            {race.name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {editChildForm.raceEthnicityIds.some(id => 
+                      raceEthnicities.find((r: any) => r.id === id)?.name.includes("Other")
+                    ) && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Please specify other race/ethnicity"
+                          value={editChildForm.raceEthnicityOther}
+                          onChange={(e) => setEditChildForm(prev => ({ ...prev, raceEthnicityOther: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Primary Language Selection */}
+                  <div>
+                    <Label>Primary Language(s) (select all that apply)</Label>
+                    <div className="border rounded-md p-3 max-h-32 overflow-y-auto">
+                      {languages.map((language: any) => (
+                        <div key={language.id} className="flex items-center space-x-2 mb-2">
+                          <input
+                            type="checkbox"
+                            id={`edit-lang-${language.id}`}
+                            checked={editChildForm.primaryLanguageIds.includes(language.id)}
+                            onChange={() => toggleSelection(language.id, editChildForm.primaryLanguageIds, 
+                              (ids) => setEditChildForm(prev => ({ ...prev, primaryLanguageIds: ids })))}
+                            className="rounded"
+                          />
+                          <label htmlFor={`edit-lang-${language.id}`} className="text-sm">
+                            {language.nameEnglish} - {language.nameNative}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    {editChildForm.primaryLanguageIds.some(id => 
+                      languages.find((l: any) => l.id === id)?.nameEnglish.includes("Other")
+                    ) && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Please specify other language"
+                          value={editChildForm.primaryLanguageOther}
+                          onChange={(e) => setEditChildForm(prev => ({ ...prev, primaryLanguageOther: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="editNotes">Notes</Label>
+                    <Textarea
+                      id="editNotes"
+                      value={editChildForm.notes}
+                      onChange={(e) => setEditChildForm(prev => ({ ...prev, notes: e.target.value }))}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setEditingChild(null)}>
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleUpdateChild}
+                      disabled={!editChildForm.firstName || !editChildForm.lastName}
+                    >
+                      Update Child
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             {/* Edit Family Dialog */}
         <Dialog open={editingFamily} onOpenChange={setEditingFamily}>

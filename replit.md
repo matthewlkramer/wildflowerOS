@@ -49,6 +49,13 @@ Preferred communication style: Simple, everyday language.
   - Reduced avatar size (h-6 w-6 on mobile, h-8 w-8 on larger screens)
   - Minimized spacing between elements (space-x-1 on mobile, increasing with screen size)
   - Hidden chevron icon on very small screens for cleaner mobile appearance
+- **Enhanced mobile bottom navigation to solve horizontal crowding**
+  - Implemented smart "More" dropdown menu for secondary navigation items
+  - Core items always visible: Dashboard, Families, Classrooms  
+  - Progressive disclosure: Messages shows on larger mobile screens, moves to More menu on smaller screens
+  - Icon-only mode: Labels hide on very small screens to save space
+  - Secondary items in More menu: Tasks, Enrollment, Billing, Knowledge, Settings
+  - Eliminates cramped horizontal navigation while preserving all functionality
 - **Enhanced auto-population functionality for network school years**
   - Fixed regex pattern to support both 2-digit and 4-digit year formats ("2024-25" and "2024-2025")
   - Added logic to convert 2-digit years to 4-digit years (e.g., "25" becomes "2025")

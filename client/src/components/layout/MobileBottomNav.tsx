@@ -2,6 +2,14 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
+import { MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface MobileBottomNavProps {
   currentRole?: any;
@@ -10,12 +18,21 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ currentRole }: MobileBottomNavProps) {
   const [location] = useLocation();
 
-  const navItems = [
+  // Core navigation items - always visible
+  const coreNavItems = [
     { icon: "fas fa-home", label: "Dashboard", href: "/" },
     { icon: "fas fa-users", label: "Families", href: "/families" },
     { icon: "fas fa-chalkboard-teacher", label: "Classrooms", href: "/classrooms" },
+  ];
+
+  // Secondary items - go in "More" menu on small screens
+  const secondaryNavItems = [
     { icon: "fas fa-comments", label: "Messages", href: "/messages" },
     { icon: "fas fa-tasks", label: "Tasks", href: "/tasks" },
+    { icon: "fas fa-user-plus", label: "Enrollment", href: "/enrollment" },
+    { icon: "fas fa-credit-card", label: "Billing", href: "/billing" },
+    { icon: "fas fa-book", label: "Knowledge", href: "/knowledge" },
+    { icon: "fas fa-cog", label: "Settings", href: "/settings" },
   ];
 
   // Show settings for all roles - no need to hide based on role type
@@ -24,34 +41,72 @@ export default function MobileBottomNav({ currentRole }: MobileBottomNavProps) {
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 z-40">
       <div className="flex justify-around">
-        {navItems.map((item, index) => {
+        {/* Core navigation items - always visible */}
+        {coreNavItems.map((item, index) => {
           const isActive = location === item.href || (location.startsWith(item.href) && item.href !== '/');
           return (
             <Link
               key={index}
               href={item.href}
               className={cn(
-                "flex flex-col items-center py-2 px-2",
+                "flex flex-col items-center py-2 px-1 sm:px-2",
                 isActive ? "text-primary" : "text-gray-400"
               )}
             >
               <i className={`${item.icon} text-lg`}></i>
-              <span className="text-xs mt-1">{item.label}</span>
+              <span className="text-xs mt-1 hidden xs:block sm:block">{item.label}</span>
             </Link>
           );
         })}
-        {showSchoolSettings && (
-          <Link
-            href="/settings"
-            className={cn(
-              "flex flex-col items-center py-2 px-2",
-              (location === "/settings" || location.startsWith("/settings")) ? "text-primary" : "text-gray-400"
-            )}
-          >
-            <i className="fas fa-cog text-lg"></i>
-            <span className="text-xs mt-1">Settings</span>
-          </Link>
-        )}
+        
+        {/* Messages - show on larger mobile screens */}
+        <Link
+          href="/messages"
+          className={cn(
+            "hidden sm:flex flex-col items-center py-2 px-2",
+            (location === "/messages" || location.startsWith("/messages")) ? "text-primary" : "text-gray-400"
+          )}
+        >
+          <i className="fas fa-comments text-lg"></i>
+          <span className="text-xs mt-1">Messages</span>
+        </Link>
+        
+        {/* More menu for additional items */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              className={cn(
+                "flex flex-col items-center py-2 px-1 sm:px-2 h-auto",
+                secondaryNavItems.some(item => 
+                  location === item.href || (location.startsWith(item.href) && item.href !== '/')
+                ) ? "text-primary" : "text-gray-400"
+              )}
+            >
+              <MoreHorizontal className="h-5 w-5" />
+              <span className="text-xs mt-1 hidden xs:block sm:block">More</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="mb-2">
+            {/* Messages on small screens */}
+            <DropdownMenuItem asChild className="sm:hidden">
+              <Link href="/messages" className="flex items-center w-full">
+                <i className="fas fa-comments mr-2"></i>
+                Messages
+              </Link>
+            </DropdownMenuItem>
+            
+            {/* All secondary navigation items */}
+            {secondaryNavItems.map((item, index) => (
+              <DropdownMenuItem key={index} asChild>
+                <Link href={item.href} className="flex items-center w-full">
+                  <i className={`${item.icon} mr-2`}></i>
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

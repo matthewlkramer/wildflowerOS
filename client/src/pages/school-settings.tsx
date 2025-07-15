@@ -3200,7 +3200,7 @@ export default function SchoolSettingsPage() {
                             {[
                               { name: "Educator Admin → Ongoing → Finance", assigned: "Sarah Johnson" },
                               { name: "Educator Admin → Startup → Marketing", assigned: "Emily Rodriguez" },
-                              { name: "Educator Classroom → Lead", assigned: "Michael Chen" },
+                              { name: "Educator Classroom → Lead", assigned: "Emily Rodriguez" },
                               { name: "Educator Classroom → Assistant", assigned: null }
                             ].map((role, index) => (
                               <tr key={role.name} className={`${role.assigned ? 'bg-green-50' : 'bg-red-50'} ${index % 2 === 0 ? '' : 'bg-opacity-50'}`}>
@@ -3330,9 +3330,16 @@ export default function SchoolSettingsPage() {
                       status: "Active"
                     },
                     {
+                      role: "Educator Admin → Startup → Marketing",
+                      staff: "Emily Rodriguez",
+                      dateAssigned: "2024-08-01",
+                      dateEnded: null,
+                      status: "Active"
+                    },
+                    {
                       role: "Educator Classroom → Lead", 
-                      staff: "Michael Chen",
-                      dateAssigned: "2024-08-20",
+                      staff: "Emily Rodriguez",
+                      dateAssigned: "2025-01-15",
                       dateEnded: null,
                       status: "Active"
                     },

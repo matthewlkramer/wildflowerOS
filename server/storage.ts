@@ -1185,7 +1185,7 @@ export class DatabaseStorage implements IStorage {
       
     console.log(`Found ${networkHolidays.length} network holidays for school year ${schoolYear.name}`);
     networkHolidays.forEach(holiday => {
-      console.log(`Holiday ${holiday.name}: startDate=${holiday.startDate}, endDate=${holiday.endDate}, date=${holiday.date}`);
+      console.log(`Holiday ${holiday.name}: startDate=${holiday.startDate}, endDate=${holiday.endDate}`);
     });
 
     // Create school-specific holidays for this school year, filtering out those outside school year dates

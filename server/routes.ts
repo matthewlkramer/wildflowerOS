@@ -1551,52 +1551,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Guardian (Family Adults) endpoints
-  app.get("/api/families/:familyId/guardians", isAuthenticated, async (req, res) => {
+  // Family Adults endpoints (simplified approach using existing users)
+  app.get("/api/families/:familyId/adults", isAuthenticated, async (req, res) => {
     try {
-      const guardians = await storage.getGuardiansByFamily(req.params.familyId);
-      res.json(guardians);
+      const adults = await storage.getFamilyAdults(req.params.familyId);
+      res.json(adults);
     } catch (error) {
-      console.error("Error fetching guardians:", error);
-      res.status(500).json({ message: "Failed to fetch guardians" });
+      console.error("Error fetching family adults:", error);
+      res.status(500).json({ message: "Failed to fetch family adults" });
     }
   });
 
-  app.post("/api/families/:familyId/guardians", isAuthenticated, async (req, res) => {
-    try {
-      const { familyId } = req.params;
-      const guardianData = { ...req.body, familyId };
-      const guardian = await storage.createGuardian(guardianData);
-      res.status(201).json(guardian);
-    } catch (error) {
-      console.error("Error creating guardian:", error);
-      res.status(500).json({ message: "Failed to create guardian" });
-    }
-  });
-
-  app.patch("/api/guardians/:guardianId", isAuthenticated, async (req, res) => {
-    try {
-      const { guardianId } = req.params;
-      const guardian = await storage.updateGuardian(guardianId, req.body);
-      res.json(guardian);
-    } catch (error) {
-      console.error("Error updating guardian:", error);
-      res.status(500).json({ message: "Failed to update guardian" });
-    }
-  });
-
-  app.delete("/api/guardians/:guardianId", isAuthenticated, async (req, res) => {
-    try {
-      const { guardianId } = req.params;
-      await storage.deleteGuardian(guardianId);
-      res.status(204).send();
-    } catch (error) {
-      console.error("Error deleting guardian:", error);
-      res.status(500).json({ message: "Failed to delete guardian" });
-    }
-  });
-
-  // Get users with parent roles for adding guardians
+  // Get users with parent roles for adding to families
   app.get("/api/users/parents", isAuthenticated, async (req, res) => {
     try {
       const parents = await storage.getUsersWithParentRole();

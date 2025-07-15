@@ -105,11 +105,13 @@ export default function FamilyDetailsPage() {
     enabled: !!familyId,
   });
 
-  // Fetch guardians (family adults)
-  const { data: guardians = [], isLoading: guardiansLoading } = useQuery({
-    queryKey: ["/api/families", familyId, "guardians"],
+  // Fetch family adults (users with parent roles)
+  const { data: adults = [], isLoading: adultsLoading } = useQuery({
+    queryKey: ["/api/families", familyId, "adults"],
     enabled: !!familyId,
   });
+
+
 
   // Fetch enrollments for this family
   const { data: enrollments = [] } = useQuery({
@@ -360,35 +362,43 @@ export default function FamilyDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {guardiansLoading ? (
+                  {adultsLoading ? (
                     <div className="space-y-3">
                       <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                       <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
                     </div>
-                  ) : guardians.length === 0 ? (
-                    <p className="text-gray-500 text-sm">No adults added yet</p>
+                  ) : adults.length === 0 ? (
+                    <div className="text-center py-6">
+                      <Users className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-gray-500 text-sm mb-3">No adults added yet</p>
+                      <p className="text-xs text-gray-400 mb-3">Connect existing users with parent roles to this family</p>
+                      <Button size="sm" variant="outline">
+                        <Plus className="mr-2 h-3 w-3" />
+                        Add First Adult
+                      </Button>
+                    </div>
                   ) : (
                     <div className="space-y-3">
-                      {guardians.map((guardian: any) => (
-                        <div key={guardian.id} className="p-3 border rounded-lg">
+                      {adults.map((adult: any) => (
+                        <div key={adult.id} className="p-3 border rounded-lg">
                           <div className="flex items-center justify-between">
                             <div>
                               <div className="font-medium">
-                                {guardian.user.firstName} {guardian.user.lastName}
+                                {adult.firstName} {adult.lastName}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {guardian.relationship || 'Guardian'}
+                                Parent/Guardian
                               </div>
-                              {guardian.user.email && (
+                              {adult.email && (
                                 <div className="flex items-center text-sm text-gray-600 mt-1">
                                   <Mail className="mr-1 h-3 w-3" />
-                                  {guardian.user.email}
+                                  {adult.email}
                                 </div>
                               )}
-                              {guardian.user.phone && (
+                              {adult.phone && (
                                 <div className="flex items-center text-sm text-gray-600 mt-1">
                                   <Phone className="mr-1 h-3 w-3" />
-                                  {guardian.user.phone}
+                                  {adult.phone}
                                 </div>
                               )}
                             </div>
@@ -425,8 +435,8 @@ export default function FamilyDetailsPage() {
                       <p className="mt-1">{family.name || "Not provided"}</p>
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-gray-700">Primary Contact</Label>
-                      <p className="mt-1">{family.primaryContactName || "Not assigned"}</p>
+                      <Label className="text-sm font-medium text-gray-700">Contact Email</Label>
+                      <p className="mt-1">{family.email || "Not provided"}</p>
                     </div>
                   </div>
                   

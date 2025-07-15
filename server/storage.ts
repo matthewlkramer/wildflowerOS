@@ -1299,45 +1299,11 @@ export class DatabaseStorage implements IStorage {
     return enrollment;
   }
 
-  // Guardians (Family Adults)
-  async getGuardiansByFamily(familyId: string): Promise<any[]> {
-    return await db
-      .select({
-        id: guardians.id,
-        relationship: guardians.relationship,
-        homeAddress: guardians.homeAddress,
-        phone: guardians.phone,
-        user: {
-          id: users.id,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          phone: users.phone,
-          homeAddress: users.homeAddress,
-        },
-      })
-      .from(guardians)
-      .innerJoin(users, eq(users.id, guardians.userId))
-      .where(eq(guardians.familyId, familyId))
-      .orderBy(users.firstName, users.lastName);
-  }
-
-  async createGuardian(guardianData: InsertGuardian): Promise<Guardian> {
-    const [guardian] = await db.insert(guardians).values(guardianData).returning();
-    return guardian;
-  }
-
-  async updateGuardian(id: string, guardianData: Partial<InsertGuardian>): Promise<Guardian> {
-    const [guardian] = await db
-      .update(guardians)
-      .set(guardianData)
-      .where(eq(guardians.id, id))
-      .returning();
-    return guardian;
-  }
-
-  async deleteGuardian(id: string): Promise<void> {
-    await db.delete(guardians).where(eq(guardians.id, id));
+  // Family Adults (Users with parent roles)
+  async getFamilyAdults(familyId: string): Promise<any[]> {
+    // For now, return empty array until we implement family-user associations
+    // This is a placeholder for connecting users with parent roles to specific families
+    return [];
   }
 
   async getUsersWithParentRole(): Promise<User[]> {

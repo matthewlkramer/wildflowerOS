@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UserRole } from "@shared/schema";
-import { Users, GraduationCap, Heart, Building2, Shield, Star, Bell, MessageCircle, ChevronDown, Settings, LogOut, User } from "lucide-react";
+import { Users, GraduationCap, Heart, Building2, Shield, Star, Bell, MessageCircle, ChevronDown, Settings, LogOut, User, UserCheck } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 // Import will be handled by public folder
 
@@ -56,6 +56,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   const [messageCount] = useState(7);
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  const [showEmulationDialog, setShowEmulationDialog] = useState(false);
   
   const roleLabels = getRoleLabels(t);
   const { toast } = useToast();
@@ -110,6 +111,50 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     onError: (error: Error) => {
       toast({
         title: "Error switching role",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Emulation mutations for system administrators
+  const emulateRoleMutation = useMutation({
+    mutationFn: async ({ roleType, schoolId }: { roleType: string; schoolId?: string }) => {
+      return apiRequest('POST', '/api/admin/emulate-role', { roleType, schoolId });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/current-role'] });
+      setShowEmulationDialog(false);
+      toast({
+        title: "Role emulation activated",
+        description: `Now emulating ${data.emulatingRole} role`,
+      });
+      window.location.reload();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const clearEmulationMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('POST', '/api/admin/clear-emulation', {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/current-role'] });
+      toast({
+        title: "Emulation cleared",
+        description: "Returned to system administrator role",
+      });
+      window.location.reload();
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
         description: error.message,
         variant: "destructive",
       });
@@ -293,6 +338,33 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
 
             <div className="flex items-center space-x-3 sm:space-x-3 lg:space-x-3">
+              {/* Admin Emulation Button - Only show for system admins */}
+              {currentUserRole?.roleName?.startsWith('sysadmin') && (
+                <>
+                  {currentUserRole?.isEmulated ? (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => clearEmulationMutation.mutate()}
+                      className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                    >
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Exit Emulation
+                    </Button>
+                  ) : (
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowEmulationDialog(true)}
+                      className="text-blue-600 border-blue-600 hover:bg-blue-50"
+                    >
+                      <UserCheck className="h-4 w-4 mr-2" />
+                      Emulate Role
+                    </Button>
+                  )}
+                </>
+              )}
+              
               {/* Notifications */}
               <Button variant="ghost" size="sm" className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 <Bell className="h-5 w-5" />
@@ -360,6 +432,56 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
         </div>
       </div>
     </nav>
+
+    {/* Admin Role Emulation Dialog */}
+    <Dialog open={showEmulationDialog} onOpenChange={setShowEmulationDialog}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Emulate User Role</DialogTitle>
+          <DialogDescription>
+            As a system administrator, you can temporarily emulate different user roles to test functionality and provide support.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Role Type</label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => emulateRoleMutation.mutate({ roleType: 'parent' })}
+                className="justify-start"
+              >
+                <Heart className="h-4 w-4 mr-2" />
+                Parent
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => emulateRoleMutation.mutate({ roleType: 'educator', schoolId: '0eb4ca76-8714-4a51-908d-76a157d11961' })}
+                className="justify-start"
+              >
+                <GraduationCap className="h-4 w-4 mr-2" />
+                Educator
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => emulateRoleMutation.mutate({ roleType: 'board' })}
+                className="justify-start"
+              >
+                <Building2 className="h-4 w-4 mr-2" />
+                Board Member
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setShowEmulationDialog(false)}
+                className="justify-start"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }

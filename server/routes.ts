@@ -93,6 +93,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // Check if we're in emulation mode
+      if (req.session.emulationMode && currentRoleId === 'emulated-role') {
+        const emulationMode = req.session.emulationMode;
+        const syntheticRole = {
+          id: 'emulated-role',
+          userId: user.id,
+          roleId: emulationMode.emulatedRoleDefinition.id,
+          schoolId: emulationMode.schoolId || null,
+          active: true,
+          roleName: emulationMode.emulatedRoleDefinition.name,
+          roleDisplayName: emulationMode.emulatedRoleDefinition.displayName,
+          roleCategory: emulationMode.emulatedRoleDefinition.category,
+          roleDescription: emulationMode.emulatedRoleDefinition.description,
+          isEmulated: true
+        };
+        return res.json(syntheticRole);
+      }
+      
       const userRoles = await storage.getUserRoles(user.id);
       
       // Get role definitions for enrichment
@@ -198,6 +216,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error switching role:", error);
       res.status(500).json({ message: "Failed to switch role" });
+    }
+  });
+
+  // System admin role emulation system
+  app.post('/api/admin/emulate-role', isAuthenticated, async (req: any, res) => {
+    try {
+      const { roleType, schoolId } = req.body;
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      // If user not found by ID, try to find by email
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if user is a system admin
+      const userRoles = await storage.getUserRoles(user.id);
+      const isSystemAdmin = userRoles.some(role => {
+        const roleDefinition = role.roleId;
+        return role.roleName?.startsWith('sysadmin') && role.active;
+      });
+      
+      if (!isSystemAdmin) {
+        return res.status(403).json({ message: "Only system administrators can emulate roles" });
+      }
+      
+      // Store original role for restoration
+      const originalRoleId = req.session.currentRoleId;
+      
+      // Create a synthetic role for emulation
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const emulatedRoleDefinition = roleDefinitions.find(rd => rd.name.startsWith(roleType));
+      
+      if (!emulatedRoleDefinition) {
+        return res.status(400).json({ message: "Invalid role type for emulation" });
+      }
+      
+      // Set emulation mode in session
+      req.session.emulationMode = {
+        roleType,
+        schoolId,
+        originalRoleId,
+        emulatedRoleDefinition
+      };
+      
+      // Create synthetic role object for current session
+      const syntheticRole = {
+        id: 'emulated-role',
+        userId: user.id,
+        roleId: emulatedRoleDefinition.id,
+        schoolId: schoolId || null,
+        active: true,
+        roleName: emulatedRoleDefinition.name,
+        roleDisplayName: emulatedRoleDefinition.displayName,
+        roleCategory: emulatedRoleDefinition.category,
+        roleDescription: emulatedRoleDefinition.description
+      };
+      
+      // Set as current role
+      req.session.currentRoleId = 'emulated-role';
+      req.session.emulatedSchoolId = schoolId;
+      
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Error saving emulation session:", err);
+          return res.status(500).json({ message: "Failed to save session" });
+        }
+        res.json({ 
+          success: true,
+          message: "Role emulation activated",
+          emulatingRole: roleType,
+          schoolId: schoolId || null,
+          currentRole: syntheticRole
+        });
+      });
+    } catch (error) {
+      console.error("Error setting role emulation:", error);
+      res.status(500).json({ message: "Failed to set role emulation" });
+    }
+  });
+
+  app.post('/api/admin/clear-emulation', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      // If user not found by ID, try to find by email
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if user is a system admin
+      const userRoles = await storage.getUserRoles(user.id);
+      const isSystemAdmin = userRoles.some(role => role.roleName?.startsWith('sysadmin') && role.active);
+      
+      if (!isSystemAdmin) {
+        return res.status(403).json({ message: "Only system administrators can clear emulation" });
+      }
+      
+      // Restore original role if it was stored
+      if (req.session.emulationMode?.originalRoleId) {
+        req.session.currentRoleId = req.session.emulationMode.originalRoleId;
+      } else {
+        // Find first sysadmin role
+        const sysadminRole = userRoles.find(role => role.roleName?.startsWith('sysadmin') && role.active);
+        if (sysadminRole) {
+          req.session.currentRoleId = sysadminRole.id;
+        }
+      }
+      
+      // Clear emulation mode
+      req.session.emulationMode = null;
+      req.session.emulatedSchoolId = null;
+      
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Error saving session:", err);
+          return res.status(500).json({ message: "Failed to save session" });
+        }
+        res.json({ success: true, message: "Role emulation cleared" });
+      });
+    } catch (error) {
+      console.error("Error clearing role emulation:", error);
+      res.status(500).json({ message: "Failed to clear role emulation" });
     }
   });
 

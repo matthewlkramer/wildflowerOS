@@ -1804,6 +1804,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's channels
+  app.get('/api/channels/my', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      // If user not found by ID, try to find by email
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const channels = await storage.getChannelsByUser(user.id);
+      res.json(channels);
+    } catch (error) {
+      console.error("Error fetching user channels:", error);
+      res.status(500).json({ message: "Failed to fetch user channels" });
+    }
+  });
+
+  // Initialize network channels
+  app.post('/api/channels/initialize-network', isAuthenticated, async (req: any, res) => {
+    try {
+      await storage.initializeNetworkChannels();
+      res.json({ message: "Network channels initialized successfully" });
+    } catch (error) {
+      console.error("Error initializing network channels:", error);
+      res.status(500).json({ message: "Failed to initialize network channels" });
+    }
+  });
+
   app.post('/api/channels', isAuthenticated, async (req: any, res) => {
     try {
       const channelData = insertChannelSchema.parse(req.body);

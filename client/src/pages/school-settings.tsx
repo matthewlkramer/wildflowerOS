@@ -4488,7 +4488,11 @@ export default function SchoolSettingsPage() {
                                   {classroom.schedules.map((schedule: any) => (
                                     <div 
                                       key={schedule.id} 
-                                      className="p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                                      className={`p-3 border rounded cursor-pointer transition-colors ${
+                                        selectedSchedule?.schedule?.id === schedule.id 
+                                          ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' 
+                                          : 'hover:bg-gray-50'
+                                      }`}
                                       onClick={() => setSelectedSchedule({ classroom, schedule })}
                                     >
                                       <div className="flex items-center justify-between">

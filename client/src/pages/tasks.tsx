@@ -91,7 +91,7 @@ export default function TasksPage({}: TasksPageProps) {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto p-3 lg:p-6">
           <div className="mb-6 lg:mb-8">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">Tasks</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tasks</h1>
             <p className="text-gray-600 dark:text-gray-300">
               Manage and track all tasks across your school operations
             </p>
@@ -149,7 +149,7 @@ export default function TasksPage({}: TasksPageProps) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-gray-500" />
-              <span className="text-lg font-medium text-gray-900 dark:text-white">
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {filteredTasks.length} {filteredTasks.length === 1 ? 'Task' : 'Tasks'}
               </span>
             </div>
@@ -164,7 +164,7 @@ export default function TasksPage({}: TasksPageProps) {
           ) : filteredTasks.length === 0 ? (
             <div className="text-center py-12">
               <Calendar className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-              <p className="text-xl font-medium text-gray-900 dark:text-white mb-2">No tasks found</p>
+              <p className="text-xl font-medium text-gray-900 dark:text-gray-100 mb-2">No tasks found</p>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 {searchTerm || statusFilter !== "all" || priorityFilter !== "all"
                   ? "Try adjusting your filters"
@@ -199,7 +199,7 @@ export default function TasksPage({}: TasksPageProps) {
                         {/* Task Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-3 mb-2">
-                            <h3 className={`font-medium text-gray-900 dark:text-white ${isCompleted ? 'line-through' : ''}`}>
+                            <h3 className={`font-medium text-gray-900 dark:text-gray-100 ${isCompleted ? 'line-through' : ''}`}>
                               {task.title}
                             </h3>
                             <div className="flex items-center gap-2 flex-shrink-0">

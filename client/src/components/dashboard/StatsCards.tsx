@@ -94,7 +94,7 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {stat.label}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {stat.value}
                   </p>
                   <div className="flex items-center justify-end mt-1">

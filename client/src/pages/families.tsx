@@ -146,11 +146,11 @@ export default function FamiliesPage() {
               <div className="mb-8">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
                       <Users className="mr-3 h-8 w-8 text-primary" />
                       Families
                     </h1>
-                    <p className="mt-2 text-gray-600">
+                    <p className="mt-2 text-gray-600 dark:text-gray-400">
                       Manage family enrollment, billing, and communication
                     </p>
                   </div>
@@ -199,7 +199,7 @@ export default function FamiliesPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className="text-sm text-gray-600 flex items-center">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
                       {filteredFamilies.length} families found
                     </div>
                   </div>
@@ -215,7 +215,7 @@ export default function FamiliesPage() {
                         <div className="flex items-start space-x-4">
                           {/* Family Avatar */}
                           <div className="flex-shrink-0">
-                            <div className="h-12 w-12 rounded-full bg-primary text-white flex items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-primary text-white dark:text-gray-100 flex items-center justify-center">
                               <span className="text-lg font-medium">
                                 {getFamilyInitials(familyGroup.family.name)}
                               </span>
@@ -225,7 +225,7 @@ export default function FamiliesPage() {
                           {/* Family Info */}
                           <div className="flex-1">
                             <div className="flex items-center space-x-3 mb-2">
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                                 {familyGroup.family.name || "Unnamed Family"}
                               </h3>
                               <Badge className="bg-blue-100 text-blue-800">
@@ -233,7 +233,7 @@ export default function FamiliesPage() {
                               </Badge>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
                               {familyGroup.family.email && (
                                 <div className="flex items-center">
                                   <Mail className="mr-2 h-4 w-4" />
@@ -256,13 +256,13 @@ export default function FamiliesPage() {
 
                             {/* Children */}
                             <div className="mt-4">
-                              <h4 className="text-sm font-medium text-gray-900 mb-2">Children:</h4>
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Children:</h4>
                               <div className="space-y-2">
                                 {familyGroup.children.map((child: any, index: number) => (
-                                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                     <div className="flex items-center space-x-3">
                                       <GraduationCap className="h-4 w-4 text-gray-400" />
-                                      <span className="font-medium">{child.firstName} {child.lastName}</span>
+                                      <span className="font-medium text-gray-900 dark:text-gray-100">{child.firstName} {child.lastName}</span>
                                       {child.classroom && (
                                         <Badge className={getClassroomColor(child.classroom.level)}>
                                           {child.classroom.name}

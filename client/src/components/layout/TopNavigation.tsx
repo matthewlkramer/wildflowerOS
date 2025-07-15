@@ -309,7 +309,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                       alt="User profile"
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-full bg-primary text-white dark:text-gray-100 flex items-center justify-center">
                       <span className="text-sm font-medium">
                         {user.firstName?.[0] || 'U'}{user.lastName?.[0] || ''}
                       </span>

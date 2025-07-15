@@ -11,6 +11,17 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
+- **✅ COMPLETED: Simplified tuition pricing interface to single-selection dropdown model**
+  - **Restored dropdown interface** - Each classroom now has a schedule dropdown with "Set Pricing" button
+  - **Single selection workflow** - Users select one classroom-schedule combination at a time for focused pricing
+  - **Visual feedback system** - Selected schedule details appear below dropdown with schedule information
+  - **Enabled/disabled button logic** - "Set Pricing" button only activates when a valid schedule is selected
+  - **Create New Schedule integration** - Option to create new schedule available within each classroom's dropdown
+  - **Simplified state management** - Removed complex multi-selection logic in favor of single selectedClassroomSchedule state
+  - **Clean interface design** - Each classroom card shows basic info, dropdown selector, and pricing button in organized layout
+  - **CONFIRMED WORKING** - User confirmed dropdown interface is functioning as requested
+
+### July 15, 2025
 - **✅ COMPLETED: Enhanced schedule creation and editing with start and end date fields**
   - **Added date fields to schedule forms** - Both create and edit schedule dialogs now include start date (required) and end date (optional) fields
   - **Updated form state management** - Schedule form state includes startDate and endDate fields with proper date formatting

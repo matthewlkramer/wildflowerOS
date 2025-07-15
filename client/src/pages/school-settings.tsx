@@ -1677,6 +1677,7 @@ export default function SchoolSettingsPage() {
   
   // Tuition management state
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
+  const [selectedClassroomSchedule, setSelectedClassroomSchedule] = useState<string>("");
   const [calculatedPricePerHour, setCalculatedPricePerHour] = useState<string>("0.00");
   const [deletingSchedule, setDeletingSchedule] = useState<any>(null);
   
@@ -4469,7 +4470,22 @@ export default function SchoolSettingsPage() {
                           </p>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          {classroomsWithSchedules.map((classroom: any) => (
+                          {classroomsWithSchedules
+                            .sort((a: any, b: any) => {
+                              // Define age level order from youngest to oldest
+                              const levelOrder = {
+                                'infant': 1,
+                                'toddler': 2, 
+                                'primary': 3,
+                                'lower_elementary': 4,
+                                'upper_elementary': 5,
+                                'junior_high': 6,
+                                'high_school': 7
+                              };
+                              return (levelOrder[a.level as keyof typeof levelOrder] || 999) - 
+                                     (levelOrder[b.level as keyof typeof levelOrder] || 999);
+                            })
+                            .map((classroom: any) => (
                             <div key={classroom.id} className="border rounded-lg p-4">
                               <div className="flex items-center justify-between mb-3">
                                 <div>
@@ -4483,69 +4499,103 @@ export default function SchoolSettingsPage() {
                                 </Badge>
                               </div>
                               
-                              {/* Schedule Options */}
-                              {(classroom.schedules && classroom.schedules.length > 0) ? (
-                                <div className="space-y-2">
-                                  {classroom.schedules?.filter((schedule: any) => schedule?.id).map((schedule: any) => (
-                                    <div 
-                                      key={schedule.id} 
-                                      className={`p-3 border rounded cursor-pointer transition-colors ${
-                                        selectedSchedule?.schedule?.id === schedule.id 
-                                          ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200' 
-                                          : 'hover:bg-gray-50'
-                                      }`}
-                                      onClick={() => setSelectedSchedule({ classroom, schedule })}
+                              {/* Schedule Selection Row */}
+                              <div className="flex items-center gap-3">
+                                <div className="flex-1">
+                                  {(classroom.schedules && classroom.schedules.length > 0) ? (
+                                    <Select 
+                                      value={selectedClassroomSchedule} 
+                                      onValueChange={(value) => {
+                                        if (value === "create-new") {
+                                          setAddingSchedule(true);
+                                        } else {
+                                          setSelectedClassroomSchedule(value);
+                                          
+                                          // Find the selected schedule
+                                          const selectedScheduleObj = classroom.schedules.find((s: any) => s.id === value);
+                                          if (selectedScheduleObj) {
+                                            setSelectedSchedule({ classroom, schedule: selectedScheduleObj });
+                                          }
+                                        }
+                                      }}
                                     >
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select a schedule..." />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {classroom.schedules?.filter((schedule: any) => schedule?.id).map((schedule: any) => (
+                                          <SelectItem key={schedule.id} value={schedule.id}>
+                                            <div className="flex items-center justify-between w-full">
+                                              <span className="font-medium">{schedule.name || 'Unnamed Schedule'}</span>
+                                              <span className="text-xs text-gray-500 ml-2">
+                                                {schedule.startTime} - {schedule.endTime} • {calculateHoursPerWeek(schedule)} hrs/week
+                                              </span>
+                                            </div>
+                                          </SelectItem>
+                                        ))}
+                                        <SelectItem value="create-new">
+                                          <div className="flex items-center text-blue-600">
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Create New Schedule
+                                          </div>
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  ) : (
+                                    <div className="flex items-center justify-center py-2 text-gray-500">
+                                      <Clock className="mr-2 h-4 w-4" />
+                                      <span className="text-sm">No schedules available</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <Button 
+                                  disabled={!selectedClassroomSchedule || selectedClassroomSchedule === "create-new"}
+                                  onClick={() => {
+                                    const selectedScheduleObj = classroom.schedules.find((s: any) => s.id === selectedClassroomSchedule);
+                                    if (selectedScheduleObj) {
+                                      setSelectedSchedule({ classroom, schedule: selectedScheduleObj });
+                                      setAddingTuitionPlan(true);
+                                    }
+                                  }}
+                                >
+                                  Set Pricing
+                                </Button>
+                              </div>
+                              
+                              {/* Show schedule details if one is selected */}
+                              {selectedClassroomSchedule && selectedClassroomSchedule !== "create-new" && (
+                                <div className="mt-3 p-3 bg-gray-50 rounded border">
+                                  {(() => {
+                                    const selectedScheduleObj = classroom.schedules.find((s: any) => s.id === selectedClassroomSchedule);
+                                    if (!selectedScheduleObj) return null;
+                                    return (
                                       <div className="flex items-center justify-between">
                                         <div>
-                                          <p className="font-medium text-sm">{schedule.name || 'Unnamed Schedule'}</p>
+                                          <p className="font-medium text-sm">{selectedScheduleObj.name}</p>
                                           <p className="text-xs text-gray-500">
-                                            {schedule.startTime} - {schedule.endTime}
+                                            {selectedScheduleObj.startTime} - {selectedScheduleObj.endTime}
                                           </p>
                                         </div>
                                         <div className="text-right">
                                           <p className="text-xs font-medium">
                                             {[
-                                              schedule.mondayOpen && 'M',
-                                              schedule.tuesdayOpen && 'T', 
-                                              schedule.wednesdayOpen && 'W',
-                                              schedule.thursdayOpen && 'Th',
-                                              schedule.fridayOpen && 'F',
-                                              schedule.saturdayOpen && 'S',
-                                              schedule.sundayOpen && 'Su'
+                                              selectedScheduleObj.mondayOpen && 'M',
+                                              selectedScheduleObj.tuesdayOpen && 'T', 
+                                              selectedScheduleObj.wednesdayOpen && 'W',
+                                              selectedScheduleObj.thursdayOpen && 'Th',
+                                              selectedScheduleObj.fridayOpen && 'F',
+                                              selectedScheduleObj.saturdayOpen && 'S',
+                                              selectedScheduleObj.sundayOpen && 'Su'
                                             ].filter(Boolean).join(', ')}
                                           </p>
                                           <p className="text-xs text-gray-500">
-                                            {calculateHoursPerWeek(schedule)} hrs/week
+                                            {calculateHoursPerWeek(selectedScheduleObj)} hrs/week
                                           </p>
                                         </div>
                                       </div>
-                                    </div>
-                                  ))}
-                                  
-                                  <div 
-                                    className="p-3 border-2 border-dashed border-gray-300 rounded cursor-pointer hover:bg-gray-50 transition-colors"
-                                    onClick={() => setAddingSchedule(true)}
-                                  >
-                                    <div className="flex items-center justify-center text-blue-600">
-                                      <Plus className="mr-2 h-4 w-4" />
-                                      Create New Schedule
-                                    </div>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="text-center py-4 text-gray-500">
-                                  <Clock className="mx-auto h-8 w-8 mb-2 text-gray-400" />
-                                  <p className="text-sm">No schedules available</p>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="mt-2"
-                                    onClick={() => setAddingSchedule(true)}
-                                  >
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Create Schedule
-                                  </Button>
+                                    );
+                                  })()}
                                 </div>
                               )}
                             </div>

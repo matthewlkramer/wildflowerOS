@@ -215,7 +215,7 @@ export default function FamiliesPage() {
                         <div className="flex items-start space-x-4">
                           {/* Family Avatar */}
                           <div className="flex-shrink-0">
-                            <div className="h-12 w-12 rounded-full bg-primary text-white dark:text-gray-100 flex items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-primary text-white dark:text-gray-200 flex items-center justify-center">
                               <span className="text-lg font-medium">
                                 {getFamilyInitials(familyGroup.family.name)}
                               </span>
@@ -261,7 +261,7 @@ export default function FamiliesPage() {
                                 {familyGroup.children.map((child: any, index: number) => (
                                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                     <div className="flex items-center space-x-3">
-                                      <GraduationCap className="h-4 w-4 text-gray-400" />
+                                      <GraduationCap className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                       <span className="font-medium text-gray-900 dark:text-gray-100">{child.firstName} {child.lastName}</span>
                                       {child.classroom && (
                                         <Badge className={getClassroomColor(child.classroom.level)}>
@@ -306,8 +306,8 @@ export default function FamiliesPage() {
                   <Card>
                     <CardContent className="p-12 text-center">
                       <Users className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No families found</h3>
-                      <p className="text-gray-600 mb-4">
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">No families found</h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
                         {searchTerm || statusFilter !== "all" || classroomFilter !== "all" 
                           ? "Try adjusting your search criteria" 
                           : "Get started by adding your first family"}

@@ -148,7 +148,7 @@ export default function TasksPage({}: TasksPageProps) {
           {/* Task Count Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-gray-500" />
+              <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 {filteredTasks.length} {filteredTasks.length === 1 ? 'Task' : 'Tasks'}
               </span>
@@ -192,7 +192,7 @@ export default function TasksPage({}: TasksPageProps) {
                           {isCompleted ? (
                             <CheckCircle2 className="h-5 w-5 text-green-600" />
                           ) : (
-                            <Circle className="h-5 w-5 text-gray-400" />
+                            <Circle className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                           )}
                         </div>
                         
@@ -222,7 +222,7 @@ export default function TasksPage({}: TasksPageProps) {
                             <div className="flex items-center gap-4">
                               {/* Due Date */}
                               <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4 text-gray-400" />
+                                <Clock className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className={`${
                                   dueDateInfo === 'No due date' 
                                     ? 'text-gray-400' 
@@ -236,7 +236,7 @@ export default function TasksPage({}: TasksPageProps) {
                               
                               {/* Owner */}
                               <div className="flex items-center gap-1">
-                                <User className="h-4 w-4 text-gray-400" />
+                                <User className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                 <span className="text-gray-600 dark:text-gray-400">
                                   {getOwnerName(task.assignedToId)}
                                 </span>

@@ -789,7 +789,6 @@ export default function FamilyDetailsPage() {
                   </div>
                 </CardContent>
               </Card>
-                </div>
               </TabsContent>
 
               {/* Enrollment Tab */}

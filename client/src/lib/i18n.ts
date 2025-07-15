@@ -180,7 +180,6 @@ const resources = {
       monthly_revenue: "Monthly Revenue",
       recent_activity: "Recent Activity",
       upcoming_tasks: "Upcoming Tasks",
-      quick_actions: "Quick Actions",
       my_classrooms: "My Classrooms",
       new_enrollment: "New Enrollment",
       create_task: "Create Task",

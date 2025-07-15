@@ -43,9 +43,8 @@ export default function FamiliesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [classroomFilter, setClassroomFilter] = useState("all");
 
-  // Get current user's school context from the current role
-
-  const schoolId = currentRole?.schoolId;
+  // Get current user's school context from the current role or fallback to first school
+  const schoolId = currentRole?.schoolId || user?.schools?.[0]?.id;
 
   // Fetch families data
   const { data: enrollments = [], isLoading, error } = useQuery({

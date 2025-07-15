@@ -431,10 +431,6 @@ export default function FamilyDetailsPage() {
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" onClick={handleFamilyEdit}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Family
-                  </Button>
                   <Button>
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Send Message
@@ -453,105 +449,104 @@ export default function FamilyDetailsPage() {
 
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Adults */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <Users className="mr-2 h-5 w-5" />
-                      Adults
-                    </div>
-                    <Button size="sm">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Adult
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {adultsLoading ? (
-                    <div className="space-y-3">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                    </div>
-                  ) : adults.length === 0 ? (
-                    <div className="text-center py-6">
-                      <Users className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                      <p className="text-gray-500 text-sm mb-3">No adults added yet</p>
-                      <p className="text-xs text-gray-400 mb-3">Connect existing users with parent roles to this family</p>
-                      <Button size="sm" variant="outline">
-                        <Plus className="mr-2 h-3 w-3" />
-                        Add First Adult
+                {/* Family Information - Full Width */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      Family Information
+                      <Button variant="ghost" size="sm" onClick={handleFamilyEdit}>
+                        <Edit className="h-4 w-4" />
                       </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700">Family Name</Label>
+                      <p className="mt-1">{family.name || "Not provided"}</p>
                     </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {adults.map((adult: any) => (
-                        <div key={adult.id} className="p-3 border rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <div className="font-medium">
-                                {adult.firstName} {adult.lastName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                Parent/Guardian
-                              </div>
-                              {adult.email && (
-                                <div className="flex items-center text-sm text-gray-600 mt-1">
-                                  <Mail className="mr-1 h-3 w-3" />
-                                  {adult.email}
+                    
+                    {family.notes && (
+                      <div>
+                        <Label className="text-sm font-medium text-gray-700">Notes</Label>
+                        <p className="mt-1 text-sm text-gray-600">{family.notes}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Adults - Full Width */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Users className="mr-2 h-5 w-5" />
+                        Adults
+                      </div>
+                      <Button size="sm">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Adult
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {adultsLoading ? (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                    ) : adults.length === 0 ? (
+                      <div className="text-center py-6">
+                        <Users className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-gray-500 text-sm mb-3">No adults added yet</p>
+                        <p className="text-xs text-gray-400 mb-3">Connect existing users with parent roles to this family</p>
+                        <Button size="sm" variant="outline">
+                          <Plus className="mr-2 h-3 w-3" />
+                          Add First Adult
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        {adults.map((adult: any) => (
+                          <div key={adult.id} className="p-4 border rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium truncate">
+                                  {adult.firstName} {adult.lastName}
                                 </div>
-                              )}
-                              {adult.phone && (
-                                <div className="flex items-center text-sm text-gray-600 mt-1">
-                                  <Phone className="mr-1 h-3 w-3" />
-                                  {adult.phone}
+                                <div className="text-sm text-gray-500">
+                                  Parent/Guardian
                                 </div>
-                              )}
-                            </div>
-                            <div className="flex space-x-1">
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                              <Button variant="ghost" size="sm">
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
+                                {adult.email && (
+                                  <div className="flex items-center text-sm text-gray-600 mt-1">
+                                    <Mail className="mr-1 h-3 w-3 flex-shrink-0" />
+                                    <span className="truncate">{adult.email}</span>
+                                  </div>
+                                )}
+                                {adult.phone && (
+                                  <div className="flex items-center text-sm text-gray-600 mt-1">
+                                    <Phone className="mr-1 h-3 w-3 flex-shrink-0" />
+                                    {adult.phone}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex space-x-1 ml-2">
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                                <Button variant="ghost" size="sm">
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
 
-              {/* Family Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    Family Information
-                    <Button variant="ghost" size="sm" onClick={handleFamilyEdit}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Family Name</Label>
-                    <p className="mt-1">{family.name || "Not provided"}</p>
-                  </div>
-                  
-                  {family.notes && (
-                    <div>
-                      <Label className="text-sm font-medium text-gray-700">Notes</Label>
-                      <p className="mt-1 text-sm text-gray-600">{family.notes}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Children */}
-              <Card>
+                {/* Children - Full Width */}
+                <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     Children

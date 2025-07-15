@@ -329,15 +329,15 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               <DropdownMenuContent align="end">
                 <DropdownMenuItem>
                   <User className="mr-2 h-4 w-4" />
-                  Profile
+                  {t("user_account")}
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Settings className="mr-2 h-4 w-4" />
-                  Settings
+                  {t("settings")}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
+                  {t("sign_out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

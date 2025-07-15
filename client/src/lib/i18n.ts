@@ -90,6 +90,89 @@ const resources = {
       language: "Language",
       english: "English",
       spanish: "Spanish",
+      
+      // Dashboard
+      welcome: "Welcome",
+      overview: "Overview",
+      recent_activity: "Recent Activity",
+      quick_actions: "Quick Actions",
+      statistics: "Statistics",
+      students: "Students",
+      staff: "Staff",
+      active_enrollments: "Active Enrollments",
+      pending_tasks: "Pending Tasks",
+      upcoming_events: "Upcoming Events",
+      financial_summary: "Financial Summary",
+      
+      // Page headers and titles
+      family_management: "Family Management",
+      classroom_management: "Classroom Management",
+      staff_directory: "Staff Directory",
+      student_records: "Student Records",
+      academic_planning: "Academic Planning",
+      financial_management: "Financial Management",
+      
+      // Common labels
+      name: "Name",
+      email: "Email",
+      phone: "Phone",
+      address: "Address",
+      date: "Date",
+      status: "Status",
+      actions: "Actions",
+      description: "Description",
+      notes: "Notes",
+      
+      // Status indicators
+      active: "Active",
+      inactive: "Inactive",
+      pending: "Pending",
+      completed: "Completed",
+      draft: "Draft",
+      published: "Published",
+      
+      // Form labels
+      first_name: "First Name",
+      last_name: "Last Name",
+      middle_name: "Middle Name",
+      date_of_birth: "Date of Birth",
+      grade_level: "Grade Level",
+      start_date: "Start Date",
+      end_date: "End Date",
+      
+      // Navigation sections
+      main_navigation: "Main Navigation",
+      user_account: "User Account",
+      system_administration: "System Administration",
+      
+      // Error messages
+      field_required: "This field is required",
+      invalid_email: "Invalid email address",
+      invalid_date: "Invalid date",
+      save_error: "Error saving data",
+      load_error: "Error loading data",
+      
+      // Success messages
+      save_success: "Data saved successfully",
+      delete_success: "Item deleted successfully",
+      update_success: "Update completed successfully",
+      
+      // Search and filters
+      search_families: "Search families...",
+      all_statuses: "All Statuses",
+      all_classrooms: "All Classrooms",
+      families_found: "families found",
+      
+      // Additional labels
+      family: "Family",
+      child: "Child",
+      contact: "Contact",
+      classroom: "Classroom",
+      view_details: "View Details",
+      send_message: "Send Message",
+      view_billing: "View Billing",
+      sign_out: "Sign Out",
+      profile: "Profile",
     }
   },
   es: {
@@ -178,6 +261,89 @@ const resources = {
       language: "Idioma",
       english: "Inglés",
       spanish: "Español",
+      
+      // Dashboard
+      welcome: "Bienvenido",
+      overview: "Resumen",
+      recent_activity: "Actividad Reciente",
+      quick_actions: "Acciones Rápidas",
+      statistics: "Estadísticas",
+      students: "Estudiantes",
+      staff: "Personal",
+      active_enrollments: "Inscripciones Activas",
+      pending_tasks: "Tareas Pendientes",
+      upcoming_events: "Próximos Eventos",
+      financial_summary: "Resumen Financiero",
+      
+      // Page headers and titles
+      family_management: "Gestión Familiar",
+      classroom_management: "Gestión de Aulas",
+      staff_directory: "Directorio de Personal",
+      student_records: "Registros de Estudiantes",
+      academic_planning: "Planificación Académica",
+      financial_management: "Gestión Financiera",
+      
+      // Common labels
+      name: "Nombre",
+      email: "Correo Electrónico",
+      phone: "Teléfono",
+      address: "Dirección",
+      date: "Fecha",
+      status: "Estado",
+      actions: "Acciones",
+      description: "Descripción",
+      notes: "Notas",
+      
+      // Status indicators
+      active: "Activo",
+      inactive: "Inactivo",
+      pending: "Pendiente",
+      completed: "Completado",
+      draft: "Borrador",
+      published: "Publicado",
+      
+      // Form labels
+      first_name: "Nombre",
+      last_name: "Apellido",
+      middle_name: "Segundo Nombre",
+      date_of_birth: "Fecha de Nacimiento",
+      grade_level: "Nivel de Grado",
+      start_date: "Fecha de Inicio",
+      end_date: "Fecha de Fin",
+      
+      // Navigation sections
+      main_navigation: "Navegación Principal",
+      user_account: "Cuenta de Usuario",
+      system_administration: "Administración del Sistema",
+      
+      // Error messages
+      field_required: "Este campo es obligatorio",
+      invalid_email: "Dirección de correo inválida",
+      invalid_date: "Fecha inválida",
+      save_error: "Error al guardar datos",
+      load_error: "Error al cargar datos",
+      
+      // Success messages
+      save_success: "Datos guardados exitosamente",
+      delete_success: "Elemento eliminado exitosamente",
+      update_success: "Actualización completada exitosamente",
+      
+      // Search and filters
+      search_families: "Buscar familias...",
+      all_statuses: "Todos los Estados",
+      all_classrooms: "Todas las Aulas",
+      families_found: "familias encontradas",
+      
+      // Additional labels
+      family: "Familia",
+      child: "Niño",
+      contact: "Contacto",
+      classroom: "Aula",
+      view_details: "Ver Detalles",
+      send_message: "Enviar Mensaje",
+      view_billing: "Ver Facturación",
+      sign_out: "Cerrar Sesión",
+      profile: "Perfil",
     }
   }
 };

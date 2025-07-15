@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ import MobileBottomNav from "@/components/layout/MobileBottomNav";
 
 export default function FamiliesPage() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   // Get current role from API
   const { data: currentRole } = useQuery({
@@ -126,7 +128,7 @@ export default function FamiliesPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading families...</p>
+          <p className="mt-4 text-gray-600">{t("loading")}</p>
         </div>
       </div>
     );
@@ -148,15 +150,15 @@ export default function FamiliesPage() {
                   <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
                       <Users className="mr-3 h-8 w-8 text-primary" />
-                      Families
+                      {t("families")}
                     </h1>
                     <p className="mt-2 text-gray-600 dark:text-gray-400">
-                      Manage family enrollment, billing, and communication
+                      {t("family_management")}
                     </p>
                   </div>
                   <Button className="flex items-center">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Family
+                    {t("add")} {t("families")}
                   </Button>
                 </div>
               </div>
@@ -168,7 +170,7 @@ export default function FamiliesPage() {
                     <div className="relative">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
-                        placeholder="Search families..."
+                        placeholder={t("search_families")}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
@@ -176,22 +178,22 @@ export default function FamiliesPage() {
                     </div>
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All Statuses" />
+                        <SelectValue placeholder={t("all_statuses")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-                        <SelectItem value="prospective">Prospective</SelectItem>
-                        <SelectItem value="enrolled">Enrolled</SelectItem>
-                        <SelectItem value="graduated">Graduated</SelectItem>
-                        <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                        <SelectItem value="all">{t("all_statuses")}</SelectItem>
+                        <SelectItem value="prospective">{t("prospective")}</SelectItem>
+                        <SelectItem value="enrolled">{t("enrolled")}</SelectItem>
+                        <SelectItem value="graduated">{t("graduated")}</SelectItem>
+                        <SelectItem value="withdrawn">{t("withdrawn")}</SelectItem>
                       </SelectContent>
                     </Select>
                     <Select value={classroomFilter} onValueChange={setClassroomFilter}>
                       <SelectTrigger>
-                        <SelectValue placeholder="All Classrooms" />
+                        <SelectValue placeholder={t("all_classrooms")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Classrooms</SelectItem>
+                        <SelectItem value="all">{t("all_classrooms")}</SelectItem>
                         {classrooms.map((classroom: any) => (
                           <SelectItem key={classroom.id} value={classroom.id}>
                             {classroom.name}
@@ -200,7 +202,7 @@ export default function FamiliesPage() {
                       </SelectContent>
                     </Select>
                     <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                      {filteredFamilies.length} families found
+                      {filteredFamilies.length} {t("families_found")}
                     </div>
                   </div>
                 </CardContent>

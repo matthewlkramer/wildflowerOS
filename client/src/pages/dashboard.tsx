@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
@@ -15,6 +16,7 @@ import FamilyManagement from "@/components/families/FamilyManagement";
 export default function Dashboard() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { t } = useTranslation();
   
   // Get current role from API
   const { data: currentRole } = useQuery({
@@ -42,7 +44,7 @@ export default function Dashboard() {
       <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-400">{t("loading")}</p>
         </div>
       </div>
     );
@@ -69,10 +71,10 @@ export default function Dashboard() {
             <div className="md:flex md:items-center md:justify-between">
               <div className="flex-1 min-w-0">
                 <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-gray-100 sm:text-3xl sm:truncate">
-                  Dashboard
+                  {t("dashboard")}
                 </h2>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Welcome back, {user.firstName}! Here's what's happening at {currentSchool?.name || "your school"}.
+                  {t("welcome")} {user.firstName}! {t("overview")}
                 </p>
               </div>
               <div className="mt-4 flex md:mt-0 md:ml-4">

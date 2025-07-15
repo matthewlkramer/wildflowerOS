@@ -792,6 +792,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid date format provided" });
       }
       
+      // Log the school year data before creation
+      console.log('Creating school year with:', {
+        schoolId,
+        name: networkYear.name,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        isActive: false,
+        networkDefault: false
+      });
+      
       // Create the school-specific year with custom dates
       const schoolYear = await storage.createSchoolYear({
         schoolId,
@@ -803,8 +813,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Handle holiday import based on type
+      console.log(`Import type: ${importType}, School Year ID: ${schoolYear.id}`);
       if (importType === 'system_holidays') {
         // Import system default holidays for this year
+        console.log('Importing system holidays for school year:', schoolYear.id);
         await storage.importSystemHolidaysForSchoolYear(schoolYear.id);
       } else if (importType === 'current_year_holidays') {
         // Copy holidays from most recent school year (active or latest)

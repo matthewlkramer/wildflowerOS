@@ -43,16 +43,20 @@ export default function FamiliesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [classroomFilter, setClassroomFilter] = useState("all");
 
+  // Determine if user is system admin
+  const isSystemAdmin = currentRole?.name?.startsWith('sysadmin');
+  
   // Get current user's school context from the current role or fallback to first school
   const schoolId = currentRole?.schoolId || user?.schools?.[0]?.id;
 
-  // Fetch families data
+  // Fetch families data - either all families for system admin or school-specific
   const { data: enrollments = [], isLoading, error } = useQuery({
-    queryKey: ["/api/schools", schoolId, "enrollments"],
-    enabled: !!schoolId,
+    queryKey: isSystemAdmin ? ["/api/enrollments"] : ["/api/schools", schoolId, "enrollments"],
+    enabled: isSystemAdmin || !!schoolId,
   });
 
   // Debug logging
+  console.log("Families page - isSystemAdmin:", isSystemAdmin);
   console.log("Families page - schoolId:", schoolId);
   console.log("Families page - enrollments:", enrollments);
   console.log("Families page - isLoading:", isLoading);

@@ -1180,12 +1180,53 @@ export class DatabaseStorage implements IStorage {
           name: classrooms.name,
           level: classrooms.level,
         },
+        school: {
+          id: schools.id,
+          name: schools.name,
+        },
       })
       .from(enrollments)
       .innerJoin(children, eq(children.id, enrollments.childId))
       .innerJoin(families, eq(families.id, children.familyId))
       .leftJoin(classrooms, eq(classrooms.id, enrollments.classroomId))
+      .leftJoin(schools, eq(schools.id, enrollments.schoolId))
       .where(eq(enrollments.schoolId, schoolId))
+      .orderBy(desc(enrollments.createdAt));
+  }
+
+  async getAllEnrollments(): Promise<any[]> {
+    return await db
+      .select({
+        id: enrollments.id,
+        status: enrollments.status,
+        startDate: enrollments.startDate,
+        endDate: enrollments.endDate,
+        child: {
+          id: children.id,
+          firstName: children.firstName,
+          lastName: children.lastName,
+          birthDate: children.birthDate,
+        },
+        family: {
+          id: families.id,
+          name: families.name,
+          email: families.email,
+        },
+        classroom: {
+          id: classrooms.id,
+          name: classrooms.name,
+          level: classrooms.level,
+        },
+        school: {
+          id: schools.id,
+          name: schools.name,
+        },
+      })
+      .from(enrollments)
+      .innerJoin(children, eq(children.id, enrollments.childId))
+      .innerJoin(families, eq(families.id, children.familyId))
+      .leftJoin(classrooms, eq(classrooms.id, enrollments.classroomId))
+      .leftJoin(schools, eq(schools.id, enrollments.schoolId))
       .orderBy(desc(enrollments.createdAt));
   }
 
@@ -1684,13 +1725,16 @@ export class DatabaseStorage implements IStorage {
     // Get family info with children names
     const familyInfo = await db
       .select({
+        familyName: families.name,
         familyLastName: families.lastName,
-        schoolId: families.primarySchoolId,
+        schoolId: enrollments.schoolId,
         schoolShortName: schools.shortName,
         schoolName: schools.name
       })
       .from(families)
-      .leftJoin(schools, eq(schools.id, families.primarySchoolId))
+      .leftJoin(children, eq(children.familyId, families.id))
+      .leftJoin(enrollments, eq(enrollments.childId, children.id))
+      .leftJoin(schools, eq(schools.id, enrollments.schoolId))
       .where(eq(families.id, familyId))
       .limit(1);
     
@@ -1707,7 +1751,8 @@ export class DatabaseStorage implements IStorage {
       .orderBy(children.firstName);
     
     const childrenNames = children.map(c => c.firstName?.toLowerCase()).filter(Boolean).join('');
-    const channelName = `${schoolPrefix}-families-${family.familyLastName?.toLowerCase() || 'family'}${childrenNames}`;
+    const familyLastNamePart = family.familyLastName?.toLowerCase() || 'family';
+    const channelName = `${schoolPrefix}-families-${familyLastNamePart}${childrenNames}`;
     
     const existingChannel = await db
       .select()
@@ -1722,7 +1767,7 @@ export class DatabaseStorage implements IStorage {
     if (existingChannel.length === 0) {
       await db.insert(channels).values({
         name: channelName,
-        description: `Private family channel for ${family.familyLastName || 'Family'}`,
+        description: `Private family channel for ${family.familyLastName || family.familyName || 'Family'}`,
         type: "private",
         scope: "family",
         schoolId: family.schoolId,

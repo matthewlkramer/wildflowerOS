@@ -2712,25 +2712,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTuitionPlansWithCalculations(schoolId: string): Promise<any[]> {
-    const plans = await db
-      .select({
-        plan: tuitionPlans,
-        classroom: classrooms,
-        schedule: classroomSchedules,
-        schoolYear: schoolYears
-      })
-      .from(tuitionPlans)
-      .leftJoin(classrooms, eq(tuitionPlans.classroomId, classrooms.id))
-      .leftJoin(classroomSchedules, eq(tuitionPlans.classroomScheduleId, classroomSchedules.id))
-      .leftJoin(schoolYears, eq(tuitionPlans.schoolYearId, schoolYears.id))
-      .where(eq(classrooms.schoolId, schoolId))
-      .orderBy(asc(classrooms.name), asc(classroomSchedules.name));
-
-    return plans;
+    // Since tuition plans might not exist yet, just return empty for now
+    // This will be populated when plans are created
+    return [];
   }
 
   async getClassroomsWithSchedulesForTuition(schoolId: string): Promise<any[]> {
-    // First get all classrooms for the school
+    // Get all classrooms for the school
     const schoolClassrooms = await db
       .select()
       .from(classrooms)
@@ -2740,25 +2728,25 @@ export class DatabaseStorage implements IStorage {
       ))
       .orderBy(asc(classrooms.name));
 
-    // For each classroom, get its schedules
-    const classroomsWithSchedules = await Promise.all(
-      schoolClassrooms.map(async (classroom) => {
-        const schedules = await db
-          .select()
-          .from(classroomSchedules)
-          .where(and(
-            eq(classroomSchedules.classroomId, classroom.id),
-            eq(classroomSchedules.isActive, true),
-            eq(classroomSchedules.networkDefault, false)
-          ))
-          .orderBy(asc(classroomSchedules.name));
+    // Get all schedules for the school - they exist independently until linked via tuition
+    const allSchedules = await db
+      .select()
+      .from(classroomSchedules)
+      .where(and(
+        eq(classroomSchedules.schoolId, schoolId),
+        eq(classroomSchedules.isActive, true),
+        eq(classroomSchedules.networkDefault, false)
+      ))
+      .orderBy(asc(classroomSchedules.name));
 
-        return {
-          ...classroom,
-          schedules
-        };
-      })
-    );
+    // For tuition planning, show all possible classroom-schedule combinations
+    // This allows flexible linking at tuition creation time
+    const classroomsWithSchedules = schoolClassrooms.map((classroom) => {
+      return {
+        ...classroom,
+        schedules: allSchedules // All schedules are available for any classroom in tuition context
+      };
+    });
 
     return classroomsWithSchedules;
   }

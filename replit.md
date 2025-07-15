@@ -11,6 +11,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
+- **✅ COMPLETED: Enhanced schedule creation and editing with start and end date fields**
+  - **Added date fields to schedule forms** - Both create and edit schedule dialogs now include start date (required) and end date (optional) fields
+  - **Updated form state management** - Schedule form state includes startDate and endDate fields with proper date formatting
+  - **Enhanced schedule display** - Schedule cards now show start and end dates when available alongside creation date
+  - **Improved form handling** - Date fields are properly populated when editing existing schedules with ISO date conversion
+  - **Complete form reset logic** - Both create and edit forms properly clear date fields after successful operations
+  - **Database integration ready** - Backend already supports date fields in classroom_schedules table with proper date conversion
+  - **User experience enhanced** - Schedule management now supports time-based scheduling with clear date boundaries
+  - **CONFIRMED WORKING** - User successfully tested schedule creation with date fields
 - **✅ COMPLETED: Fixed school year edit dialog holiday display issue with correct date formatting**
   - **Resolved "0 holidays" display bug** - holidays now properly show in edit dialog (11 holidays visible)
   - **Fixed frontend data parsing** - React Query was receiving data but not displaying it due to component refresh logic

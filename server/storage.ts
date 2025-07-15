@@ -1173,14 +1173,19 @@ export class DatabaseStorage implements IStorage {
       return;
     }
 
-    // Get network default holidays for this specific school year
+    // Get network default holidays for this specific school year (exclude templates with NULL dates)
     const networkHolidays = await db
       .select()
       .from(calendarClosures)
       .where(and(
         eq(calendarClosures.networkDefault, true),
         eq(calendarClosures.schoolYearId, networkSchoolYear[0].id),
-        isNull(calendarClosures.schoolId)
+        isNull(calendarClosures.schoolId),
+        // Exclude template holidays with NULL dates
+        or(
+          isNotNull(calendarClosures.startDate),
+          isNotNull(calendarClosures.date)
+        )
       ));
 
     // Create school-specific holidays for this school year, filtering out those outside school year dates
@@ -1257,14 +1262,19 @@ export class DatabaseStorage implements IStorage {
       return;
     }
 
-    // Get network default holidays for the new school year to get updated dates
+    // Get network default holidays for the new school year to get updated dates (exclude templates with NULL dates)
     const networkHolidays = await db
       .select()
       .from(calendarClosures)
       .where(and(
         eq(calendarClosures.networkDefault, true),
         eq(calendarClosures.schoolYearId, networkSchoolYear[0].id),
-        isNull(calendarClosures.schoolId)
+        isNull(calendarClosures.schoolId),
+        // Exclude template holidays with NULL dates
+        or(
+          isNotNull(calendarClosures.startDate),
+          isNotNull(calendarClosures.date)
+        )
       ));
 
     // Create a map of network holidays by name for quick lookup

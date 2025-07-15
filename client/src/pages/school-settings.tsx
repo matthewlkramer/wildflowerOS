@@ -81,10 +81,11 @@ function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
   // Force refetch when component mounts or schoolYearId changes
   useEffect(() => {
     if (schoolYearId) {
-      console.log("DEBUG: Refetching holidays for schoolYearId:", schoolYearId);
+      console.log("DEBUG Frontend: Refetching holidays for schoolYearId:", schoolYearId);
+      console.log("DEBUG Frontend: holidays data:", holidays);
       refetch();
     }
-  }, [schoolYearId, refetch]);
+  }, [schoolYearId, refetch, holidays]);
 
   // Create holiday mutation
   const createHolidayMutation = useMutation({

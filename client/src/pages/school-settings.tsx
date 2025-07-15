@@ -455,12 +455,14 @@ function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
                         <div className="flex items-center space-x-4 mt-1">
                           <span className="text-xs text-gray-600">
                             {(() => {
-                              // Parse ISO date strings properly
-                              const startDate = new Date(holiday.startDate);
-                              const endDate = new Date(holiday.endDate);
-                              const startStr = startDate.toLocaleDateString();
-                              const endStr = endDate.toLocaleDateString();
-                              return holiday.duration === 1 ? startStr : `${startStr} - ${endStr}`;
+                              // Extract date parts to avoid timezone conversion
+                              const startDateStr = holiday.startDate.split('T')[0];
+                              const endDateStr = holiday.endDate.split('T')[0];
+                              const [startYear, startMonth, startDay] = startDateStr.split('-');
+                              const [endYear, endMonth, endDay] = endDateStr.split('-');
+                              const startFormatted = `${parseInt(startMonth)}/${parseInt(startDay)}/${startYear}`;
+                              const endFormatted = `${parseInt(endMonth)}/${parseInt(endDay)}/${endYear}`;
+                              return holiday.duration === 1 ? startFormatted : `${startFormatted} - ${endFormatted}`;
                             })()}
                           </span>
                           {holiday.description && (

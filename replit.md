@@ -11,6 +11,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
+- **✅ COMPLETED: Fixed school year edit dialog holiday display issue with correct date formatting**
+  - **Resolved "0 holidays" display bug** - holidays now properly show in edit dialog (11 holidays visible)
+  - **Fixed frontend data parsing** - React Query was receiving data but not displaying it due to component refresh logic
+  - **Corrected timezone date conversion** - eliminated "Invalid Date" display by parsing ISO strings directly without timezone conversion
+  - **Accurate date display** - single-day holidays show one date, multi-day holidays show proper date ranges
+  - **Server API confirmed working** - debug logs show all 11 holidays being fetched and returned correctly
+  - **Database dates verified correct** - all holidays have proper 2025-26 academic year dates stored in UTC
+  - **Final date parsing solution** - extracts date components from ISO strings to avoid JavaScript Date timezone issues
+  - **CONFIRMED WORKING** - Holiday management system now fully functional with accurate date display
 - **✅ FIXED: School year import "Invalid time value" error and comprehensive date handling**
   - **Database cleanup** - Removed 13 template holidays with NULL dates that were causing database insert errors
   - **Text updates** - Changed "Select Network School Year to Import" to "Select School Year to Create" and confirmed "I'll add them later" text

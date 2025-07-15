@@ -204,22 +204,22 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
       </Dialog>
 
       <nav className="bg-white shadow-sm border-b border-gray-200 h-16">
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-primary">WildflowerOS</h1>
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-primary">WildflowerOS</h1>
             </div>
           </div>
           
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.roleName?.split('_')[0] || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-32 border-gray-300 text-sm">
+                <SelectTrigger className="w-20 sm:w-24 lg:w-32 border-gray-300 text-xs sm:text-sm">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
-                      <span className="truncate text-sm">{getContextDisplayName()}</span>
+                      <span className="truncate text-xs sm:text-sm">{getContextDisplayName()}</span>
                     )}
                     {!currentUserRole && <SelectValue placeholder="Role" />}
                   </div>
@@ -247,13 +247,13 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               </Select>
             </div>
 
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
               {/* Notifications */}
-              <Button variant="ghost" size="sm" className="relative p-2">
-                <Bell className="h-5 w-5" />
+              <Button variant="ghost" size="sm" className="relative p-1 sm:p-2">
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 {notificationCount > 0 && (
                   <Badge 
-                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center p-0"
+                    className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center p-0"
                   >
                     {notificationCount}
                   </Badge>
@@ -261,11 +261,11 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               </Button>
               
               {/* Messages */}
-              <Button variant="ghost" size="sm" className="relative p-2">
-                <MessageCircle className="h-5 w-5" />
+              <Button variant="ghost" size="sm" className="relative p-1 sm:p-2">
+                <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                 {messageCount > 0 && (
                   <Badge 
-                    className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-4 w-4 flex items-center justify-center p-0"
+                    className="absolute -top-1 -right-1 bg-primary text-white text-xs rounded-full h-3 w-3 sm:h-4 sm:w-4 flex items-center justify-center p-0"
                   >
                     {messageCount}
                   </Badge>
@@ -278,18 +278,18 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 <Button variant="ghost" className="p-1 flex items-center space-x-1">
                   {user.profileImageUrl ? (
                     <img 
-                      className="h-8 w-8 rounded-full object-cover" 
+                      className="h-6 w-6 sm:h-8 sm:w-8 rounded-full object-cover" 
                       src={user.profileImageUrl} 
                       alt="User profile"
                     />
                   ) : (
-                    <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center">
-                      <span className="text-sm font-medium">
+                    <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary text-white flex items-center justify-center">
+                      <span className="text-xs sm:text-sm font-medium">
                         {user.firstName?.[0] || 'U'}{user.lastName?.[0] || ''}
                       </span>
                     </div>
                   )}
-                  <ChevronDown className="h-3 w-3 text-gray-500" />
+                  <ChevronDown className="h-3 w-3 text-gray-500 hidden sm:block" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

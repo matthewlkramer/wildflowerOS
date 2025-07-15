@@ -211,19 +211,27 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             <div className="flex-shrink-0">
               {/* Mobile logo */}
               <div className="sm:hidden">
-                <img 
-                  src="/generated-icon.png"
-                  alt="Wildflower Schools" 
-                  className="w-8 h-8 rounded-lg"
-                  onError={(e) => {
-                    // Fallback to a simple icon if image fails to load
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling!.style.display = 'block';
-                  }}
-                />
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center" style={{ display: 'none' }}>
-                  <span className="text-white font-bold text-sm">W</span>
-                </div>
+                <svg 
+                  width="32" 
+                  height="32" 
+                  viewBox="0 0 32 32" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-8 h-8"
+                >
+                  {/* Flower petals */}
+                  <circle cx="16" cy="8" r="4" fill="#F59E0B" opacity="0.8"/>
+                  <circle cx="24" cy="16" r="4" fill="#F59E0B" opacity="0.8"/>
+                  <circle cx="16" cy="24" r="4" fill="#F59E0B" opacity="0.8"/>
+                  <circle cx="8" cy="16" r="4" fill="#F59E0B" opacity="0.8"/>
+                  <circle cx="22" cy="10" r="3" fill="#EAB308" opacity="0.7"/>
+                  <circle cx="22" cy="22" r="3" fill="#EAB308" opacity="0.7"/>
+                  <circle cx="10" cy="22" r="3" fill="#EAB308" opacity="0.7"/>
+                  <circle cx="10" cy="10" r="3" fill="#EAB308" opacity="0.7"/>
+                  {/* Flower center */}
+                  <circle cx="16" cy="16" r="4" fill="#059669"/>
+                  <circle cx="16" cy="16" r="2" fill="#10B981"/>
+                </svg>
               </div>
               {/* Desktop text */}
               <h1 className="hidden sm:block text-xl lg:text-2xl font-bold text-primary">WildflowerOS</h1>

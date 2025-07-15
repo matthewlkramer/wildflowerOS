@@ -18,9 +18,8 @@ export default function MobileBottomNav({ currentRole }: MobileBottomNavProps) {
     { icon: "fas fa-tasks", label: "Tasks", href: "/tasks" },
   ];
 
-  const showSchoolSettings = currentRole?.roleCategory === "educator" || 
-                            currentRole?.roleCategory === "systems_administrator" || 
-                            currentRole?.roleDefinition?.name === "school_admin";
+  // Show settings for all roles - no need to hide based on role type
+  const showSchoolSettings = true;
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-2 py-2 z-40">

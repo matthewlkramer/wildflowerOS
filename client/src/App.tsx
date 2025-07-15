@@ -22,9 +22,9 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Dashboard} />
-          {/* <Route path="/families" component={FamiliesPage} />
+          <Route path="/families" component={FamiliesPage} />
           <Route path="/families/:familyId" component={FamilyDetailsPage} />
-          <Route path="/families/:familyId/billing" component={FamilyBillingPage} /> */}
+          <Route path="/families/:familyId/billing" component={FamilyBillingPage} />
           <Route path="/settings" component={SchoolSettingsPage} />
           {/* Add more authenticated routes here */}
         </>

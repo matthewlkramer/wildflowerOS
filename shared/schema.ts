@@ -413,9 +413,12 @@ export const tasks = pgTable("tasks", {
   description: text("description"),
   assignedToId: varchar("assigned_to_id").references(() => users.id),
   dueDate: timestamp("due_date"),
+  priority: varchar("priority", { 
+    enum: ["low", "medium", "high", "urgent"] 
+  }).default("medium"),
   status: varchar("status", { 
     enum: ["open", "in_progress", "completed", "overdue", "canceled"] 
-  }),
+  }).default("open"),
   createdById: varchar("created_by_id").references(() => users.id),
   commentChannelId: uuid("comment_channel_id").references(() => channels.id),
   createdAt: timestamp("created_at").defaultNow(),

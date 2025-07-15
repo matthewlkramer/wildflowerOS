@@ -241,6 +241,7 @@ export interface IStorage {
   // Tasks
   getTasksByUser(userId: string): Promise<Task[]>;
   getTasksBySchool(schoolId: string): Promise<Task[]>;
+  getAllTasks(): Promise<Task[]>;
   createTask(task: InsertTask): Promise<Task>;
   updateTask(id: string, task: Partial<InsertTask>): Promise<Task>;
   
@@ -1316,6 +1317,13 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(tasks.createdAt));
   }
 
+  async getAllTasks(): Promise<Task[]> {
+    return await db
+      .select()
+      .from(tasks)
+      .orderBy(desc(tasks.createdAt));
+  }
+
   async getTasksBySchool(schoolId: string): Promise<Task[]> {
     return await db
       .select({
@@ -1323,6 +1331,7 @@ export class DatabaseStorage implements IStorage {
         title: tasks.title,
         description: tasks.description,
         status: tasks.status,
+        priority: tasks.priority,
         assignedToId: tasks.assignedToId,
         dueDate: tasks.dueDate,
         createdById: tasks.createdById,
@@ -1350,6 +1359,25 @@ export class DatabaseStorage implements IStorage {
     return updatedTask;
   }
 
+  async getAllTasks(): Promise<Task[]> {
+    return await db
+      .select({
+        id: tasks.id,
+        title: tasks.title,
+        description: tasks.description,
+        status: tasks.status,
+        priority: tasks.priority,
+        assignedToId: tasks.assignedToId,
+        dueDate: tasks.dueDate,
+        createdById: tasks.createdById,
+        commentChannelId: tasks.commentChannelId,
+        createdAt: tasks.createdAt,
+        updatedAt: tasks.updatedAt,
+      })
+      .from(tasks)
+      .orderBy(desc(tasks.createdAt));
+  }
+
   // Messages and Channels
   async getChannelsByUser(userId: string): Promise<Channel[]> {
     return await db
@@ -1369,12 +1397,28 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(channels.updatedAt));
   }
 
-  async getMessagesByChannel(channelId: string, limit = 50): Promise<Message[]> {
+  async getMessagesByChannel(channelId: string, limit = 50): Promise<any[]> {
     return await db
-      .select()
+      .select({
+        id: messages.id,
+        channelId: messages.channelId,
+        senderId: messages.senderId,
+        content: messages.content,
+        attachments: messages.attachments,
+        sentAt: messages.sentAt,
+        readBy: messages.readBy,
+        threadId: messages.threadId,
+        isPinned: messages.isPinned,
+        isUrgent: messages.isUrgent,
+        createdAt: messages.createdAt,
+        updatedAt: messages.updatedAt,
+        senderName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, SPLIT_PART(${users.email}, '@', 1))`,
+        senderEmail: users.email,
+      })
       .from(messages)
+      .leftJoin(users, eq(users.id, messages.senderId))
       .where(eq(messages.channelId, channelId))
-      .orderBy(desc(messages.sentAt))
+      .orderBy(messages.sentAt)
       .limit(limit);
   }
 

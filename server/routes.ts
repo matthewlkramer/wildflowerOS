@@ -1653,6 +1653,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tasks
+  app.get('/api/tasks', isAuthenticated, async (req: any, res) => {
+    try {
+      const tasks = await storage.getAllTasks();
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching all tasks:", error);
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+  });
+
   app.get('/api/tasks/my', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.dbUserId || req.user.claims.sub;

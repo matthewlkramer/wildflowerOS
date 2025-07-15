@@ -885,8 +885,16 @@ export class DatabaseStorage implements IStorage {
     // Convert date strings to Date objects with proper timezone handling
     const processedData = {
       ...schoolYearData,
-      startDate: schoolYearData.startDate ? new Date(schoolYearData.startDate + 'T00:00:00') : undefined,
-      endDate: schoolYearData.endDate ? new Date(schoolYearData.endDate + 'T00:00:00') : undefined,
+      startDate: schoolYearData.startDate instanceof Date 
+        ? schoolYearData.startDate 
+        : schoolYearData.startDate 
+          ? new Date(schoolYearData.startDate + (schoolYearData.startDate.includes('T') ? '' : 'T00:00:00'))
+          : undefined,
+      endDate: schoolYearData.endDate instanceof Date 
+        ? schoolYearData.endDate 
+        : schoolYearData.endDate 
+          ? new Date(schoolYearData.endDate + (schoolYearData.endDate.includes('T') ? '' : 'T00:00:00'))
+          : undefined,
     };
     
     const [schoolYear] = await db.insert(schoolYears).values(processedData).returning();

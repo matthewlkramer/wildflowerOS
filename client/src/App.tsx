@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect } from "react";
 import Dashboard from "@/pages/dashboard";
 import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
@@ -35,6 +36,27 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => {
+    // Enable dark mode for mobile and tablet devices automatically
+    const isMobileOrTablet = window.innerWidth <= 1024;
+    if (isMobileOrTablet) {
+      document.documentElement.classList.add('dark');
+    }
+    
+    // Listen for window resize to toggle dark mode based on screen size
+    const handleResize = () => {
+      const isMobileOrTablet = window.innerWidth <= 1024;
+      if (isMobileOrTablet) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

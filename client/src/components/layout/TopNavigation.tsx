@@ -204,7 +204,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
         </DialogContent>
       </Dialog>
 
-      <nav className="bg-white shadow-sm border-b border-gray-200 h-16">
+      <nav className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700 h-16">
       <div className="max-w-full mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -234,7 +234,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 </svg>
               </div>
               {/* Desktop text */}
-              <h1 className="hidden sm:block text-xl lg:text-2xl font-bold text-primary">WildflowerOS</h1>
+              <h1 className="hidden sm:block text-xl lg:text-2xl font-bold text-primary dark:text-primary">WildflowerOS</h1>
             </div>
           </div>
           
@@ -242,7 +242,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.roleName?.split('_')[0] || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-28 sm:w-32 lg:w-36 border-gray-300 text-sm">
+                <SelectTrigger className="w-28 sm:w-32 lg:w-36 border-gray-300 dark:border-gray-600 text-sm dark:text-gray-200 dark:bg-gray-800">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
                       <span className="truncate text-xs sm:text-sm">{getContextDisplayName()}</span>
@@ -275,7 +275,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
 
             <div className="flex items-center space-x-3 sm:space-x-3 lg:space-x-3">
               {/* Notifications */}
-              <Button variant="ghost" size="sm" className="relative p-2">
+              <Button variant="ghost" size="sm" className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
                   <Badge 
@@ -287,7 +287,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               </Button>
               
               {/* Messages */}
-              <Button variant="ghost" size="sm" className="relative p-2">
+              <Button variant="ghost" size="sm" className="relative p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">
                 <MessageCircle className="h-5 w-5" />
                 {messageCount > 0 && (
                   <Badge 
@@ -315,7 +315,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                       </span>
                     </div>
                   )}
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                  <ChevronDown className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

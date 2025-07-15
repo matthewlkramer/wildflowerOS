@@ -2090,20 +2090,20 @@ export default function SchoolSettingsPage() {
                           Roles
                         </TabsTrigger>
                         <TabsTrigger value="school-years" className="flex items-center">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          School Years
+                          <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
+                          <span className="hidden sm:inline">School </span>Years
                         </TabsTrigger>
                         <TabsTrigger value="schedules" className="flex items-center">
-                          <Clock className="mr-2 h-4 w-4" />
-                          Schedules
+                          <Clock className="mr-1 sm:mr-2 h-4 w-4" />
+                          <span className="hidden sm:inline">Sched</span><span className="sm:hidden">Sched</span><span className="hidden sm:inline">ules</span>
                         </TabsTrigger>
                         <TabsTrigger value="tuition" className="flex items-center">
-                          <DollarSign className="mr-2 h-4 w-4" />
-                          Tuition Plans
+                          <DollarSign className="mr-1 sm:mr-2 h-4 w-4" />
+                          Tuition<span className="hidden sm:inline"> Plans</span>
                         </TabsTrigger>
                         <TabsTrigger value="subsidies" className="flex items-center">
-                          <School className="mr-2 h-4 w-4" />
-                          Public Subsidies
+                          <School className="mr-1 sm:mr-2 h-4 w-4" />
+                          <span className="hidden sm:inline">Public </span>Subsidies
                         </TabsTrigger>
                       </TabsList>
 
@@ -2624,20 +2624,20 @@ export default function SchoolSettingsPage() {
               Classrooms
             </TabsTrigger>
             <TabsTrigger value="school-years" className="flex items-center">
-              <Calendar className="mr-2 h-4 w-4" />
-              School Years
+              <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">School </span>Years
             </TabsTrigger>
             <TabsTrigger value="schedules" className="flex items-center">
-              <Clock className="mr-2 h-4 w-4" />
-              Schedules
+              <Clock className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Sched</span><span className="sm:hidden">Sched</span><span className="hidden sm:inline">ules</span>
             </TabsTrigger>
             <TabsTrigger value="tuition" className="flex items-center">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Tuition Plans
+              <DollarSign className="mr-1 sm:mr-2 h-4 w-4" />
+              Tuition<span className="hidden sm:inline"> Plans</span>
             </TabsTrigger>
             <TabsTrigger value="subsidies" className="flex items-center">
-              <School className="mr-2 h-4 w-4" />
-              Public Subsidies
+              <School className="mr-1 sm:mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Public </span>Subsidies
             </TabsTrigger>
           </TabsList>
 

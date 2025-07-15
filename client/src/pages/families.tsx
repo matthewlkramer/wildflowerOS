@@ -48,10 +48,16 @@ export default function FamiliesPage() {
   const schoolId = currentRole?.schoolId;
 
   // Fetch families data
-  const { data: enrollments = [], isLoading } = useQuery({
+  const { data: enrollments = [], isLoading, error } = useQuery({
     queryKey: ["/api/schools", schoolId, "enrollments"],
     enabled: !!schoolId,
   });
+
+  // Debug logging
+  console.log("Families page - schoolId:", schoolId);
+  console.log("Families page - enrollments:", enrollments);
+  console.log("Families page - isLoading:", isLoading);
+  console.log("Families page - error:", error);
 
   const { data: classrooms = [] } = useQuery({
     queryKey: ["/api/schools", schoolId, "classrooms"],

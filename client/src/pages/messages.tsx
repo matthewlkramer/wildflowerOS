@@ -363,16 +363,10 @@ export default function MessagesPage({}: MessagesPageProps) {
             showChannelList ? 'hidden' : 'flex'
           } lg:flex flex-1 items-center justify-center bg-gray-50 dark:bg-gray-800`}>
             <div className="text-center px-4">
-              <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-              <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
-                No channel selected
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-4">
-                Choose a channel to start messaging
-              </p>
+              <MessageCircle className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600" />
               <Button 
                 onClick={() => setShowChannelList(true)}
-                className="lg:hidden"
+                className="lg:hidden mt-4"
                 variant="outline"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />

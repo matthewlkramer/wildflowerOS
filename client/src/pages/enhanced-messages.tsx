@@ -232,9 +232,7 @@ export default function EnhancedMessagesPage() {
         ) : (
           <div className={`${showChannelList ? 'hidden' : 'flex'} lg:flex flex-1 items-center justify-center`}>
             <div className="text-center text-muted-foreground">
-              <Hash className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
-              <p className="text-xl font-medium mb-2">Select a channel</p>
-              <p>Choose a channel from the sidebar to start messaging</p>
+              <Hash className="h-16 w-16 mx-auto text-muted-foreground/50" />
             </div>
           </div>
         )}

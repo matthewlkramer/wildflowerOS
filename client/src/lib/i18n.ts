@@ -183,9 +183,7 @@ const resources = {
       quick_actions: "Quick Actions",
       my_classrooms: "My Classrooms",
       new_enrollment: "New Enrollment",
-      send_message: "Send Message",
       create_task: "Create Task",
-      view_billing: "View Billing",
       manage_classrooms: "Manage classrooms",
       view_tasks: "View tasks",
       view_all_activity: "View all activity",
@@ -296,8 +294,6 @@ const resources = {
       // Dashboard
       welcome: "Bienvenido",
       overview: "Resumen",
-      recent_activity: "Actividad Reciente",
-      quick_actions: "Acciones Rápidas",
       statistics: "Estadísticas",
       students: "Estudiantes",
       staff: "Personal",

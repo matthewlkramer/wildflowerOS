@@ -11,6 +11,21 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
+- **✅ COMPLETED: Comprehensive child and family tracking system with transportation, communication, and financial verification**
+  - **Transportation profiles** - persistent child-level data for pickup authorization, emergency contacts, and transportation preferences
+  - **Field trip and photo permissions** - evergreen consent tracking that doesn't need annual renewal
+  - **Communication preferences** - detailed parent preferences for billing, child updates, classroom communications, and conference reminders
+  - **Frequency and method preferences** - email, text, or phone options for different communication types (billing, regular updates, significant updates, classroom news)
+  - **Confirmation tracking** - system tracks when communication preferences were last confirmed by parents
+  - **Income verification system** - annual family-level income documentation for sliding scale tuition calculation
+  - **Verification workflow** - pending/approved/denied status tracking with documentation requirements and discount percentage calculation
+  - **Database schema expansion** - added transportation_profiles, communication_preferences, and income_verifications tables
+  - **Child health profiles** - comprehensive medical information including pediatrician, hospital, allergies, medications, insurance details
+  - **Child learning profiles** - IEP/504 plan tracking, learning diagnoses, therapy needs, assessments, and educational accommodations
+  - **Document separation** - enrollment documents (contracts, waivers) vs child documents (medical records, birth certificates)
+  - **Persistent vs annual data** - medical/learning info stays with child, income verification renewed yearly per family
+  - **Required communication validation** - at least one parent must receive billing and classroom communications
+  - **Comprehensive tracking** covers transportation, medical, educational, financial, and communication needs per child/family
 - **✅ RESOLVED: Critical application startup failures**
   - **Fixed database schema mismatch** - added missing columns (birth_date, gender_id, race_ethnicity_ids, etc.) to users table
   - **Fixed JavaScript syntax error** - removed duplicate translation keys in Spanish i18n configuration

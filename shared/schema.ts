@@ -495,6 +495,126 @@ export const enrollmentDocuments = pgTable("enrollment_documents", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Transportation and pickup authorization (persistent child data)
+export const transportationProfiles = pgTable("transportation_profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  childId: uuid("child_id").notNull().references(() => children.id, { onDelete: "cascade" }),
+  
+  // Pickup authorization
+  authorizedPickupPersons: text("authorized_pickup_persons"), // JSON array of authorized people
+  primaryTransportation: varchar("primary_transportation", { 
+    enum: ["parent_pickup", "bus", "walking", "other"]
+  }).notNull().default("parent_pickup"),
+  transportationNotes: text("transportation_notes"),
+  
+  // Emergency authorization
+  emergencyPickupContact1Name: varchar("emergency_pickup_contact_1_name", { length: 255 }),
+  emergencyPickupContact1Phone: varchar("emergency_pickup_contact_1_phone", { length: 20 }),
+  emergencyPickupContact1Relationship: varchar("emergency_pickup_contact_1_relationship", { length: 100 }),
+  emergencyPickupContact2Name: varchar("emergency_pickup_contact_2_name", { length: 255 }),
+  emergencyPickupContact2Phone: varchar("emergency_pickup_contact_2_phone", { length: 20 }),
+  emergencyPickupContact2Relationship: varchar("emergency_pickup_contact_2_relationship", { length: 100 }),
+  
+  // Field trip and photo permissions (evergreen)
+  fieldTripPermission: boolean("field_trip_permission").notNull().default(false),
+  photoMediaConsent: boolean("photo_media_consent").notNull().default(false),
+  photoMediaConsentDetails: text("photo_media_consent_details"), // What types of media use are allowed
+  
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: uuid("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Communication preferences for parents (persistent family data)
+export const communicationPreferences = pgTable("communication_preferences", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  guardianId: uuid("guardian_id").notNull().references(() => guardians.id, { onDelete: "cascade" }),
+  
+  // Billing communications
+  receiveBillingNotifications: boolean("receive_billing_notifications").notNull().default(true),
+  billingPreferredMethod: varchar("billing_preferred_method", { 
+    enum: ["email", "text", "both"]
+  }).notNull().default("email"),
+  
+  receiveInvoices: boolean("receive_invoices").notNull().default(true),
+  invoicePreferredMethod: varchar("invoice_preferred_method", { 
+    enum: ["email", "text", "both"]
+  }).notNull().default("email"),
+  
+  // Regular child updates
+  receiveRegularUpdates: boolean("receive_regular_updates").notNull().default(true),
+  regularUpdatesPreferredMethod: varchar("regular_updates_preferred_method", { 
+    enum: ["email", "text", "both"]
+  }).notNull().default("email"),
+  regularUpdatesFrequency: varchar("regular_updates_frequency", {
+    enum: ["daily", "weekly", "as_needed"]
+  }).notNull().default("weekly"),
+  
+  // Significant child updates (meetings, concerns)
+  receiveSignificantUpdates: boolean("receive_significant_updates").notNull().default(true),
+  significantUpdatesPreferredMethod: varchar("significant_updates_preferred_method", { 
+    enum: ["email", "text", "phone", "all"]
+  }).notNull().default("phone"),
+  
+  // Classroom/school communications
+  receiveClassroomUpdates: boolean("receive_classroom_updates").notNull().default(true),
+  classroomUpdatesPreferredMethod: varchar("classroom_updates_preferred_method", { 
+    enum: ["email", "text", "both"]
+  }).notNull().default("email"),
+  classroomUpdatesFrequency: varchar("classroom_updates_frequency", {
+    enum: ["weekly", "monthly", "quarterly"]
+  }).notNull().default("monthly"),
+  
+  // Conference and meeting scheduling
+  receiveConferenceReminders: boolean("receive_conference_reminders").notNull().default(true),
+  conferenceReminderPreferredMethod: varchar("conference_reminder_preferred_method", { 
+    enum: ["email", "text", "both"]
+  }).notNull().default("email"),
+  
+  // Confirmation tracking
+  lastConfirmedDate: timestamp("last_confirmed_date"),
+  confirmedBy: uuid("confirmed_by").references(() => users.id),
+  needsReconfirmation: boolean("needs_reconfirmation").notNull().default(false),
+  
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: uuid("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Income verification for sliding scale (annual family data)
+export const incomeVerifications = pgTable("income_verifications", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  familyId: uuid("family_id").notNull().references(() => families.id, { onDelete: "cascade" }),
+  schoolYearId: uuid("school_year_id").notNull().references(() => schoolYears.id),
+  
+  // Income information
+  grossAnnualIncome: decimal("gross_annual_income", { precision: 10, scale: 2 }),
+  incomeVerificationMethod: varchar("income_verification_method", {
+    enum: ["tax_return", "pay_stubs", "employer_letter", "bank_statements", "self_employment", "other"]
+  }),
+  
+  // Supporting documentation
+  documentationSubmitted: boolean("documentation_submitted").notNull().default(false),
+  documentationDate: timestamp("documentation_date"),
+  documentationNotes: text("documentation_notes"),
+  
+  // Verification status
+  verificationStatus: varchar("verification_status", {
+    enum: ["pending", "approved", "denied", "needs_more_info"]
+  }).notNull().default("pending"),
+  verifiedBy: uuid("verified_by").references(() => users.id),
+  verificationDate: timestamp("verification_date"),
+  verificationNotes: text("verification_notes"),
+  
+  // Approved sliding scale
+  approvedDiscountPercentage: decimal("approved_discount_percentage", { precision: 5, scale: 2 }),
+  effectiveStartDate: timestamp("effective_start_date"),
+  effectiveEndDate: timestamp("effective_end_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Child documents table for medical and personal documents
 export const childDocuments = pgTable("child_documents", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -1294,6 +1414,7 @@ export const childrenRelations = relations(children, ({ one, many }) => ({
   subsidyAssignments: many(childSubsidyAssignments),
   healthProfile: one(childHealthProfiles),
   learningProfile: one(childLearningProfiles),
+  transportationProfile: one(transportationProfiles),
   documents: many(childDocuments),
 }));
 
@@ -1315,6 +1436,47 @@ export const childLearningProfilesRelations = relations(childLearningProfiles, (
   }),
   updatedByUser: one(users, {
     fields: [childLearningProfiles.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const transportationProfilesRelations = relations(transportationProfiles, ({ one }) => ({
+  child: one(children, {
+    fields: [transportationProfiles.childId],
+    references: [children.id],
+  }),
+  updatedByUser: one(users, {
+    fields: [transportationProfiles.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const communicationPreferencesRelations = relations(communicationPreferences, ({ one }) => ({
+  guardian: one(guardians, {
+    fields: [communicationPreferences.guardianId],
+    references: [guardians.id],
+  }),
+  confirmedByUser: one(users, {
+    fields: [communicationPreferences.confirmedBy],
+    references: [users.id],
+  }),
+  updatedByUser: one(users, {
+    fields: [communicationPreferences.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const incomeVerificationsRelations = relations(incomeVerifications, ({ one }) => ({
+  family: one(families, {
+    fields: [incomeVerifications.familyId],
+    references: [families.id],
+  }),
+  schoolYear: one(schoolYears, {
+    fields: [incomeVerifications.schoolYearId],
+    references: [schoolYears.id],
+  }),
+  verifiedByUser: one(users, {
+    fields: [incomeVerifications.verifiedBy],
     references: [users.id],
   }),
 }));
@@ -1676,6 +1838,12 @@ export type ChildDocument = typeof childDocuments.$inferSelect;
 export type InsertChildDocument = typeof childDocuments.$inferInsert;
 export type ChildLearningProfile = typeof childLearningProfiles.$inferSelect;
 export type InsertChildLearningProfile = typeof childLearningProfiles.$inferInsert;
+export type TransportationProfile = typeof transportationProfiles.$inferSelect;
+export type InsertTransportationProfile = typeof transportationProfiles.$inferInsert;
+export type CommunicationPreference = typeof communicationPreferences.$inferSelect;
+export type InsertCommunicationPreference = typeof communicationPreferences.$inferInsert;
+export type IncomeVerification = typeof incomeVerifications.$inferSelect;
+export type InsertIncomeVerification = typeof incomeVerifications.$inferInsert;
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = typeof tasks.$inferInsert;
 export type Message = typeof messages.$inferSelect;

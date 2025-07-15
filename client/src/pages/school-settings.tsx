@@ -455,8 +455,9 @@ function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
                         <div className="flex items-center space-x-4 mt-1">
                           <span className="text-xs text-gray-600">
                             {(() => {
-                              const startDate = new Date(holiday.startDate + 'T00:00:00');
-                              const endDate = new Date(holiday.endDate + 'T00:00:00');
+                              // Parse ISO date strings properly
+                              const startDate = new Date(holiday.startDate);
+                              const endDate = new Date(holiday.endDate);
                               const startStr = startDate.toLocaleDateString();
                               const endStr = endDate.toLocaleDateString();
                               return holiday.duration === 1 ? startStr : `${startStr} - ${endStr}`;

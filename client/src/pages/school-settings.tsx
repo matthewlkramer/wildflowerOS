@@ -1689,6 +1689,19 @@ export default function SchoolSettingsPage() {
   // School year import mutations
   const importWithSystemHolidaysMutation = useMutation({
     mutationFn: async (networkYearId: string) => {
+      // Validate dates before sending request
+      if (!schoolStartDate || !schoolEndDate) {
+        throw new Error("School start date and end date are required");
+      }
+      
+      // Validate date format
+      const startDate = new Date(schoolStartDate);
+      const endDate = new Date(schoolEndDate);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error("Invalid date format provided");
+      }
+      
       return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
         networkYearId,
         importType: 'system_holidays',
@@ -1718,6 +1731,19 @@ export default function SchoolSettingsPage() {
 
   const importWithCurrentYearHolidaysMutation = useMutation({
     mutationFn: async (networkYearId: string) => {
+      // Validate dates before sending request
+      if (!schoolStartDate || !schoolEndDate) {
+        throw new Error("School start date and end date are required");
+      }
+      
+      // Validate date format
+      const startDate = new Date(schoolStartDate);
+      const endDate = new Date(schoolEndDate);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error("Invalid date format provided");
+      }
+      
       return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
         networkYearId,
         importType: 'current_year_holidays',
@@ -1747,6 +1773,19 @@ export default function SchoolSettingsPage() {
 
   const importWithNoHolidaysMutation = useMutation({
     mutationFn: async (networkYearId: string) => {
+      // Validate dates before sending request
+      if (!schoolStartDate || !schoolEndDate) {
+        throw new Error("School start date and end date are required");
+      }
+      
+      // Validate date format
+      const startDate = new Date(schoolStartDate);
+      const endDate = new Date(schoolEndDate);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        throw new Error("Invalid date format provided");
+      }
+      
       return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
         networkYearId,
         importType: 'no_holidays',

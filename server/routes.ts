@@ -773,18 +773,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { schoolId } = req.params;
       const { networkYearId, importType, schoolStartDate, schoolEndDate } = req.body;
       
+      // Validate date inputs
+      if (!schoolStartDate || !schoolEndDate) {
+        return res.status(400).json({ message: "School start date and end date are required" });
+      }
+      
       // Get the network school year
       const networkYear = await storage.getSchoolYearById(networkYearId);
       if (!networkYear) {
         return res.status(404).json({ message: "Network school year not found" });
       }
       
+      // Safely convert dates with validation
+      const startDate = new Date(schoolStartDate);
+      const endDate = new Date(schoolEndDate);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        return res.status(400).json({ message: "Invalid date format provided" });
+      }
+      
       // Create the school-specific year with custom dates
       const schoolYear = await storage.createSchoolYear({
         schoolId,
         name: networkYear.name,
-        startDate: new Date(schoolStartDate),
-        endDate: new Date(schoolEndDate),
+        startDate,
+        endDate,
         isActive: false,
         networkDefault: false
       });

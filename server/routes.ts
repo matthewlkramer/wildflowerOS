@@ -1583,6 +1583,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/children/:childId", isAuthenticated, async (req, res) => {
+    try {
+      const child = await storage.getChildById(req.params.childId);
+      if (!child) {
+        return res.status(404).json({ message: "Child not found" });
+      }
+      res.json(child);
+    } catch (error) {
+      console.error("Error fetching child:", error);
+      res.status(500).json({ message: "Failed to fetch child" });
+    }
+  });
+
   app.patch("/api/children/:childId", isAuthenticated, async (req, res) => {
     try {
       const child = await storage.updateChild(req.params.childId, req.body);

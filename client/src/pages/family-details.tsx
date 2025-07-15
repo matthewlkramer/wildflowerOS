@@ -748,6 +748,11 @@ export default function FamilyDetailsPage() {
                               )}
                             </div>
                             <div className="flex space-x-2">
+                              <Link href={`/children/${child.id}`}>
+                                <Button variant="outline" size="sm">
+                                  <GraduationCap className="h-4 w-4" />
+                                </Button>
+                              </Link>
                               <Button variant="outline" size="sm" onClick={() => handleEditChild(child)}>
                                 <Edit className="h-4 w-4" />
                               </Button>

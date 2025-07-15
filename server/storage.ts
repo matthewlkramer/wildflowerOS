@@ -231,6 +231,7 @@ export interface IStorage {
   
   // Children
   getChildrenByFamily(familyId: string): Promise<Child[]>;
+  getChildById(id: string): Promise<Child | undefined>;
   createChild(child: any): Promise<Child>;
   updateChild(id: string, child: any): Promise<Child>;
   
@@ -1164,6 +1165,11 @@ export class DatabaseStorage implements IStorage {
   // Children
   async getChildrenByFamily(familyId: string): Promise<Child[]> {
     return await db.select().from(children).where(eq(children.familyId, familyId));
+  }
+
+  async getChildById(id: string): Promise<Child | undefined> {
+    const [child] = await db.select().from(children).where(eq(children.id, id));
+    return child;
   }
 
   async createChild(childData: any): Promise<Child> {

@@ -12,6 +12,7 @@ import NotFound from "@/pages/not-found";
 import FamiliesPage from "@/pages/families";
 import FamilyDetailsPage from "@/pages/family-details";
 import FamilyBillingPage from "@/pages/family-billing";
+import ChildDetailsPage from "@/pages/child-details";
 import SchoolSettingsPage from "@/pages/school-settings";
 import MessagesPage from "@/pages/messages";
 import TasksPage from "@/pages/tasks";
@@ -31,6 +32,7 @@ function Router() {
           <Route path="/families" component={FamiliesPage} />
           <Route path="/families/:familyId" component={FamilyDetailsPage} />
           <Route path="/families/:familyId/billing" component={FamilyBillingPage} />
+          <Route path="/children/:childId" component={ChildDetailsPage} />
           <Route path="/messages" component={MessagesPage} />
           <Route path="/enhanced-messages" component={EnhancedMessagesPage} />
           <Route path="/channel-test" component={ChannelTestPage} />

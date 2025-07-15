@@ -2353,7 +2353,6 @@ export default function SchoolSettingsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
-      
       <div className="flex-1 flex">
         <Sidebar currentRole={currentRole} />
         
@@ -2406,7 +2405,7 @@ export default function SchoolSettingsPage() {
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (
               // System Administrator View
-              <div className="space-y-6">
+              (<div className="space-y-6">
                 {/* System Admin Header */}
                 <div className="border-b border-gray-200 pb-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">System Administration</h3>
@@ -2414,7 +2413,6 @@ export default function SchoolSettingsPage() {
                     Manage network-wide settings, user accounts, and school configurations.
                   </p>
                 </div>
-
                 {/* System Admin Top Level Tabs */}
                 <Tabs value={systemAdminTab} onValueChange={setSystemAdminTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
@@ -2644,7 +2642,6 @@ export default function SchoolSettingsPage() {
                     </Tabs>
                   </TabsContent>
                 </Tabs>
-
                 {/* Add Network School Year Dialog */}
                 <Dialog open={addingSchoolYear} onOpenChange={setAddingSchoolYear}>
                   <DialogContent>
@@ -2718,7 +2715,6 @@ export default function SchoolSettingsPage() {
                     </div>
                   </DialogContent>
                 </Dialog>
-
                 {/* Edit Network School Year Dialog */}
                 <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
                   <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -2777,7 +2773,6 @@ export default function SchoolSettingsPage() {
                     </div>
                   </DialogContent>
                 </Dialog>
-
                 {/* Delete Network School Year Confirmation Dialog */}
                 <AlertDialog open={deletingSchoolYear !== null} onOpenChange={(open) => !open && setDeletingSchoolYear(null)}>
                   <AlertDialogContent>
@@ -2800,10 +2795,10 @@ export default function SchoolSettingsPage() {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-              </div>
+              </div>)
             ) : currentRole?.roleName?.startsWith('parent') ? (
               // Parent View
-              <div className="space-y-6">
+              (<div className="space-y-6">
                 {/* Parent Header */}
                 <div className="border-b border-gray-200 pb-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Family Settings</h3>
@@ -2811,7 +2806,6 @@ export default function SchoolSettingsPage() {
                     Manage your family's enrollment, billing, and communication preferences.
                   </p>
                 </div>
-
                 {/* Parent-specific content */}
                 <Tabs defaultValue="family-info" className="w-full">
                   <TabsList className="grid w-full grid-cols-4">
@@ -2889,10 +2883,10 @@ export default function SchoolSettingsPage() {
                     </Card>
                   </TabsContent>
                 </Tabs>
-              </div>
+              </div>)
             ) : currentRole?.roleName?.startsWith('board') ? (
               // Board Member View
-              <div className="space-y-6">
+              (<div className="space-y-6">
                 {/* Board Header */}
                 <div className="border-b border-gray-200 pb-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Board Governance</h3>
@@ -2900,7 +2894,6 @@ export default function SchoolSettingsPage() {
                     Access board documents, meeting materials, and governance tools.
                   </p>
                 </div>
-
                 {/* Board-specific content */}
                 <Tabs defaultValue="meetings" className="w-full">
                   <TabsList className="grid w-full grid-cols-4">
@@ -2978,1612 +2971,1610 @@ export default function SchoolSettingsPage() {
                     </Card>
                   </TabsContent>
                 </Tabs>
-              </div>
+              </div>)
             ) : (
               // Educator/Default School-Level Settings View (existing functionality)
-              <div className="space-y-6">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Settings className="mr-3 h-8 w-8 text-primary" />
-            School Settings
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Manage administrative roles, classrooms, schedules, and tuition plans for {school?.name || "your school"}
-          </p>
-        </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="roles" className="flex items-center px-1 sm:px-3">
-              <Settings className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Admin Roles</span>
-            </TabsTrigger>
-            <TabsTrigger value="classrooms" className="flex items-center px-1 sm:px-3">
-              <Home className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Rooms</span>
-            </TabsTrigger>
-            <TabsTrigger value="school-years" className="flex items-center px-1 sm:px-3">
-              <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Years</span>
-            </TabsTrigger>
-            <TabsTrigger value="schedules" className="flex items-center px-1 sm:px-3">
-              <Clock className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Schedule</span>
-            </TabsTrigger>
-            <TabsTrigger value="tuition" className="flex items-center px-1 sm:px-3">
-              <DollarSign className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Tuition</span>
-            </TabsTrigger>
-            <TabsTrigger value="subsidies" className="flex items-center px-1 sm:px-3">
-              <School className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Subsidy</span>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Admin Roles Tab */}
-          <TabsContent value="roles" className="space-y-6">
-            {/* School Roles Management */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>School Admin Roles</CardTitle>
-                    <p className="text-sm text-gray-600">
-                      Manage and customize administrative roles available at this school. These roles form the foundation for staff assignments.
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">Show SSJ</span>
-                      <Button
-                        variant={showSSJ ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setShowSSJ(!showSSJ)}
-                        className="h-8"
-                      >
-                        {showSSJ ? "ON" : "OFF"}
-                      </Button>
-                    </div>
-                    <Button>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add Custom Role
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Role Categories */}
-                  <RoleTree showSSJ={showSSJ} />
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Role Assignments Tab */}
-
-          {/* Classrooms Tab */}
-          <TabsContent value="classrooms" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Classrooms</CardTitle>
-                  <Dialog open={addingClassroom} onOpenChange={setAddingClassroom}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Classroom
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New Classroom</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Classroom Name</Label>
-                          <Input
-                            value={classroomForm.name}
-                            onChange={(e) => setClassroomForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Maple Room, Oak Room"
-                          />
-                        </div>
-                        <div>
-                          <Label>Level</Label>
-                          <Select onValueChange={handleLevelChange}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="infant">Infant (0-18 months)</SelectItem>
-                              <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
-                              <SelectItem value="primary">Primary (3-6 years)</SelectItem>
-                              <SelectItem value="lower_elem">Lower Elementary (6-9 years)</SelectItem>
-                              <SelectItem value="upper_elem">Upper Elementary (9-12 years)</SelectItem>
-                              <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
-                              <SelectItem value="high_school">High School (15-18 years)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Capacity</Label>
-                            <Input
-                              type="number"
-                              value={classroomForm.capacity}
-                              onChange={(e) => setClassroomForm(prev => ({ ...prev, capacity: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>Age Range</Label>
-                            <Input
-                              value={classroomForm.ageRange}
-                              onChange={(e) => setClassroomForm(prev => ({ ...prev, ageRange: e.target.value }))}
-                              placeholder="e.g., 3-6 years"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={classroomForm.description}
-                            onChange={(e) => setClassroomForm(prev => ({ ...prev, description: e.target.value }))}
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setAddingClassroom(false)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleAddClassroom}
-                            disabled={!classroomForm.name || !classroomForm.level}
-                          >
-                            Add Classroom
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Edit Classroom Dialog */}
-                  <Dialog open={editingClassroom !== null} onOpenChange={(open) => !open && setEditingClassroom(null)}>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Classroom</DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Classroom Name</Label>
-                          <Input
-                            value={classroomForm.name}
-                            onChange={(e) => setClassroomForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Maple Room, Oak Room"
-                          />
-                        </div>
-                        <div>
-                          <Label>Level</Label>
-                          <Select value={classroomForm.level} onValueChange={handleLevelChange}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select level" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="infant">Infant (0-18 months)</SelectItem>
-                              <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
-                              <SelectItem value="primary">Primary (3-6 years)</SelectItem>
-                              <SelectItem value="lower_elem">Lower Elementary (6-9 years)</SelectItem>
-                              <SelectItem value="upper_elem">Upper Elementary (9-12 years)</SelectItem>
-                              <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
-                              <SelectItem value="high_school">High School (15-18 years)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Capacity</Label>
-                            <Input
-                              type="number"
-                              value={classroomForm.capacity}
-                              onChange={(e) => setClassroomForm(prev => ({ ...prev, capacity: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>Age Range</Label>
-                            <Input
-                              value={classroomForm.ageRange}
-                              onChange={(e) => setClassroomForm(prev => ({ ...prev, ageRange: e.target.value }))}
-                              placeholder="e.g., 3-6 years"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={classroomForm.description}
-                            onChange={(e) => setClassroomForm(prev => ({ ...prev, description: e.target.value }))}
-                          />
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setEditingClassroom(null)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleUpdateClassroom}
-                            disabled={!classroomForm.name || !classroomForm.level || updateClassroomMutation.isPending}
-                          >
-                            {updateClassroomMutation.isPending ? "Updating..." : "Update Classroom"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Delete Classroom Confirmation Dialog */}
-                  <AlertDialog open={deletingClassroom !== null} onOpenChange={(open) => !open && setDeletingClassroom(null)}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Classroom</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{deletingClassroom?.name}"? This action cannot be undone and will remove all associated data.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setDeletingClassroom(null)}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={confirmDeleteClassroom}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Delete Classroom
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {classrooms.map((classroom: any) => (
-                    <div key={classroom.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">{classroom.name}</h4>
-                        <Badge className={getLevelColor(classroom.level)}>
-                          {formatLevel(classroom.level)}
-                        </Badge>
-                      </div>
-                      <div className="space-y-2 text-sm text-gray-600">
-                        {classroom.capacity && (
-                          <div className="flex items-center">
-                            <Users className="mr-2 h-4 w-4" />
-                            Capacity: {classroom.capacity}
-                          </div>
-                        )}
-                        {classroom.ageRange && (
-                          <div className="flex items-center">
-                            <Calendar className="mr-2 h-4 w-4" />
-                            Age: {classroom.ageRange}
-                          </div>
-                        )}
-                        {classroom.description && (
-                          <p className="text-xs mt-2">{classroom.description}</p>
-                        )}
-                      </div>
-                      <div className="flex justify-end space-x-2 mt-4">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleEditClassroom(classroom)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleDeleteClassroom(classroom)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-
-                  {classrooms.length === 0 && (
-                    <div className="col-span-full text-center py-8">
-                      <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600">No classrooms configured yet</p>
-                      <Button className="mt-2" onClick={() => setAddingClassroom(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add First Classroom
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* School Years Tab */}
-          <TabsContent value="school-years" className="space-y-6">
-            
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>School Years</CardTitle>
-                  <Dialog open={addingSchoolYear} onOpenChange={setAddingSchoolYear}>
-                    <DialogTrigger asChild>
-                      <Button onClick={() => {
-                        if (currentRole?.roleName?.startsWith('sysadmin')) {
-                          setAddingSchoolYear(true);
-                        } else {
-                          setShowImportDialog(true);
-                        }
-                      }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add School Year
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add New School Year</DialogTitle>
-                        <DialogDescription>
-                          {currentRole?.roleName?.startsWith('sysadmin') 
-                            ? "Create a new school year with dates for outer boundaries."
-                            : "Create a new school year with start and end dates for your school."
-                          }
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Year Name</Label>
-                          <Input
-                            value={schoolYearForm.name}
-                            onChange={(e) => handleSchoolYearNameChange(e.target.value)}
-                            placeholder="e.g., 2024-2025"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Date</Label>
-                            <Input
-                              type="date"
-                              value={schoolYearForm.startDate}
-                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>End Date</Label>
-                            <Input
-                              type="date"
-                              value={schoolYearForm.endDate}
-                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-between">
-                          <div className="space-x-2">
-                            {!currentRole?.roleName?.startsWith('sysadmin') && systemHolidays.length > 0 && (
-                              <Button 
-                                variant="outline"
-                                onClick={handleImportSystemHolidays}
-                                disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate || importSystemHolidaysMutation.isPending}
-                              >
-                                {importSystemHolidaysMutation.isPending ? "Importing..." : "Import & Customize System Defaults"}
-                              </Button>
-                            )}
-                          </div>
-                          <div className="space-x-2">
-                            <Button variant="outline" onClick={() => setAddingSchoolYear(false)}>
-                              Cancel
-                            </Button>
-                            <Button 
-                              onClick={handleAddSchoolYear}
-                              disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
-                            >
-                              Add School Year
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Edit School Year Dialog */}
-                  <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit School Year</DialogTitle>
-                        <DialogDescription>
-                          Update the school year information and dates.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Year Name</Label>
-                          <Input
-                            value={schoolYearForm.name}
-                            onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., 2024-2025"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Date</Label>
-                            <Input
-                              type="date"
-                              value={schoolYearForm.startDate}
-                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>End Date</Label>
-                            <Input
-                              type="date"
-                              value={schoolYearForm.endDate}
-                              onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setEditingSchoolYear(null)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleUpdateSchoolYear}
-                            disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
-                          >
-                            Update School Year
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Delete School Year Confirmation Dialog */}
-                  <AlertDialog open={deletingSchoolYear !== null} onOpenChange={(open) => !open && setDeletingSchoolYear(null)}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete School Year</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{deletingSchoolYear?.name}"? This action cannot be undone and will remove all associated academic calendar data.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setDeletingSchoolYear(null)}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={confirmDeleteSchoolYear}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Delete School Year
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-
-
-
-                  {/* Import School Year Dialog */}
-                  <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle className="flex items-center">
-                          <Download className="mr-2 h-5 w-5" />
-                          Add New School Year
-                        </DialogTitle>
-                        <DialogDescription>
-                          Select a network default school year to import and choose how to handle holidays.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-6">
-                        {/* Network Year Selection */}
-                        <div className="space-y-4">
-                          <Label>Select Network School Year to Import</Label>
-                          {(() => {
-                            const availableYears = networkSchoolYears.filter(networkYear => 
-                              !schoolYears.some(schoolYear => schoolYear.name === networkYear.name)
-                            );
-                            
-                            if (availableYears.length === 0) {
-                              return (
-                                <div className="text-center py-8 text-gray-500">
-                                  <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-                                  <p>All network default school years have been imported.</p>
-                                </div>
-                              );
-                            }
-                            
-                            return (
-                              <RadioGroup value={selectedNetworkYear} onValueChange={setSelectedNetworkYear}>
-                                <div className="space-y-3">
-                                  {availableYears.map((year) => (
-                                    <div key={year.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                                      <RadioGroupItem value={year.id} id={year.id} />
-                                      <Label htmlFor={year.id} className="flex-1 cursor-pointer">
-                                        <div className="flex items-center justify-between">
-                                          <div>
-                                            <p className="font-medium">{year.name}</p>
-                                          </div>
-                                          <Badge variant="outline">Network Default</Badge>
-                                        </div>
-                                      </Label>
-                                    </div>
-                                  ))}
-                                </div>
-                              </RadioGroup>
-                            );
-                          })()}
-                        </div>
-
-                        {/* School Date Selection */}
-                        {selectedNetworkYear && (
-                          <div className="space-y-4">
-                            <div className="border-t pt-4">
-                              <Label>Set Your School's Actual Dates</Label>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="schoolStartDate">
-                                  School Start Date
-                                </Label>
-                                <Input
-                                  id="schoolStartDate"
-                                  type="date"
-                                  value={schoolStartDate}
-                                  onChange={(e) => setSchoolStartDate(e.target.value)}
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div>
-                                <Label htmlFor="schoolEndDate">
-                                  School End Date
-                                </Label>
-                                <Input
-                                  id="schoolEndDate"
-                                  type="date"
-                                  value={schoolEndDate}
-                                  onChange={(e) => setSchoolEndDate(e.target.value)}
-                                  className="mt-1"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Action Buttons */}
-                        {selectedNetworkYear && schoolStartDate && schoolEndDate && (
-                          <div className="space-y-4">
-                            <div className="border-t pt-4">
-                              <Label>Choose how to handle holidays:</Label>
-                            </div>
-                            <div className="grid grid-cols-1 gap-3">
-                              <Button 
-                                variant="outline"
-                                onClick={() => importWithSystemHolidaysMutation.mutate(selectedNetworkYear)}
-                                disabled={importWithSystemHolidaysMutation.isPending}
-                                className="justify-start h-auto p-4"
-                              >
-                                <div className="text-left">
-                                  <div className="font-medium">Add with system default holidays</div>
-                                  <div className="text-sm text-gray-500">Import with standard network holidays</div>
-                                </div>
-                              </Button>
-                              <Button 
-                                variant="outline"
-                                onClick={() => importWithCurrentYearHolidaysMutation.mutate(selectedNetworkYear)}
-                                disabled={importWithCurrentYearHolidaysMutation.isPending}
-                                className="justify-start h-auto p-4"
-                              >
-                                <div className="text-left">
-                                  <div className="font-medium">Add with the same holidays we used this year</div>
-                                  <div className="text-sm text-gray-500">Copy holidays from your current active year</div>
-                                </div>
-                              </Button>
-                              <Button 
-                                variant="outline"
-                                onClick={() => importWithNoHolidaysMutation.mutate(selectedNetworkYear)}
-                                disabled={importWithNoHolidaysMutation.isPending}
-                                className="justify-start h-auto p-4"
-                              >
-                                <div className="text-left">
-                                  <div className="font-medium">Add with no holidays (I'll enter them later)</div>
-                                  <div className="text-sm text-gray-500">Import without any holidays</div>
-                                </div>
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Cancel Button */}
-                        <div className="flex justify-end border-t pt-4">
-                          <Button 
-                            variant="outline" 
-                            onClick={() => {
-                              setShowImportDialog(false);
-                              setSelectedNetworkYear("");
-                              setSchoolStartDate("");
-                              setSchoolEndDate("");
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {schoolYears.map((year: any) => (
-                    <div key={year.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium flex items-center">
-                            {year.name}
-                            {year.isActive && (
-                              <Badge className="ml-2 bg-green-100 text-green-800">
-                                Current
-                              </Badge>
-                            )}
-                            {year.networkDefault && (
-                              <Badge className="ml-2 bg-blue-100 text-blue-800">
-                                Network Default
-                              </Badge>
-                            )}
-                          </h4>
-                          <div className="text-sm text-gray-600 mt-1">
-                            {year.startDate && year.endDate && (
-                              <div className="flex items-center">
-                                <Calendar className="mr-2 h-4 w-4" />
-                                {new Date(year.startDate).toLocaleDateString()} - {new Date(year.endDate).toLocaleDateString()}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditSchoolYear(year)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          {!year.isActive && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleDeleteSchoolYear(year)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {!year.isActive && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleSetActiveSchoolYear(year.id)}
-                            >
-                              Set Active
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {schoolYears.length === 0 && (
-                    <div className="text-center py-8">
-                      <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600 mb-2">No school years configured yet</p>
-                      <p className="text-sm text-gray-500 mb-4">
-                        Create your first school year to start managing academic calendars, enrollment periods, and schedules.
-                      </p>
-                      <Button onClick={() => {
-                        if (currentRole?.roleName?.startsWith('sysadmin')) {
-                          setAddingSchoolYear(true);
-                        } else {
-                          setShowImportDialog(true);
-                        }
-                      }}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create First School Year
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Note: Academic Calendar functionality has been simplified */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Academic Calendar</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-600">
-                  Academic calendar management has been simplified. Holiday management is now handled through the school year editing interface.
-                </p>
-              </CardContent>
-            </Card>
-
-          </TabsContent>
-
-          {/* Schedules Tab */}
-          <TabsContent value="schedules" className="space-y-6">
-            {/* Schedule Management */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Classroom Schedules</CardTitle>
-                    <p className="text-sm text-gray-600">
-                      Manage operating schedules for your classrooms and programs
-                    </p>
-                  </div>
-                  <Dialog open={addingSchedule} onOpenChange={setAddingSchedule}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create Schedule
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Create New Schedule</DialogTitle>
-                        <DialogDescription>
-                          Create a schedule template with operating hours and days
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Schedule Name</Label>
-                          <Input
-                            value={scheduleForm.name}
-                            onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Primary Full Day, Elementary Extended"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Time</Label>
-                            <Input
-                              type="time"
-                              value={scheduleForm.startTime}
-                              onChange={(e) => setScheduleForm(prev => ({ ...prev, startTime: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>End Time</Label>
-                            <Input
-                              type="time"
-                              value={scheduleForm.endTime}
-                              onChange={(e) => setScheduleForm(prev => ({ ...prev, endTime: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Operating Days</Label>
-                          <div className="grid grid-cols-7 gap-2 mt-2">
-                            {[
-                              { key: 'mondayOpen', label: 'Mon' },
-                              { key: 'tuesdayOpen', label: 'Tue' },
-                              { key: 'wednesdayOpen', label: 'Wed' },
-                              { key: 'thursdayOpen', label: 'Thu' },
-                              { key: 'fridayOpen', label: 'Fri' },
-                              { key: 'saturdayOpen', label: 'Sat' },
-                              { key: 'sundayOpen', label: 'Sun' }
-                            ].map(day => (
-                              <div key={day.key} className="flex flex-col items-center">
-                                <label className="text-xs font-medium mb-1">{day.label}</label>
-                                <input
-                                  type="checkbox"
-                                  checked={scheduleForm[day.key as keyof typeof scheduleForm] as boolean}
-                                  onChange={(e) => setScheduleForm(prev => ({ 
-                                    ...prev, 
-                                    [day.key]: e.target.checked 
-                                  }))}
-                                  className="h-4 w-4 text-primary rounded border-gray-300"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setAddingSchedule(false)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleAddSchedule}
-                            disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime}
-                          >
-                            Create Schedule
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Edit Schedule Dialog */}
-                  <Dialog open={editingSchedule !== null} onOpenChange={(open) => !open && setEditingSchedule(null)}>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Edit Schedule</DialogTitle>
-                        <DialogDescription>
-                          Update the schedule template with new operating hours and days
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4">
-                        <div>
-                          <Label>Schedule Name</Label>
-                          <Input
-                            value={scheduleForm.name}
-                            onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="e.g., Primary Full Day, Elementary Extended"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Time</Label>
-                            <Input
-                              type="time"
-                              value={scheduleForm.startTime}
-                              onChange={(e) => setScheduleForm(prev => ({ ...prev, startTime: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>End Time</Label>
-                            <Input
-                              type="time"
-                              value={scheduleForm.endTime}
-                              onChange={(e) => setScheduleForm(prev => ({ ...prev, endTime: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label>Operating Days</Label>
-                          <div className="grid grid-cols-7 gap-2 mt-2">
-                            {[
-                              { key: 'mondayOpen', label: 'Mon' },
-                              { key: 'tuesdayOpen', label: 'Tue' },
-                              { key: 'wednesdayOpen', label: 'Wed' },
-                              { key: 'thursdayOpen', label: 'Thu' },
-                              { key: 'fridayOpen', label: 'Fri' },
-                              { key: 'saturdayOpen', label: 'Sat' },
-                              { key: 'sundayOpen', label: 'Sun' }
-                            ].map(day => (
-                              <div key={day.key} className="flex flex-col items-center">
-                                <label className="text-xs font-medium mb-1">{day.label}</label>
-                                <input
-                                  type="checkbox"
-                                  checked={scheduleForm[day.key as keyof typeof scheduleForm] as boolean}
-                                  onChange={(e) => setScheduleForm(prev => ({ 
-                                    ...prev, 
-                                    [day.key]: e.target.checked 
-                                  }))}
-                                  className="h-4 w-4 text-primary rounded border-gray-300"
-                                />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="flex justify-end space-x-2">
-                          <Button variant="outline" onClick={() => setEditingSchedule(null)}>
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleUpdateSchedule}
-                            disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime || updateScheduleMutation.isPending}
-                          >
-                            {updateScheduleMutation.isPending ? "Updating..." : "Update Schedule"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-
-                  {/* Delete Schedule Confirmation Dialog */}
-                  <AlertDialog open={deletingSchedule !== null} onOpenChange={(open) => !open && setDeletingSchedule(null)}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Schedule</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to delete "{deletingSchedule?.name}"? This action cannot be undone and will affect any classrooms using this schedule.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setDeletingSchedule(null)}>
-                          Cancel
-                        </AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={confirmDeleteSchedule}
-                          className="bg-red-600 hover:bg-red-700"
-                        >
-                          Delete Schedule
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {classroomSchedules.map((schedule: any) => (
-                    <div key={schedule.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="font-medium">{schedule.name}</h4>
-                        <div className="flex space-x-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleEditSchedule(schedule)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteSchedule(schedule)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Operating Hours:</span>
-                          <Badge variant="outline">
-                            {schedule.startTime} - {schedule.endTime}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-gray-600">
-                          <div className="flex items-center justify-between">
-                            <span>Days:</span>
-                            <div className="flex space-x-1">
-                              {schedule.mondayOpen && <Badge variant="secondary" className="text-xs">M</Badge>}
-                              {schedule.tuesdayOpen && <Badge variant="secondary" className="text-xs">T</Badge>}
-                              {schedule.wednesdayOpen && <Badge variant="secondary" className="text-xs">W</Badge>}
-                              {schedule.thursdayOpen && <Badge variant="secondary" className="text-xs">T</Badge>}
-                              {schedule.fridayOpen && <Badge variant="secondary" className="text-xs">F</Badge>}
-                              {schedule.saturdayOpen && <Badge variant="secondary" className="text-xs">S</Badge>}
-                              {schedule.sundayOpen && <Badge variant="secondary" className="text-xs">S</Badge>}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-xs text-gray-500 mt-2">
-                          Created: {new Date(schedule.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  {classroomSchedules.length === 0 && (
-                    <div className="col-span-full text-center py-8">
-                      <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600">No schedules configured yet</p>
-                      <p className="text-sm text-gray-500 mb-4">
-                        Create schedule templates to define operating hours and days for your classrooms
-                      </p>
-                      <Button onClick={() => setAddingSchedule(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Create First Schedule
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Tuition Plans Tab */}
-          <TabsContent value="tuition" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Side: Classrooms and Schedules */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Classrooms & Schedules</CardTitle>
-                  <p className="text-sm text-gray-600">
-                    Select a classroom schedule to set pricing
+              (<div className="space-y-6">
+                {/* Page Header */}
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                    <Settings className="mr-3 h-8 w-8 text-primary" />
+                    School Settings
+                  </h1>
+                  <p className="mt-2 text-gray-600">
+                    Manage administrative roles, classrooms, schedules, and tuition plans for {school?.name || "your school"}
                   </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {classroomsWithSchedules.map((classroom: any) => (
-                    <div key={classroom.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h4 className="font-medium">{classroom.name}</h4>
-                          <p className="text-sm text-gray-500 capitalize">
-                            {classroom.level.replace('_', ' ')} • {classroom.capacity} students
-                          </p>
+                </div>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-6">
+                    <TabsTrigger value="roles" className="flex items-center px-1 sm:px-3">
+                      <Settings className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Admin Roles</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="classrooms" className="flex items-center px-1 sm:px-3">
+                      <Home className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Rooms</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="school-years" className="flex items-center px-1 sm:px-3">
+                      <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Years</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="schedules" className="flex items-center px-1 sm:px-3">
+                      <Clock className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Schedule</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="tuition" className="flex items-center px-1 sm:px-3">
+                      <DollarSign className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Tuition</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="subsidies" className="flex items-center px-1 sm:px-3">
+                      <School className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Subsidy</span>
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Admin Roles Tab */}
+                  <TabsContent value="roles" className="space-y-6">
+                    {/* School Roles Management */}
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>School Admin Roles</CardTitle>
+                            <p className="text-sm text-gray-600">
+                              Manage and customize administrative roles available at this school. These roles form the foundation for staff assignments.
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm text-gray-600">Show SSJ</span>
+                              <Button
+                                variant={showSSJ ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => setShowSSJ(!showSSJ)}
+                                className="h-8"
+                              >
+                                {showSSJ ? "ON" : "OFF"}
+                              </Button>
+                            </div>
+                            <Button>
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Custom Role
+                            </Button>
+                          </div>
                         </div>
-                        <Badge variant="outline">
-                          {classroom.programType === 'continuous' ? 'Year-round' : 'School Year'}
-                        </Badge>
-                      </div>
-                      
-                      {classroom.schedules.length > 0 ? (
-                        <div className="space-y-2">
-                          {classroom.schedules.map((schedule: any) => (
-                            <div 
-                              key={schedule.id} 
-                              className="p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors"
-                              onClick={() => setSelectedSchedule({ classroom, schedule })}
-                            >
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Role Categories */}
+                          <RoleTree showSSJ={showSSJ} />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Role Assignments Tab */}
+
+                  {/* Classrooms Tab */}
+                  <TabsContent value="classrooms" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>Classrooms</CardTitle>
+                          <Dialog open={addingClassroom} onOpenChange={setAddingClassroom}>
+                            <DialogTrigger asChild>
+                              <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Classroom
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add New Classroom</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Classroom Name</Label>
+                                  <Input
+                                    value={classroomForm.name}
+                                    onChange={(e) => setClassroomForm(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="e.g., Maple Room, Oak Room"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Level</Label>
+                                  <Select onValueChange={handleLevelChange}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select level" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="infant">Infant (0-18 months)</SelectItem>
+                                      <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
+                                      <SelectItem value="primary">Primary (3-6 years)</SelectItem>
+                                      <SelectItem value="lower_elem">Lower Elementary (6-9 years)</SelectItem>
+                                      <SelectItem value="upper_elem">Upper Elementary (9-12 years)</SelectItem>
+                                      <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
+                                      <SelectItem value="high_school">High School (15-18 years)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Capacity</Label>
+                                    <Input
+                                      type="number"
+                                      value={classroomForm.capacity}
+                                      onChange={(e) => setClassroomForm(prev => ({ ...prev, capacity: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Age Range</Label>
+                                    <Input
+                                      value={classroomForm.ageRange}
+                                      onChange={(e) => setClassroomForm(prev => ({ ...prev, ageRange: e.target.value }))}
+                                      placeholder="e.g., 3-6 years"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label>Description</Label>
+                                  <Textarea
+                                    value={classroomForm.description}
+                                    onChange={(e) => setClassroomForm(prev => ({ ...prev, description: e.target.value }))}
+                                  />
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="outline" onClick={() => setAddingClassroom(false)}>
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={handleAddClassroom}
+                                    disabled={!classroomForm.name || !classroomForm.level}
+                                  >
+                                    Add Classroom
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Edit Classroom Dialog */}
+                          <Dialog open={editingClassroom !== null} onOpenChange={(open) => !open && setEditingClassroom(null)}>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Classroom</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Classroom Name</Label>
+                                  <Input
+                                    value={classroomForm.name}
+                                    onChange={(e) => setClassroomForm(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="e.g., Maple Room, Oak Room"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Level</Label>
+                                  <Select value={classroomForm.level} onValueChange={handleLevelChange}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select level" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="infant">Infant (0-18 months)</SelectItem>
+                                      <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
+                                      <SelectItem value="primary">Primary (3-6 years)</SelectItem>
+                                      <SelectItem value="lower_elem">Lower Elementary (6-9 years)</SelectItem>
+                                      <SelectItem value="upper_elem">Upper Elementary (9-12 years)</SelectItem>
+                                      <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
+                                      <SelectItem value="high_school">High School (15-18 years)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Capacity</Label>
+                                    <Input
+                                      type="number"
+                                      value={classroomForm.capacity}
+                                      onChange={(e) => setClassroomForm(prev => ({ ...prev, capacity: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Age Range</Label>
+                                    <Input
+                                      value={classroomForm.ageRange}
+                                      onChange={(e) => setClassroomForm(prev => ({ ...prev, ageRange: e.target.value }))}
+                                      placeholder="e.g., 3-6 years"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label>Description</Label>
+                                  <Textarea
+                                    value={classroomForm.description}
+                                    onChange={(e) => setClassroomForm(prev => ({ ...prev, description: e.target.value }))}
+                                  />
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="outline" onClick={() => setEditingClassroom(null)}>
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={handleUpdateClassroom}
+                                    disabled={!classroomForm.name || !classroomForm.level || updateClassroomMutation.isPending}
+                                  >
+                                    {updateClassroomMutation.isPending ? "Updating..." : "Update Classroom"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Delete Classroom Confirmation Dialog */}
+                          <AlertDialog open={deletingClassroom !== null} onOpenChange={(open) => !open && setDeletingClassroom(null)}>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Classroom</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{deletingClassroom?.name}"? This action cannot be undone and will remove all associated data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setDeletingClassroom(null)}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={confirmDeleteClassroom}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete Classroom
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {classrooms.map((classroom: any) => (
+                            <div key={classroom.id} className="p-4 border rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <h4 className="font-medium">{classroom.name}</h4>
+                                <Badge className={getLevelColor(classroom.level)}>
+                                  {formatLevel(classroom.level)}
+                                </Badge>
+                              </div>
+                              <div className="space-y-2 text-sm text-gray-600">
+                                {classroom.capacity && (
+                                  <div className="flex items-center">
+                                    <Users className="mr-2 h-4 w-4" />
+                                    Capacity: {classroom.capacity}
+                                  </div>
+                                )}
+                                {classroom.ageRange && (
+                                  <div className="flex items-center">
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    Age: {classroom.ageRange}
+                                  </div>
+                                )}
+                                {classroom.description && (
+                                  <p className="text-xs mt-2">{classroom.description}</p>
+                                )}
+                              </div>
+                              <div className="flex justify-end space-x-2 mt-4">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleEditClassroom(classroom)}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => handleDeleteClassroom(classroom)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+
+                          {classrooms.length === 0 && (
+                            <div className="col-span-full text-center py-8">
+                              <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <p className="text-gray-600">No classrooms configured yet</p>
+                              <Button className="mt-2" onClick={() => setAddingClassroom(true)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add First Classroom
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* School Years Tab */}
+                  <TabsContent value="school-years" className="space-y-6">
+                    
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>School Years</CardTitle>
+                          <Dialog open={addingSchoolYear} onOpenChange={setAddingSchoolYear}>
+                            <DialogTrigger asChild>
+                              <Button onClick={() => {
+                                if (currentRole?.roleName?.startsWith('sysadmin')) {
+                                  setAddingSchoolYear(true);
+                                } else {
+                                  setShowImportDialog(true);
+                                }
+                              }}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add School Year
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Add New School Year</DialogTitle>
+                                <DialogDescription>
+                                  {currentRole?.roleName?.startsWith('sysadmin') 
+                                    ? "Create a new school year with dates for outer boundaries."
+                                    : "Create a new school year with start and end dates for your school."
+                                  }
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Year Name</Label>
+                                  <Input
+                                    value={schoolYearForm.name}
+                                    onChange={(e) => handleSchoolYearNameChange(e.target.value)}
+                                    placeholder="e.g., 2024-2025"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Start Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={schoolYearForm.startDate}
+                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={schoolYearForm.endDate}
+                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex justify-between">
+                                  <div className="space-x-2">
+                                    {!currentRole?.roleName?.startsWith('sysadmin') && systemHolidays.length > 0 && (
+                                      <Button 
+                                        variant="outline"
+                                        onClick={handleImportSystemHolidays}
+                                        disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate || importSystemHolidaysMutation.isPending}
+                                      >
+                                        {importSystemHolidaysMutation.isPending ? "Importing..." : "Import & Customize System Defaults"}
+                                      </Button>
+                                    )}
+                                  </div>
+                                  <div className="space-x-2">
+                                    <Button variant="outline" onClick={() => setAddingSchoolYear(false)}>
+                                      Cancel
+                                    </Button>
+                                    <Button 
+                                      onClick={handleAddSchoolYear}
+                                      disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
+                                    >
+                                      Add School Year
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Edit School Year Dialog */}
+                          <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit School Year</DialogTitle>
+                                <DialogDescription>
+                                  Update the school year information and dates.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Year Name</Label>
+                                  <Input
+                                    value={schoolYearForm.name}
+                                    onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="e.g., 2024-2025"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Start Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={schoolYearForm.startDate}
+                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={schoolYearForm.endDate}
+                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="outline" onClick={() => setEditingSchoolYear(null)}>
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={handleUpdateSchoolYear}
+                                    disabled={!schoolYearForm.name || !schoolYearForm.startDate || !schoolYearForm.endDate}
+                                  >
+                                    Update School Year
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Delete School Year Confirmation Dialog */}
+                          <AlertDialog open={deletingSchoolYear !== null} onOpenChange={(open) => !open && setDeletingSchoolYear(null)}>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete School Year</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{deletingSchoolYear?.name}"? This action cannot be undone and will remove all associated academic calendar data.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setDeletingSchoolYear(null)}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={confirmDeleteSchoolYear}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete School Year
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+
+
+
+                          {/* Import School Year Dialog */}
+                          <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle className="flex items-center">
+                                  <Download className="mr-2 h-5 w-5" />
+                                  Add New School Year
+                                </DialogTitle>
+                                <DialogDescription>
+                                  Select a network default school year to import and choose how to handle holidays.
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-6">
+                                {/* Network Year Selection */}
+                                <div className="space-y-4">
+                                  <Label>Select Network School Year to Import</Label>
+                                  {(() => {
+                                    const availableYears = networkSchoolYears.filter(networkYear => 
+                                      !schoolYears.some(schoolYear => schoolYear.name === networkYear.name)
+                                    );
+                                    
+                                    if (availableYears.length === 0) {
+                                      return (
+                                        <div className="text-center py-8 text-gray-500">
+                                          <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                                          <p>All network default school years have been imported.</p>
+                                        </div>
+                                      );
+                                    }
+                                    
+                                    return (
+                                      <RadioGroup value={selectedNetworkYear} onValueChange={setSelectedNetworkYear}>
+                                        <div className="space-y-3">
+                                          {availableYears.map((year) => (
+                                            <div key={year.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                                              <RadioGroupItem value={year.id} id={year.id} />
+                                              <Label htmlFor={year.id} className="flex-1 cursor-pointer">
+                                                <div className="flex items-center justify-between">
+                                                  <div>
+                                                    <p className="font-medium">{year.name}</p>
+                                                  </div>
+                                                  <Badge variant="outline">Network Default</Badge>
+                                                </div>
+                                              </Label>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </RadioGroup>
+                                    );
+                                  })()}
+                                </div>
+
+                                {/* School Date Selection */}
+                                {selectedNetworkYear && (
+                                  <div className="space-y-4">
+                                    <div className="border-t pt-4">
+                                      <Label>Set Your School's Actual Dates</Label>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <Label htmlFor="schoolStartDate">
+                                          School Start Date
+                                        </Label>
+                                        <Input
+                                          id="schoolStartDate"
+                                          type="date"
+                                          value={schoolStartDate}
+                                          onChange={(e) => setSchoolStartDate(e.target.value)}
+                                          className="mt-1"
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label htmlFor="schoolEndDate">
+                                          School End Date
+                                        </Label>
+                                        <Input
+                                          id="schoolEndDate"
+                                          type="date"
+                                          value={schoolEndDate}
+                                          onChange={(e) => setSchoolEndDate(e.target.value)}
+                                          className="mt-1"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Action Buttons */}
+                                {selectedNetworkYear && schoolStartDate && schoolEndDate && (
+                                  <div className="space-y-4">
+                                    <div className="border-t pt-4">
+                                      <Label>Choose how to handle holidays:</Label>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3">
+                                      <Button 
+                                        variant="outline"
+                                        onClick={() => importWithSystemHolidaysMutation.mutate(selectedNetworkYear)}
+                                        disabled={importWithSystemHolidaysMutation.isPending}
+                                        className="justify-start h-auto p-4"
+                                      >
+                                        <div className="text-left">
+                                          <div className="font-medium">Add with system default holidays</div>
+                                          <div className="text-sm text-gray-500">Import with standard network holidays</div>
+                                        </div>
+                                      </Button>
+                                      <Button 
+                                        variant="outline"
+                                        onClick={() => importWithCurrentYearHolidaysMutation.mutate(selectedNetworkYear)}
+                                        disabled={importWithCurrentYearHolidaysMutation.isPending}
+                                        className="justify-start h-auto p-4"
+                                      >
+                                        <div className="text-left">
+                                          <div className="font-medium">Add with the same holidays we used this year</div>
+                                          <div className="text-sm text-gray-500">Copy holidays from your current active year (but with updated dates)</div>
+                                        </div>
+                                      </Button>
+                                      <Button 
+                                        variant="outline"
+                                        onClick={() => importWithNoHolidaysMutation.mutate(selectedNetworkYear)}
+                                        disabled={importWithNoHolidaysMutation.isPending}
+                                        className="justify-start h-auto p-4"
+                                      >
+                                        <div className="text-left">
+                                          <div className="font-medium">Add with no holidays (I'll enter them later)</div>
+                                          <div className="text-sm text-gray-500">Import without any holidays</div>
+                                        </div>
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Cancel Button */}
+                                <div className="flex justify-end border-t pt-4">
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={() => {
+                                      setShowImportDialog(false);
+                                      setSelectedNetworkYear("");
+                                      setSchoolStartDate("");
+                                      setSchoolEndDate("");
+                                    }}
+                                  >
+                                    Cancel
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {schoolYears.map((year: any) => (
+                            <div key={year.id} className="p-4 border rounded-lg">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="font-medium text-sm">{schedule.name}</p>
-                                  <p className="text-xs text-gray-500">
-                                    {schedule.startTime} - {schedule.endTime}
-                                  </p>
+                                  <h4 className="font-medium flex items-center">
+                                    {year.name}
+                                    {year.isActive && (
+                                      <Badge className="ml-2 bg-green-100 text-green-800">
+                                        Current
+                                      </Badge>
+                                    )}
+                                    {year.networkDefault && (
+                                      <Badge className="ml-2 bg-blue-100 text-blue-800">
+                                        Network Default
+                                      </Badge>
+                                    )}
+                                  </h4>
+                                  <div className="text-sm text-gray-600 mt-1">
+                                    {year.startDate && year.endDate && (
+                                      <div className="flex items-center">
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        {new Date(year.startDate).toLocaleDateString()} - {new Date(year.endDate).toLocaleDateString()}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="text-right">
-                                  <p className="text-xs font-medium">
-                                    {[
-                                      schedule.mondayOpen && 'M',
-                                      schedule.tuesdayOpen && 'T', 
-                                      schedule.wednesdayOpen && 'W',
-                                      schedule.thursdayOpen && 'Th',
-                                      schedule.fridayOpen && 'F',
-                                      schedule.saturdayOpen && 'S',
-                                      schedule.sundayOpen && 'Su'
-                                    ].filter(Boolean).join(', ')}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {calculateHoursPerWeek(schedule)} hrs/week
-                                  </p>
+                                <div className="flex space-x-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleEditSchoolYear(year)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  {!year.isActive && (
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleDeleteSchoolYear(year)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  )}
+                                  {!year.isActive && (
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleSetActiveSchoolYear(year.id)}
+                                    >
+                                      Set Active
+                                    </Button>
+                                  )}
                                 </div>
                               </div>
                             </div>
                           ))}
+                          
+                          {schoolYears.length === 0 && (
+                            <div className="text-center py-8">
+                              <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <p className="text-gray-600 mb-2">No school years configured yet</p>
+                              <p className="text-sm text-gray-500 mb-4">
+                                Create your first school year to start managing academic calendars, enrollment periods, and schedules.
+                              </p>
+                              <Button onClick={() => {
+                                if (currentRole?.roleName?.startsWith('sysadmin')) {
+                                  setAddingSchoolYear(true);
+                                } else {
+                                  setShowImportDialog(true);
+                                }
+                              }}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create First School Year
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="text-center py-4 text-gray-500">
-                          <Clock className="mx-auto h-8 w-8 mb-2 text-gray-400" />
-                          <p className="text-sm">No schedules configured</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="mt-2"
-                            onClick={() => setActiveTab('schedules')}
-                          >
-                            Add Schedule
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  
-                  {classroomsWithSchedules.length === 0 && (
-                    <div className="text-center py-8">
-                      <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600">No classrooms found</p>
-                      <Button 
-                        variant="outline" 
-                        className="mt-2"
-                        onClick={() => setActiveTab('classrooms')}
-                      >
-                        Add Classroom
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                      </CardContent>
+                    </Card>
 
-              {/* Right Side: Tuition Pricing */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Tuition Pricing</CardTitle>
-                      <p className="text-sm text-gray-600">
-                        {selectedSchedule ? 
-                          `Set pricing for ${selectedSchedule.classroom.name} - ${selectedSchedule.schedule.name}` :
-                          'Select a schedule to set pricing'
-                        }
-                      </p>
-                    </div>
-                    {selectedSchedule && (
-                      <Dialog open={addingTuitionPlan} onOpenChange={setAddingTuitionPlan}>
-                        <DialogTrigger asChild>
-                          <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Add Pricing
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Set Tuition Pricing</DialogTitle>
-                            <DialogDescription>
-                              {selectedSchedule.classroom.name} - {selectedSchedule.schedule.name}
-                            </DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label>Plan Name</Label>
-                              <Input
-                                value={tuitionForm.name}
-                                onChange={(e) => setTuitionForm(prev => ({ ...prev, name: e.target.value }))}
-                                placeholder={`${selectedSchedule.classroom.name} - ${selectedSchedule.schedule.name}`}
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label>Full Price</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={tuitionForm.fullPrice}
-                                  onChange={(e) => {
-                                    setTuitionForm(prev => ({ ...prev, fullPrice: e.target.value }));
-                                    calculatePricePerHour(e.target.value, tuitionForm.billingFrequency);
-                                  }}
-                                  placeholder="0.00"
-                                />
-                              </div>
-                              <div>
-                                <Label>Billing Frequency</Label>
-                                <Select onValueChange={(value) => {
-                                  setTuitionForm(prev => ({ ...prev, billingFrequency: value }));
-                                  calculatePricePerHour(tuitionForm.fullPrice, value);
-                                }}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select frequency" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="weekly">Weekly</SelectItem>
-                                    <SelectItem value="monthly">Monthly</SelectItem>
-                                    <SelectItem value="annually">Annually</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            </div>
-                            
-                            {/* Pricing Calculation Display */}
-                            {tuitionForm.fullPrice && tuitionForm.billingFrequency && (
-                              <div className="bg-blue-50 p-4 rounded-lg space-y-2">
-                                <h4 className="font-medium text-blue-900">Price Calculation</h4>
-                                <div className="grid grid-cols-2 gap-4 text-sm">
+                    {/* Note: Academic Calendar functionality has been simplified */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Academic Calendar</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">
+                          Academic calendar management has been simplified. Holiday management is now handled through the school year editing interface.
+                        </p>
+                      </CardContent>
+                    </Card>
+
+                  </TabsContent>
+
+                  {/* Schedules Tab */}
+                  <TabsContent value="schedules" className="space-y-6">
+                    {/* Schedule Management */}
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>Classroom Schedules</CardTitle>
+                            <p className="text-sm text-gray-600">
+                              Manage operating schedules for your classrooms and programs
+                            </p>
+                          </div>
+                          <Dialog open={addingSchedule} onOpenChange={setAddingSchedule}>
+                            <DialogTrigger asChild>
+                              <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create Schedule
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Create New Schedule</DialogTitle>
+                                <DialogDescription>
+                                  Create a schedule template with operating hours and days
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Schedule Name</Label>
+                                  <Input
+                                    value={scheduleForm.name}
+                                    onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="e.g., Primary Full Day, Elementary Extended"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
                                   <div>
-                                    <p className="text-gray-600">Hours per week:</p>
-                                    <p className="font-medium">{calculateHoursPerWeek(selectedSchedule.schedule)} hours</p>
+                                    <Label>Start Time</Label>
+                                    <Input
+                                      type="time"
+                                      value={scheduleForm.startTime}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, startTime: e.target.value }))}
+                                    />
                                   </div>
                                   <div>
-                                    <p className="text-gray-600">Weeks per year:</p>
-                                    <p className="font-medium">{selectedSchedule.classroom.programType === 'continuous' ? '52' : '36'} weeks</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-gray-600">Total hours/year:</p>
-                                    <p className="font-medium">
-                                      {(parseFloat(calculateHoursPerWeek(selectedSchedule.schedule)) * 
-                                        (selectedSchedule.classroom.programType === 'continuous' ? 52 : 36)).toFixed(0)} hours
-                                    </p>
-                                  </div>
-                                  <div>
-                                    <p className="text-gray-600">Price per hour:</p>
-                                    <p className="font-medium text-blue-600">
-                                      ${calculatedPricePerHour}
-                                    </p>
+                                    <Label>End Time</Label>
+                                    <Input
+                                      type="time"
+                                      value={scheduleForm.endTime}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, endTime: e.target.value }))}
+                                    />
                                   </div>
                                 </div>
+                                <div>
+                                  <Label>Operating Days</Label>
+                                  <div className="grid grid-cols-7 gap-2 mt-2">
+                                    {[
+                                      { key: 'mondayOpen', label: 'Mon' },
+                                      { key: 'tuesdayOpen', label: 'Tue' },
+                                      { key: 'wednesdayOpen', label: 'Wed' },
+                                      { key: 'thursdayOpen', label: 'Thu' },
+                                      { key: 'fridayOpen', label: 'Fri' },
+                                      { key: 'saturdayOpen', label: 'Sat' },
+                                      { key: 'sundayOpen', label: 'Sun' }
+                                    ].map(day => (
+                                      <div key={day.key} className="flex flex-col items-center">
+                                        <label className="text-xs font-medium mb-1">{day.label}</label>
+                                        <input
+                                          type="checkbox"
+                                          checked={scheduleForm[day.key as keyof typeof scheduleForm] as boolean}
+                                          onChange={(e) => setScheduleForm(prev => ({ 
+                                            ...prev, 
+                                            [day.key]: e.target.checked 
+                                          }))}
+                                          className="h-4 w-4 text-primary rounded border-gray-300"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="outline" onClick={() => setAddingSchedule(false)}>
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={handleAddSchedule}
+                                    disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime}
+                                  >
+                                    Create Schedule
+                                  </Button>
+                                </div>
                               </div>
-                            )}
+                            </DialogContent>
+                          </Dialog>
 
-                            <div>
-                              <Label>School Year (for annual pricing)</Label>
-                              <Select onValueChange={(value) => setTuitionForm(prev => ({ ...prev, schoolYearId: value }))}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select school year (optional)" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="">No specific year</SelectItem>
-                                  {schoolYears.map((year: any) => (
-                                    <SelectItem key={year.id} value={year.id}>
-                                      {year.name}
-                                    </SelectItem>
+                          {/* Edit Schedule Dialog */}
+                          <Dialog open={editingSchedule !== null} onOpenChange={(open) => !open && setEditingSchedule(null)}>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Edit Schedule</DialogTitle>
+                                <DialogDescription>
+                                  Update the schedule template with new operating hours and days
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Schedule Name</Label>
+                                  <Input
+                                    value={scheduleForm.name}
+                                    onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
+                                    placeholder="e.g., Primary Full Day, Elementary Extended"
+                                  />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Start Time</Label>
+                                    <Input
+                                      type="time"
+                                      value={scheduleForm.startTime}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, startTime: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End Time</Label>
+                                    <Input
+                                      type="time"
+                                      value={scheduleForm.endTime}
+                                      onChange={(e) => setScheduleForm(prev => ({ ...prev, endTime: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <Label>Operating Days</Label>
+                                  <div className="grid grid-cols-7 gap-2 mt-2">
+                                    {[
+                                      { key: 'mondayOpen', label: 'Mon' },
+                                      { key: 'tuesdayOpen', label: 'Tue' },
+                                      { key: 'wednesdayOpen', label: 'Wed' },
+                                      { key: 'thursdayOpen', label: 'Thu' },
+                                      { key: 'fridayOpen', label: 'Fri' },
+                                      { key: 'saturdayOpen', label: 'Sat' },
+                                      { key: 'sundayOpen', label: 'Sun' }
+                                    ].map(day => (
+                                      <div key={day.key} className="flex flex-col items-center">
+                                        <label className="text-xs font-medium mb-1">{day.label}</label>
+                                        <input
+                                          type="checkbox"
+                                          checked={scheduleForm[day.key as keyof typeof scheduleForm] as boolean}
+                                          onChange={(e) => setScheduleForm(prev => ({ 
+                                            ...prev, 
+                                            [day.key]: e.target.checked 
+                                          }))}
+                                          className="h-4 w-4 text-primary rounded border-gray-300"
+                                        />
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="outline" onClick={() => setEditingSchedule(null)}>
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={handleUpdateSchedule}
+                                    disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime || updateScheduleMutation.isPending}
+                                  >
+                                    {updateScheduleMutation.isPending ? "Updating..." : "Update Schedule"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+
+                          {/* Delete Schedule Confirmation Dialog */}
+                          <AlertDialog open={deletingSchedule !== null} onOpenChange={(open) => !open && setDeletingSchedule(null)}>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Schedule</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete "{deletingSchedule?.name}"? This action cannot be undone and will affect any classrooms using this schedule.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel onClick={() => setDeletingSchedule(null)}>
+                                  Cancel
+                                </AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={confirmDeleteSchedule}
+                                  className="bg-red-600 hover:bg-red-700"
+                                >
+                                  Delete Schedule
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {classroomSchedules.map((schedule: any) => (
+                            <div key={schedule.id} className="p-4 border rounded-lg">
+                              <div className="flex items-center justify-between mb-3">
+                                <h4 className="font-medium">{schedule.name}</h4>
+                                <div className="flex space-x-2">
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleEditSchedule(schedule)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDeleteSchedule(schedule)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-medium">Operating Hours:</span>
+                                  <Badge variant="outline">
+                                    {schedule.startTime} - {schedule.endTime}
+                                  </Badge>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                  <div className="flex items-center justify-between">
+                                    <span>Days:</span>
+                                    <div className="flex space-x-1">
+                                      {schedule.mondayOpen && <Badge variant="secondary" className="text-xs">M</Badge>}
+                                      {schedule.tuesdayOpen && <Badge variant="secondary" className="text-xs">T</Badge>}
+                                      {schedule.wednesdayOpen && <Badge variant="secondary" className="text-xs">W</Badge>}
+                                      {schedule.thursdayOpen && <Badge variant="secondary" className="text-xs">T</Badge>}
+                                      {schedule.fridayOpen && <Badge variant="secondary" className="text-xs">F</Badge>}
+                                      {schedule.saturdayOpen && <Badge variant="secondary" className="text-xs">S</Badge>}
+                                      {schedule.sundayOpen && <Badge variant="secondary" className="text-xs">S</Badge>}
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-gray-500 mt-2">
+                                  Created: {new Date(schedule.createdAt).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          {classroomSchedules.length === 0 && (
+                            <div className="col-span-full text-center py-8">
+                              <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <p className="text-gray-600">No schedules configured yet</p>
+                              <p className="text-sm text-gray-500 mb-4">
+                                Create schedule templates to define operating hours and days for your classrooms
+                              </p>
+                              <Button onClick={() => setAddingSchedule(true)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Create First Schedule
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Tuition Plans Tab */}
+                  <TabsContent value="tuition" className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left Side: Classrooms and Schedules */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Classrooms & Schedules</CardTitle>
+                          <p className="text-sm text-gray-600">
+                            Select a classroom schedule to set pricing
+                          </p>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          {classroomsWithSchedules.map((classroom: any) => (
+                            <div key={classroom.id} className="border rounded-lg p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <h4 className="font-medium">{classroom.name}</h4>
+                                  <p className="text-sm text-gray-500 capitalize">
+                                    {classroom.level.replace('_', ' ')} • {classroom.capacity} students
+                                  </p>
+                                </div>
+                                <Badge variant="outline">
+                                  {classroom.programType === 'continuous' ? 'Year-round' : 'School Year'}
+                                </Badge>
+                              </div>
+                              
+                              {classroom.schedules.length > 0 ? (
+                                <div className="space-y-2">
+                                  {classroom.schedules.map((schedule: any) => (
+                                    <div 
+                                      key={schedule.id} 
+                                      className="p-3 border rounded cursor-pointer hover:bg-gray-50 transition-colors"
+                                      onClick={() => setSelectedSchedule({ classroom, schedule })}
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <div>
+                                          <p className="font-medium text-sm">{schedule.name}</p>
+                                          <p className="text-xs text-gray-500">
+                                            {schedule.startTime} - {schedule.endTime}
+                                          </p>
+                                        </div>
+                                        <div className="text-right">
+                                          <p className="text-xs font-medium">
+                                            {[
+                                              schedule.mondayOpen && 'M',
+                                              schedule.tuesdayOpen && 'T', 
+                                              schedule.wednesdayOpen && 'W',
+                                              schedule.thursdayOpen && 'Th',
+                                              schedule.fridayOpen && 'F',
+                                              schedule.saturdayOpen && 'S',
+                                              schedule.sundayOpen && 'Su'
+                                            ].filter(Boolean).join(', ')}
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            {calculateHoursPerWeek(schedule)} hrs/week
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </div>
                                   ))}
-                                </SelectContent>
-                              </Select>
+                                </div>
+                              ) : (
+                                <div className="text-center py-4 text-gray-500">
+                                  <Clock className="mx-auto h-8 w-8 mb-2 text-gray-400" />
+                                  <p className="text-sm">No schedules configured</p>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="mt-2"
+                                    onClick={() => setActiveTab('schedules')}
+                                  >
+                                    Add Schedule
+                                  </Button>
+                                </div>
+                              )}
                             </div>
-
-                            <div className="flex justify-end space-x-2">
-                              <Button variant="outline" onClick={() => setAddingTuitionPlan(false)}>
-                                Cancel
-                              </Button>
+                          ))}
+                          
+                          {classroomsWithSchedules.length === 0 && (
+                            <div className="text-center py-8">
+                              <Home className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <p className="text-gray-600">No classrooms found</p>
                               <Button 
-                                onClick={handleAddTuitionPlan}
-                                disabled={addTuitionPlanMutation.isPending || !tuitionForm.fullPrice || !tuitionForm.billingFrequency}
+                                variant="outline" 
+                                className="mt-2"
+                                onClick={() => setActiveTab('classrooms')}
                               >
-                                {addTuitionPlanMutation.isPending ? "Adding..." : "Add Pricing"}
+                                Add Classroom
                               </Button>
                             </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {/* Right Side: Tuition Pricing */}
+                      <Card>
+                        <CardHeader>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle>Tuition Pricing</CardTitle>
+                              <p className="text-sm text-gray-600">
+                                {selectedSchedule ? 
+                                  `Set pricing for ${selectedSchedule.classroom.name} - ${selectedSchedule.schedule.name}` :
+                                  'Select a schedule to set pricing'
+                                }
+                              </p>
+                            </div>
+                            {selectedSchedule && (
+                              <Dialog open={addingTuitionPlan} onOpenChange={setAddingTuitionPlan}>
+                                <DialogTrigger asChild>
+                                  <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Add Pricing
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Set Tuition Pricing</DialogTitle>
+                                    <DialogDescription>
+                                      {selectedSchedule.classroom.name} - {selectedSchedule.schedule.name}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <Label>Plan Name</Label>
+                                      <Input
+                                        value={tuitionForm.name}
+                                        onChange={(e) => setTuitionForm(prev => ({ ...prev, name: e.target.value }))}
+                                        placeholder={`${selectedSchedule.classroom.name} - ${selectedSchedule.schedule.name}`}
+                                      />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <Label>Full Price</Label>
+                                        <Input
+                                          type="number"
+                                          step="0.01"
+                                          value={tuitionForm.fullPrice}
+                                          onChange={(e) => {
+                                            setTuitionForm(prev => ({ ...prev, fullPrice: e.target.value }));
+                                            calculatePricePerHour(e.target.value, tuitionForm.billingFrequency);
+                                          }}
+                                          placeholder="0.00"
+                                        />
+                                      </div>
+                                      <div>
+                                        <Label>Billing Frequency</Label>
+                                        <Select onValueChange={(value) => {
+                                          setTuitionForm(prev => ({ ...prev, billingFrequency: value }));
+                                          calculatePricePerHour(tuitionForm.fullPrice, value);
+                                        }}>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select frequency" />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="weekly">Weekly</SelectItem>
+                                            <SelectItem value="monthly">Monthly</SelectItem>
+                                            <SelectItem value="annually">Annually</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+                                    
+                                    {/* Pricing Calculation Display */}
+                                    {tuitionForm.fullPrice && tuitionForm.billingFrequency && (
+                                      <div className="bg-blue-50 p-4 rounded-lg space-y-2">
+                                        <h4 className="font-medium text-blue-900">Price Calculation</h4>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                          <div>
+                                            <p className="text-gray-600">Hours per week:</p>
+                                            <p className="font-medium">{calculateHoursPerWeek(selectedSchedule.schedule)} hours</p>
+                                          </div>
+                                          <div>
+                                            <p className="text-gray-600">Weeks per year:</p>
+                                            <p className="font-medium">{selectedSchedule.classroom.programType === 'continuous' ? '52' : '36'} weeks</p>
+                                          </div>
+                                          <div>
+                                            <p className="text-gray-600">Total hours/year:</p>
+                                            <p className="font-medium">
+                                              {(parseFloat(calculateHoursPerWeek(selectedSchedule.schedule)) * 
+                                                (selectedSchedule.classroom.programType === 'continuous' ? 52 : 36)).toFixed(0)} hours
+                                            </p>
+                                          </div>
+                                          <div>
+                                            <p className="text-gray-600">Price per hour:</p>
+                                            <p className="font-medium text-blue-600">
+                                              ${calculatedPricePerHour}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    <div>
+                                      <Label>School Year (for annual pricing)</Label>
+                                      <Select onValueChange={(value) => setTuitionForm(prev => ({ ...prev, schoolYearId: value }))}>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Select school year (optional)" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="">No specific year</SelectItem>
+                                          {schoolYears.map((year: any) => (
+                                            <SelectItem key={year.id} value={year.id}>
+                                              {year.name}
+                                            </SelectItem>
+                                          ))}
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+
+                                    <div className="flex justify-end space-x-2">
+                                      <Button variant="outline" onClick={() => setAddingTuitionPlan(false)}>
+                                        Cancel
+                                      </Button>
+                                      <Button 
+                                        onClick={handleAddTuitionPlan}
+                                        disabled={addTuitionPlanMutation.isPending || !tuitionForm.fullPrice || !tuitionForm.billingFrequency}
+                                      >
+                                        {addTuitionPlanMutation.isPending ? "Adding..." : "Add Pricing"}
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                            )}
                           </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {selectedSchedule ? (
-                    <div className="space-y-4">
-                      {/* Current Pricing Plans */}
-                      {tuitionPlans
-                        .filter((plan: any) => 
-                          plan.plan?.classroomId === selectedSchedule.classroom.id && 
-                          plan.plan?.classroomScheduleId === selectedSchedule.schedule.id
-                        )
-                        .map((planData: any) => {
-                          const plan = planData.plan;
-                          return (
-                            <Card key={plan.id} className="border-l-4 border-l-green-500">
+                        </CardHeader>
+                        <CardContent>
+                          {selectedSchedule ? (
+                            <div className="space-y-4">
+                              {/* Current Pricing Plans */}
+                              {tuitionPlans
+                                .filter((plan: any) => 
+                                  plan.plan?.classroomId === selectedSchedule.classroom.id && 
+                                  plan.plan?.classroomScheduleId === selectedSchedule.schedule.id
+                                )
+                                .map((planData: any) => {
+                                  const plan = planData.plan;
+                                  return (
+                                    <Card key={plan.id} className="border-l-4 border-l-green-500">
+                                      <CardHeader>
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <h4 className="font-medium">{plan.name}</h4>
+                                            <p className="text-sm text-gray-600">
+                                              ${plan.fullPrice} per {plan.billingFrequency}
+                                            </p>
+                                            {plan.pricePerHour && (
+                                              <p className="text-xs text-blue-600">
+                                                ${plan.pricePerHour}/hour • {plan.hoursPerWeek} hrs/week • {plan.totalHoursPerYear} hrs/year
+                                              </p>
+                                            )}
+                                          </div>
+                                          <div className="flex space-x-2">
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm"
+                                              onClick={() => handleEditTuitionPlan(plan)}
+                                            >
+                                              <Edit className="h-4 w-4" />
+                                            </Button>
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm"
+                                              onClick={() => handleDeleteTuitionPlan(plan)}
+                                            >
+                                              <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </CardHeader>
+                                    </Card>
+                                  );
+                                })}
+                              
+                              {tuitionPlans.filter((plan: any) => 
+                                plan.plan?.classroomId === selectedSchedule.classroom.id && 
+                                plan.plan?.classroomScheduleId === selectedSchedule.schedule.id
+                              ).length === 0 && (
+                                <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
+                                  <DollarSign className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                                  <p className="text-gray-600">No pricing set for this schedule</p>
+                                  <Button 
+                                    className="mt-2" 
+                                    onClick={() => setAddingTuitionPlan(true)}
+                                  >
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Set Pricing
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-12 text-gray-500">
+                              <DollarSign className="mx-auto h-16 w-16 text-gray-300 mb-4" />
+                              <p className="text-lg font-medium mb-2">Select a Schedule</p>
+                              <p className="text-sm">
+                                Choose a classroom schedule from the left to set tuition pricing
+                              </p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
+                  {/* Public Subsidies Tab */}
+                  <TabsContent value="subsidies" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>Public Subsidy Programs</CardTitle>
+                            <p className="text-sm text-gray-600">
+                              Manage charter funding, childcare subsidies, ESA funding, and other public support programs
+                            </p>
+                          </div>
+                          <Dialog open={addingSubsidy} onOpenChange={setAddingSubsidy}>
+                            <DialogTrigger asChild>
+                              <Button>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Subsidy Program
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Add New Public Subsidy Program</DialogTitle>
+                                <DialogDescription>
+                                  Create a new public subsidy program with specific eligibility criteria and rates
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4 max-h-96 overflow-y-auto">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Program Name</Label>
+                                    <Input
+                                      value={subsidyForm.name}
+                                      onChange={(e) => setSubsidyForm(prev => ({ ...prev, name: e.target.value }))}
+                                      placeholder="e.g., State Childcare Subsidy"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Program Type</Label>
+                                    <Select onValueChange={(value) => setSubsidyForm(prev => ({ ...prev, type: value }))}>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select type" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="charter">Charter School Funding</SelectItem>
+                                        <SelectItem value="childcare_subsidy">Childcare Subsidy</SelectItem>
+                                        <SelectItem value="esa">Education Savings Account (ESA)</SelectItem>
+                                        <SelectItem value="scholarship">Private Scholarship</SelectItem>
+                                        <SelectItem value="universal_prek">Universal Pre-K</SelectItem>
+                                        <SelectItem value="head_start">Head Start</SelectItem>
+                                        <SelectItem value="other">Other</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <Label>Description</Label>
+                                  <Textarea
+                                    value={subsidyForm.description}
+                                    onChange={(e) => setSubsidyForm(prev => ({ ...prev, description: e.target.value }))}
+                                    placeholder="Program details, eligibility requirements, application process..."
+                                  />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Start Date</Label>
+                                    <Input
+                                      type="date"
+                                      value={subsidyForm.startDate}
+                                      onChange={(e) => setSubsidyForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>End Date (Optional)</Label>
+                                    <Input
+                                      type="date"
+                                      value={subsidyForm.endDate}
+                                      onChange={(e) => setSubsidyForm(prev => ({ ...prev, endDate: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>External Program ID</Label>
+                                    <Input
+                                      value={subsidyForm.externalId}
+                                      onChange={(e) => setSubsidyForm(prev => ({ ...prev, externalId: e.target.value }))}
+                                      placeholder="State/federal program ID"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label>Application Deadline</Label>
+                                    <Input
+                                      type="date"
+                                      value={subsidyForm.applicationDeadline}
+                                      onChange={(e) => setSubsidyForm(prev => ({ ...prev, applicationDeadline: e.target.value }))}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <Label>Required Documentation</Label>
+                                  <Textarea
+                                    value={subsidyForm.requiredDocumentation}
+                                    onChange={(e) => setSubsidyForm(prev => ({ ...prev, requiredDocumentation: e.target.value }))}
+                                    placeholder="List required documents for application..."
+                                  />
+                                </div>
+
+                                <div className="flex justify-end space-x-2 pt-4">
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={() => setAddingSubsidy(false)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button 
+                                    onClick={handleAddSubsidy}
+                                    disabled={addSubsidyMutation.isPending}
+                                  >
+                                    {addSubsidyMutation.isPending ? "Adding..." : "Add Program"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-6">
+                          {publicSubsidies.map((program: any) => (
+                            <Card key={program.id} className="border-l-4 border-l-blue-500">
                               <CardHeader>
                                 <div className="flex items-center justify-between">
-                                  <div>
-                                    <h4 className="font-medium">{plan.name}</h4>
-                                    <p className="text-sm text-gray-600">
-                                      ${plan.fullPrice} per {plan.billingFrequency}
-                                    </p>
-                                    {plan.pricePerHour && (
-                                      <p className="text-xs text-blue-600">
-                                        ${plan.pricePerHour}/hour • {plan.hoursPerWeek} hrs/week • {plan.totalHoursPerYear} hrs/year
-                                      </p>
-                                    )}
+                                  <div className="flex items-center space-x-3">
+                                    <div>
+                                      <h3 className="font-semibold">{program.name}</h3>
+                                      <div className="flex items-center space-x-2 mt-1">
+                                        <Badge variant="secondary">
+                                          {program.type.replace('_', ' ').toUpperCase()}
+                                        </Badge>
+                                        <Badge variant={program.isActive ? "default" : "destructive"}>
+                                          {program.isActive ? "Active" : "Inactive"}
+                                        </Badge>
+                                      </div>
+                                    </div>
                                   </div>
                                   <div className="flex space-x-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => handleEditTuitionPlan(plan)}
-                                    >
+                                    <Button variant="outline" size="sm">
                                       <Edit className="h-4 w-4" />
                                     </Button>
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => handleDeleteTuitionPlan(plan)}
-                                    >
+                                    <Button variant="outline" size="sm">
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
                                   </div>
                                 </div>
+                                {program.description && (
+                                  <p className="text-sm text-gray-600 mt-2">{program.description}</p>
+                                )}
                               </CardHeader>
-                            </Card>
-                          );
-                        })}
-                      
-                      {tuitionPlans.filter((plan: any) => 
-                        plan.plan?.classroomId === selectedSchedule.classroom.id && 
-                        plan.plan?.classroomScheduleId === selectedSchedule.schedule.id
-                      ).length === 0 && (
-                        <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-                          <DollarSign className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                          <p className="text-gray-600">No pricing set for this schedule</p>
-                          <Button 
-                            className="mt-2" 
-                            onClick={() => setAddingTuitionPlan(true)}
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Set Pricing
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-center py-12 text-gray-500">
-                      <DollarSign className="mx-auto h-16 w-16 text-gray-300 mb-4" />
-                      <p className="text-lg font-medium mb-2">Select a Schedule</p>
-                      <p className="text-sm">
-                        Choose a classroom schedule from the left to set tuition pricing
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Public Subsidies Tab */}
-          <TabsContent value="subsidies" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Public Subsidy Programs</CardTitle>
-                    <p className="text-sm text-gray-600">
-                      Manage charter funding, childcare subsidies, ESA funding, and other public support programs
-                    </p>
-                  </div>
-                  <Dialog open={addingSubsidy} onOpenChange={setAddingSubsidy}>
-                    <DialogTrigger asChild>
-                      <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Subsidy Program
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
-                      <DialogHeader>
-                        <DialogTitle>Add New Public Subsidy Program</DialogTitle>
-                        <DialogDescription>
-                          Create a new public subsidy program with specific eligibility criteria and rates
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="space-y-4 max-h-96 overflow-y-auto">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Program Name</Label>
-                            <Input
-                              value={subsidyForm.name}
-                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, name: e.target.value }))}
-                              placeholder="e.g., State Childcare Subsidy"
-                            />
-                          </div>
-                          <div>
-                            <Label>Program Type</Label>
-                            <Select onValueChange={(value) => setSubsidyForm(prev => ({ ...prev, type: value }))}>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="charter">Charter School Funding</SelectItem>
-                                <SelectItem value="childcare_subsidy">Childcare Subsidy</SelectItem>
-                                <SelectItem value="esa">Education Savings Account (ESA)</SelectItem>
-                                <SelectItem value="scholarship">Private Scholarship</SelectItem>
-                                <SelectItem value="universal_prek">Universal Pre-K</SelectItem>
-                                <SelectItem value="head_start">Head Start</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <Label>Description</Label>
-                          <Textarea
-                            value={subsidyForm.description}
-                            onChange={(e) => setSubsidyForm(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Program details, eligibility requirements, application process..."
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>Start Date</Label>
-                            <Input
-                              type="date"
-                              value={subsidyForm.startDate}
-                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, startDate: e.target.value }))}
-                            />
-                          </div>
-                          <div>
-                            <Label>End Date (Optional)</Label>
-                            <Input
-                              type="date"
-                              value={subsidyForm.endDate}
-                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, endDate: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label>External Program ID</Label>
-                            <Input
-                              value={subsidyForm.externalId}
-                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, externalId: e.target.value }))}
-                              placeholder="State/federal program ID"
-                            />
-                          </div>
-                          <div>
-                            <Label>Application Deadline</Label>
-                            <Input
-                              type="date"
-                              value={subsidyForm.applicationDeadline}
-                              onChange={(e) => setSubsidyForm(prev => ({ ...prev, applicationDeadline: e.target.value }))}
-                            />
-                          </div>
-                        </div>
-
-                        <div>
-                          <Label>Required Documentation</Label>
-                          <Textarea
-                            value={subsidyForm.requiredDocumentation}
-                            onChange={(e) => setSubsidyForm(prev => ({ ...prev, requiredDocumentation: e.target.value }))}
-                            placeholder="List required documents for application..."
-                          />
-                        </div>
-
-                        <div className="flex justify-end space-x-2 pt-4">
-                          <Button 
-                            variant="outline" 
-                            onClick={() => setAddingSubsidy(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button 
-                            onClick={handleAddSubsidy}
-                            disabled={addSubsidyMutation.isPending}
-                          >
-                            {addSubsidyMutation.isPending ? "Adding..." : "Add Program"}
-                          </Button>
-                        </div>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  {publicSubsidies.map((program: any) => (
-                    <Card key={program.id} className="border-l-4 border-l-blue-500">
-                      <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div>
-                              <h3 className="font-semibold">{program.name}</h3>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <Badge variant="secondary">
-                                  {program.type.replace('_', ' ').toUpperCase()}
-                                </Badge>
-                                <Badge variant={program.isActive ? "default" : "destructive"}>
-                                  {program.isActive ? "Active" : "Inactive"}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                        {program.description && (
-                          <p className="text-sm text-gray-600 mt-2">{program.description}</p>
-                        )}
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div>
-                            <Label className="text-xs text-gray-500">Start Date</Label>
-                            <p>{new Date(program.startDate).toLocaleDateString()}</p>
-                          </div>
-                          {program.endDate && (
-                            <div>
-                              <Label className="text-xs text-gray-500">End Date</Label>
-                              <p>{new Date(program.endDate).toLocaleDateString()}</p>
-                            </div>
-                          )}
-                          {program.applicationDeadline && (
-                            <div>
-                              <Label className="text-xs text-gray-500">Application Deadline</Label>
-                              <p>{new Date(program.applicationDeadline).toLocaleDateString()}</p>
-                            </div>
-                          )}
-                          {program.externalId && (
-                            <div>
-                              <Label className="text-xs text-gray-500">External ID</Label>
-                              <p>{program.externalId}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="mt-4">
-                          <div className="flex items-center justify-between mb-2">
-                            <Label className="text-sm font-medium">Subsidy Rates</Label>
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button variant="outline" size="sm">
-                                  <Plus className="mr-1 h-3 w-3" />
-                                  Add Rate
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Add Subsidy Rate</DialogTitle>
-                                  <DialogDescription>
-                                    Configure rate structure for {program.name}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  <div className="grid grid-cols-2 gap-4">
+                              <CardContent>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <Label className="text-xs text-gray-500">Start Date</Label>
+                                    <p>{new Date(program.startDate).toLocaleDateString()}</p>
+                                  </div>
+                                  {program.endDate && (
                                     <div>
-                                      <Label>Child Type</Label>
-                                      <Select>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Select type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                          <SelectItem value="baseline">Baseline</SelectItem>
-                                          <SelectItem value="special_education">Special Education</SelectItem>
-                                          <SelectItem value="low_income">Low Income</SelectItem>
-                                          <SelectItem value="at_risk">At Risk</SelectItem>
-                                        </SelectContent>
-                                      </Select>
+                                      <Label className="text-xs text-gray-500">End Date</Label>
+                                      <p>{new Date(program.endDate).toLocaleDateString()}</p>
                                     </div>
+                                  )}
+                                  {program.applicationDeadline && (
                                     <div>
-                                      <Label>Rate Amount ($)</Label>
-                                      <Input type="number" step="0.01" placeholder="0.00" />
+                                      <Label className="text-xs text-gray-500">Application Deadline</Label>
+                                      <p>{new Date(program.applicationDeadline).toLocaleDateString()}</p>
                                     </div>
+                                  )}
+                                  {program.externalId && (
+                                    <div>
+                                      <Label className="text-xs text-gray-500">External ID</Label>
+                                      <p>{program.externalId}</p>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <div className="mt-4">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <Label className="text-sm font-medium">Subsidy Rates</Label>
+                                    <Dialog>
+                                      <DialogTrigger asChild>
+                                        <Button variant="outline" size="sm">
+                                          <Plus className="mr-1 h-3 w-3" />
+                                          Add Rate
+                                        </Button>
+                                      </DialogTrigger>
+                                      <DialogContent>
+                                        <DialogHeader>
+                                          <DialogTitle>Add Subsidy Rate</DialogTitle>
+                                          <DialogDescription>
+                                            Configure rate structure for {program.name}
+                                          </DialogDescription>
+                                        </DialogHeader>
+                                        <div className="space-y-4">
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <Label>Child Type</Label>
+                                              <Select>
+                                                <SelectTrigger>
+                                                  <SelectValue placeholder="Select type" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                  <SelectItem value="baseline">Baseline</SelectItem>
+                                                  <SelectItem value="special_education">Special Education</SelectItem>
+                                                  <SelectItem value="low_income">Low Income</SelectItem>
+                                                  <SelectItem value="at_risk">At Risk</SelectItem>
+                                                </SelectContent>
+                                              </Select>
+                                            </div>
+                                            <div>
+                                              <Label>Rate Amount ($)</Label>
+                                              <Input type="number" step="0.01" placeholder="0.00" />
+                                            </div>
+                                          </div>
+                                          
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <Label>Effective Date</Label>
+                                              <Input type="date" />
+                                            </div>
+                                            <div>
+                                              <Label>Expiration Date (Optional)</Label>
+                                              <Input type="date" />
+                                            </div>
+                                          </div>
+
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <Label>Min Age (months)</Label>
+                                              <Input type="number" placeholder="0" />
+                                            </div>
+                                            <div>
+                                              <Label>Max Age (months)</Label>
+                                              <Input type="number" placeholder="72" />
+                                            </div>
+                                          </div>
+
+                                          <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                              <Label>Income Min ($)</Label>
+                                              <Input type="number" placeholder="0" />
+                                            </div>
+                                            <div>
+                                              <Label>Income Max ($)</Label>
+                                              <Input type="number" placeholder="50000" />
+                                            </div>
+                                          </div>
+
+                                          <div className="flex justify-end space-x-2">
+                                            <Button variant="outline">Cancel</Button>
+                                            <Button>Add Rate</Button>
+                                          </div>
+                                        </div>
+                                      </DialogContent>
+                                    </Dialog>
                                   </div>
                                   
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <Label>Effective Date</Label>
-                                      <Input type="date" />
-                                    </div>
-                                    <div>
-                                      <Label>Expiration Date (Optional)</Label>
-                                      <Input type="date" />
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <Label>Min Age (months)</Label>
-                                      <Input type="number" placeholder="0" />
-                                    </div>
-                                    <div>
-                                      <Label>Max Age (months)</Label>
-                                      <Input type="number" placeholder="72" />
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <Label>Income Min ($)</Label>
-                                      <Input type="number" placeholder="0" />
-                                    </div>
-                                    <div>
-                                      <Label>Income Max ($)</Label>
-                                      <Input type="number" placeholder="50000" />
-                                    </div>
-                                  </div>
-
-                                  <div className="flex justify-end space-x-2">
-                                    <Button variant="outline">Cancel</Button>
-                                    <Button>Add Rate</Button>
+                                  <div className="border rounded-lg p-3 bg-gray-50">
+                                    <p className="text-sm text-gray-600">
+                                      No rates configured yet. Add rates to define eligibility and amounts.
+                                    </p>
                                   </div>
                                 </div>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
-                          
-                          <div className="border rounded-lg p-3 bg-gray-50">
-                            <p className="text-sm text-gray-600">
-                              No rates configured yet. Add rates to define eligibility and amounts.
-                            </p>
-                          </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+
+                          {publicSubsidies.length === 0 && (
+                            <div className="text-center py-12">
+                              <School className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                              <h3 className="text-lg font-medium text-gray-900 mb-2">No Public Subsidies</h3>
+                              <p className="text-gray-600 mb-6">
+                                Get started by adding your first public subsidy program
+                              </p>
+                              <Button onClick={() => setAddingSubsidy(true)}>
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add First Subsidy Program
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
-
-                  {publicSubsidies.length === 0 && (
-                    <div className="text-center py-12">
-                      <School className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No Public Subsidies</h3>
-                      <p className="text-gray-600 mb-6">
-                        Get started by adding your first public subsidy program
-                      </p>
-                      <Button onClick={() => setAddingSubsidy(true)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add First Subsidy Program
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-              </div>
+                  </TabsContent>
+                </Tabs>
+              </div>)
             )}
           </div>
         </main>
       </div>
-      
       <MobileBottomNav currentRole={currentRole} />
     </div>
   );

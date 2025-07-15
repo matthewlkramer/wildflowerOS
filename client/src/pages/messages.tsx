@@ -226,9 +226,7 @@ export default function MessagesPage({}: MessagesPageProps) {
                         {channel.type}
                       </Badge>
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
-                      Tap to open conversation
-                    </p>
+
                   </div>
                 </div>
               ))}

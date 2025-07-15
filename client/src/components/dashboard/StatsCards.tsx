@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, GraduationCap, AlertTriangle, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 
@@ -8,6 +9,7 @@ interface StatsCardsProps {
 }
 
 export default function StatsCards({ schoolId }: StatsCardsProps) {
+  const { t } = useTranslation();
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/dashboard/stats", schoolId],
   });
@@ -31,46 +33,46 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
   const statsData = [
     {
       icon: Users,
-      label: "Total Students",
+      label: t("total_students"),
       value: stats?.totalStudents || 0,
       color: "text-blue-600 dark:text-blue-400",
       bgColor: "bg-blue-50 dark:bg-blue-900/20",
       link: "/families",
-      linkText: "View details",
-      trend: "+12% this month",
+      linkText: t("view_details"),
+      trend: `+12% ${t("this_month")}`,
       trendUp: true,
     },
     {
       icon: GraduationCap,
-      label: "Active Classrooms",
+      label: t("active_classrooms"),
       value: stats?.activeClassrooms || 0,
       color: "text-green-600 dark:text-green-400",
       bgColor: "bg-green-50 dark:bg-green-900/20",
       link: "/settings",
-      linkText: "Manage classrooms",
+      linkText: t("manage_classrooms"),
       trend: "2 new this year",
       trendUp: true,
     },
     {
       icon: AlertTriangle,
-      label: "Pending Tasks",
+      label: t("pending_tasks"),
       value: stats?.pendingTasks || 0,
       color: "text-orange-600 dark:text-orange-400",
       bgColor: "bg-orange-50 dark:bg-orange-900/20",
       link: "/tasks",
-      linkText: "View tasks",
-      trend: "-8% this week",
+      linkText: t("view_tasks"),
+      trend: `-8% ${t("this_week")}`,
       trendUp: false,
     },
     {
       icon: DollarSign,
-      label: "Monthly Revenue",
+      label: t("monthly_revenue"),
       value: `$${stats?.monthlyRevenue?.toLocaleString() || "0"}`,
       color: "text-emerald-600 dark:text-emerald-400",
       bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
       link: "/billing",
-      linkText: "View billing",
-      trend: "+$2.4k this month",
+      linkText: t("view_billing"),
+      trend: `+$2.4k ${t("this_month")}`,
       trendUp: true,
     },
   ];

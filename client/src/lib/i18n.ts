@@ -173,6 +173,39 @@ const resources = {
       view_billing: "View Billing",
       sign_out: "Sign Out",
       profile: "Profile",
+      
+      // Dashboard specific content
+      total_students: "Total Students",
+      active_classrooms: "Active Classrooms",
+      monthly_revenue: "Monthly Revenue",
+      recent_activity: "Recent Activity",
+      upcoming_tasks: "Upcoming Tasks",
+      quick_actions: "Quick Actions",
+      my_classrooms: "My Classrooms",
+      new_enrollment: "New Enrollment",
+      send_message: "Send Message",
+      create_task: "Create Task",
+      view_billing: "View Billing",
+      manage_classrooms: "Manage classrooms",
+      view_tasks: "View tasks",
+      view_all_activity: "View all activity",
+      view_all_tasks: "View all tasks",
+      no_pending_tasks: "No pending tasks",
+      great_job_staying: "Great job staying on top of everything!",
+      export_report: "Export Report",
+      
+      // Time indicators
+      hours_ago: "hours ago",
+      this_week: "This Week",
+      this_month: "This Month",
+      no_data_available: "No data available",
+      
+      // Activity descriptions
+      added_comment: "Added a new comment to the",
+      discussion: "discussion",
+      completed_enrollment: "Completed enrollment for the",
+      children_enrolled: "children enrolled in",
+      created_task: "Created task",
     }
   },
   es: {
@@ -344,6 +377,39 @@ const resources = {
       view_billing: "Ver Facturación",
       sign_out: "Cerrar Sesión",
       profile: "Perfil",
+      
+      // Dashboard specific content
+      total_students: "Total Estudiantes",
+      active_classrooms: "Aulas Activas",
+      monthly_revenue: "Ingresos Mensuales",
+      recent_activity: "Actividad Reciente",
+      upcoming_tasks: "Tareas Pendientes",
+      quick_actions: "Acciones Rápidas",
+      my_classrooms: "Mis Aulas",
+      new_enrollment: "Nueva Inscripción",
+      send_message: "Enviar Mensaje",
+      create_task: "Crear Tarea",
+      view_billing: "Ver Facturación",
+      manage_classrooms: "Gestionar aulas",
+      view_tasks: "Ver tareas",
+      view_all_activity: "Ver toda la actividad",
+      view_all_tasks: "Ver todas las tareas",
+      no_pending_tasks: "Sin tareas pendientes",
+      great_job_staying: "¡Excelente trabajo manteniéndote al día!",
+      export_report: "Exportar Reporte",
+      
+      // Time indicators
+      hours_ago: "horas atrás",
+      this_week: "Esta Semana",
+      this_month: "Este Mes",
+      no_data_available: "No hay datos disponibles",
+      
+      // Activity descriptions
+      added_comment: "Agregó un nuevo comentario a la",
+      discussion: "discusión",
+      completed_enrollment: "Completó la inscripción para la",
+      children_enrolled: "niños inscritos en",
+      created_task: "Creó la tarea",
     }
   }
 };

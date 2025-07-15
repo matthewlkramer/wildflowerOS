@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UpcomingTasks() {
+  const { t } = useTranslation();
   const { data: tasks, isLoading } = useQuery({
     queryKey: ["/api/tasks/my"],
   });
@@ -37,7 +39,7 @@ export default function UpcomingTasks() {
     <Card className="shadow rounded-lg">
       <CardContent className="px-4 py-5 sm:p-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-          Upcoming Tasks
+          {t("upcoming_tasks")}
         </h3>
         
         {isLoading ? (
@@ -52,8 +54,8 @@ export default function UpcomingTasks() {
         ) : upcomingTasks.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <i className="fas fa-check-circle text-4xl mb-4 text-gray-300"></i>
-            <p>No pending tasks</p>
-            <p className="text-sm">Great job staying on top of everything!</p>
+            <p>{t("no_pending_tasks")}</p>
+            <p className="text-sm">{t("great_job_staying")}</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -84,7 +86,7 @@ export default function UpcomingTasks() {
         
         <div className="mt-4">
           <a href="/tasks" className="text-sm font-medium text-primary hover:text-blue-900">
-            View all tasks →
+            {t("view_all_tasks")} →
           </a>
         </div>
       </CardContent>

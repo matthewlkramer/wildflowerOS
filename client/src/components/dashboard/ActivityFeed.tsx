@@ -1,7 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 export default function ActivityFeed() {
+  const { t } = useTranslation();
+  
   // This would normally come from an API
   const activities = [
     {
@@ -10,8 +13,8 @@ export default function ActivityFeed() {
         name: "Emily Rodriguez",
         profileImageUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&w=150&h=150",
       },
-      description: "Added a new comment to the \"Fall Curriculum Planning\" discussion",
-      timestamp: "2 hours ago",
+      description: `${t("added_comment")} "Fall Curriculum Planning" ${t("discussion")}`,
+      timestamp: `2 ${t("hours_ago")}`,
       icon: "fas fa-comment",
       iconColor: "text-primary",
     },
@@ -21,8 +24,8 @@ export default function ActivityFeed() {
         name: "Michael Chen",
         profileImageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&w=150&h=150",
       },
-      description: "Completed enrollment for the Johnson family - 2 children enrolled in Primary classroom",
-      timestamp: "4 hours ago",
+      description: `${t("completed_enrollment")} Johnson family - 2 ${t("children_enrolled")} Primary classroom`,
+      timestamp: `4 ${t("hours_ago")}`,
       icon: "fas fa-user-plus",
       iconColor: "text-secondary",
     },
@@ -32,8 +35,8 @@ export default function ActivityFeed() {
         name: "Sarah Williams",
         profileImageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&w=150&h=150",
       },
-      description: "Created task: \"Prepare materials for next week's practical life lessons\"",
-      timestamp: "6 hours ago",
+      description: `${t("created_task")}: "Prepare materials for next week's practical life lessons"`,
+      timestamp: `6 ${t("hours_ago")}`,
       icon: "fas fa-tasks",
       iconColor: "text-warning",
     },
@@ -43,7 +46,7 @@ export default function ActivityFeed() {
     <Card className="shadow rounded-lg">
       <CardContent className="px-4 py-5 sm:p-6">
         <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
-          Recent Activity
+          {t("recent_activity")}
         </h3>
         <div className="flow-root">
           <ul className="-mb-8">
@@ -87,7 +90,7 @@ export default function ActivityFeed() {
         </div>
         <div className="mt-6">
           <Button variant="outline" className="w-full">
-            View all activity
+            {t("view_all_activity")}
           </Button>
         </div>
       </CardContent>

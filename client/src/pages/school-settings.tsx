@@ -14,6 +14,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
   Dialog,
   DialogContent,
@@ -47,7 +48,8 @@ import {
   Clock,
   School,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Download
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -1228,7 +1230,8 @@ export default function SchoolSettingsPage() {
   const [deletingSchoolYear, setDeletingSchoolYear] = useState<any>(null);
   const [importingSystemHolidays, setImportingSystemHolidays] = useState(false);
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<any>(null);
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [selectedNetworkYear, setSelectedNetworkYear] = useState<string>("");
   const [addingSubsidy, setAddingSubsidy] = useState(false);
   const [showSSJ, setShowSSJ] = useState(true);
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
@@ -1423,10 +1426,10 @@ export default function SchoolSettingsPage() {
     enabled: !!currentRole && !currentRole.roleName?.startsWith('sysadmin'),
   });
 
-  // Fetch network default school years (for system admins)
+  // Fetch network default school years (for system admins and educators)
   const { data: networkSchoolYears = [] } = useQuery({
     queryKey: ["/api/network-school-years"],
-    enabled: !!currentRole && currentRole.roleName?.startsWith('sysadmin'),
+    enabled: !!currentRole,
   });
 
   // Add staff mutation
@@ -1675,6 +1678,82 @@ export default function SchoolSettingsPage() {
     onError: (error: Error) => {
       toast({
         title: "Error deleting network school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // School year import mutations
+  const importWithSystemHolidaysMutation = useMutation({
+    mutationFn: async (networkYearId: string) => {
+      return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
+        networkYearId,
+        importType: 'system_holidays'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
+      setShowImportDialog(false);
+      setSelectedNetworkYear("");
+      toast({
+        title: "School year imported",
+        description: "School year imported with system default holidays.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error importing school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const importWithCurrentYearHolidaysMutation = useMutation({
+    mutationFn: async (networkYearId: string) => {
+      return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
+        networkYearId,
+        importType: 'current_year_holidays'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
+      setShowImportDialog(false);
+      setSelectedNetworkYear("");
+      toast({
+        title: "School year imported",
+        description: "School year imported with current year holidays.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error importing school year",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const importWithNoHolidaysMutation = useMutation({
+    mutationFn: async (networkYearId: string) => {
+      return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
+        networkYearId,
+        importType: 'no_holidays'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
+      setShowImportDialog(false);
+      setSelectedNetworkYear("");
+      toast({
+        title: "School year imported",
+        description: "School year imported with no holidays.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error importing school year",
         description: error.message,
         variant: "destructive",
       });
@@ -3180,7 +3259,13 @@ export default function SchoolSettingsPage() {
                   <CardTitle>School Years</CardTitle>
                   <Dialog open={addingSchoolYear} onOpenChange={setAddingSchoolYear}>
                     <DialogTrigger asChild>
-                      <Button>
+                      <Button onClick={() => {
+                        if (currentRole?.roleName?.startsWith('sysadmin')) {
+                          setAddingSchoolYear(true);
+                        } else {
+                          setShowImportDialog(true);
+                        }
+                      }}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add School Year
                       </Button>
@@ -3324,16 +3409,122 @@ export default function SchoolSettingsPage() {
                     </AlertDialogContent>
                   </AlertDialog>
 
-                  {/* Academic Calendar Dialog */}
-                  <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+
+
+                  {/* Import School Year Dialog */}
+                  <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+                    <DialogContent className="max-w-2xl">
                       <DialogHeader>
-                        <DialogTitle>Academic Calendar - {selectedSchoolYear?.name}</DialogTitle>
+                        <DialogTitle className="flex items-center">
+                          <Download className="mr-2 h-5 w-5" />
+                          Import School Year
+                        </DialogTitle>
                         <DialogDescription>
-                          Manage the academic calendar including first/last day of school, operational days, and holidays.
+                          Select a network default school year to import and choose how to handle holidays.
                         </DialogDescription>
                       </DialogHeader>
-                      <AcademicCalendarView schoolYear={selectedSchoolYear} />
+                      <div className="space-y-6">
+                        {/* Network Year Selection */}
+                        <div className="space-y-4">
+                          <Label>Select Network School Year to Import</Label>
+                          {(() => {
+                            const availableYears = networkSchoolYears.filter(networkYear => 
+                              !schoolYears.some(schoolYear => schoolYear.name === networkYear.name)
+                            );
+                            
+                            if (availableYears.length === 0) {
+                              return (
+                                <div className="text-center py-8 text-gray-500">
+                                  <Calendar className="mx-auto h-12 w-12 text-gray-400 mb-2" />
+                                  <p>All network default school years have been imported.</p>
+                                </div>
+                              );
+                            }
+                            
+                            return (
+                              <RadioGroup value={selectedNetworkYear} onValueChange={setSelectedNetworkYear}>
+                                <div className="space-y-3">
+                                  {availableYears.map((year) => (
+                                    <div key={year.id} className="flex items-center space-x-3 p-3 border rounded-lg">
+                                      <RadioGroupItem value={year.id} id={year.id} />
+                                      <Label htmlFor={year.id} className="flex-1 cursor-pointer">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <p className="font-medium">{year.name}</p>
+                                            {year.startDate && year.endDate && (
+                                              <p className="text-sm text-gray-500">
+                                                {new Date(year.startDate).toLocaleDateString()} - {new Date(year.endDate).toLocaleDateString()}
+                                              </p>
+                                            )}
+                                          </div>
+                                          <Badge variant="outline">Network Default</Badge>
+                                        </div>
+                                      </Label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </RadioGroup>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Action Buttons */}
+                        {selectedNetworkYear && (
+                          <div className="space-y-4">
+                            <div className="border-t pt-4">
+                              <Label>Choose how to handle holidays:</Label>
+                            </div>
+                            <div className="grid grid-cols-1 gap-3">
+                              <Button 
+                                variant="outline"
+                                onClick={() => importWithSystemHolidaysMutation.mutate(selectedNetworkYear)}
+                                disabled={importWithSystemHolidaysMutation.isPending}
+                                className="justify-start h-auto p-4"
+                              >
+                                <div className="text-left">
+                                  <div className="font-medium">Add with system default holidays</div>
+                                  <div className="text-sm text-gray-500">Import with standard network holidays</div>
+                                </div>
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                onClick={() => importWithCurrentYearHolidaysMutation.mutate(selectedNetworkYear)}
+                                disabled={importWithCurrentYearHolidaysMutation.isPending}
+                                className="justify-start h-auto p-4"
+                              >
+                                <div className="text-left">
+                                  <div className="font-medium">Add with the same holidays we used this year</div>
+                                  <div className="text-sm text-gray-500">Copy holidays from your current active year</div>
+                                </div>
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                onClick={() => importWithNoHolidaysMutation.mutate(selectedNetworkYear)}
+                                disabled={importWithNoHolidaysMutation.isPending}
+                                className="justify-start h-auto p-4"
+                              >
+                                <div className="text-left">
+                                  <div className="font-medium">Add with no holidays (I'll enter them later)</div>
+                                  <div className="text-sm text-gray-500">Import without any holidays</div>
+                                </div>
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Cancel Button */}
+                        <div className="flex justify-end border-t pt-4">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => {
+                              setShowImportDialog(false);
+                              setSelectedNetworkYear("");
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -3367,16 +3558,6 @@ export default function SchoolSettingsPage() {
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          {/* Hide calendar button for system admin */}
-                          {!currentRole?.roleName?.startsWith('sysadmin') && (
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleViewCalendar(year)}
-                            >
-                              <Calendar className="h-4 w-4" />
-                            </Button>
-                          )}
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -3414,7 +3595,13 @@ export default function SchoolSettingsPage() {
                       <p className="text-sm text-gray-500 mb-4">
                         Create your first school year to start managing academic calendars, enrollment periods, and schedules.
                       </p>
-                      <Button onClick={() => setAddingSchoolYear(true)}>
+                      <Button onClick={() => {
+                        if (currentRole?.roleName?.startsWith('sysadmin')) {
+                          setAddingSchoolYear(true);
+                        } else {
+                          setShowImportDialog(true);
+                        }
+                      }}>
                         <Plus className="mr-2 h-4 w-4" />
                         Create First School Year
                       </Button>
@@ -3424,12 +3611,17 @@ export default function SchoolSettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Academic Calendar Overview */}
-            <AcademicCalendarOverview 
-              schoolYears={schoolYears} 
-              selectedSchoolYear={selectedSchoolYear}
-              onSchoolYearSelect={setSelectedSchoolYear}
-            />
+            {/* Note: Academic Calendar functionality has been simplified */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Academic Calendar</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-600">
+                  Academic calendar management has been simplified. Holiday management is now handled through the school year editing interface.
+                </p>
+              </CardContent>
+            </Card>
 
           </TabsContent>
 

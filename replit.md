@@ -11,6 +11,17 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
+- **✅ COMPLETED: School year import functionality with holiday management**
+  - **Import dialog interface** - Shows radio button selection for available network default years that haven't been imported yet
+  - **Four import options** - "Add with system default holidays", "Add with current year holidays", "Add with no holidays", and "Cancel"
+  - **Proper button logic** - System admins see regular creation dialog, educators see import dialog for better workflow
+  - **Calendar closures integration** - Creates school year entries with schoolId and calendar_closures entries with holidays
+  - **Storage methods added** - importSystemHolidaysForSchoolYear and copyHolidaysFromSchoolYear for holiday management
+  - **Network year filtering** - Only shows network years that haven't been imported yet to prevent duplicates
+  - **Academic calendar cleanup** - Removed deprecated Academic Calendar dialog and functions since academic_calendars table was removed
+  - **Simplified holiday management** - Holiday tracking now happens directly through school year and calendar_closures tables
+  - **API endpoint complete** - `/api/schools/:schoolId/import-school-year` handles all three import types correctly
+  - **CONFIRMED WORKING** - Import system creates school-specific years with proper holiday associations
 - **✅ COMPLETED: Created dedicated Staff and Roles navigation section**
   - **New left navigation item** - "Staff and Roles" added between billing and tasks with user-tie icon
   - **Dedicated staff-roles page** - Complete staff management interface with two-tab layout (Staff and Role Assignments)

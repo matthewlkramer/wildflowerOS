@@ -1132,6 +1132,81 @@ export class DatabaseStorage implements IStorage {
     await db.delete(calendarClosures).where(eq(calendarClosures.id, id));
   }
 
+  // School year import methods
+  async getActiveSchoolYear(schoolId: string): Promise<SchoolYear | undefined> {
+    const [activeYear] = await db
+      .select()
+      .from(schoolYears)
+      .where(and(
+        eq(schoolYears.schoolId, schoolId),
+        eq(schoolYears.isActive, true)
+      ));
+    return activeYear;
+  }
+
+  async importSystemHolidaysForSchoolYear(schoolYearId: string): Promise<void> {
+    const schoolYear = await this.getSchoolYearById(schoolYearId);
+    if (!schoolYear) return;
+
+    // Get network default holidays
+    const networkHolidays = await db
+      .select()
+      .from(calendarClosures)
+      .where(and(
+        eq(calendarClosures.networkDefault, true),
+        isNull(calendarClosures.schoolId),
+        isNull(calendarClosures.schoolYearId)
+      ));
+
+    // Create school-specific holidays for this school year
+    const schoolHolidays = networkHolidays.map(holiday => ({
+      schoolId: schoolYear.schoolId,
+      schoolYearId: schoolYearId,
+      name: holiday.name,
+      description: holiday.description,
+      startDate: holiday.startDate,
+      endDate: holiday.endDate,
+      duration: holiday.duration,
+      networkDefault: false,
+      active: true
+    }));
+
+    if (schoolHolidays.length > 0) {
+      await db.insert(calendarClosures).values(schoolHolidays);
+    }
+  }
+
+  async copyHolidaysFromSchoolYear(fromSchoolYearId: string, toSchoolYearId: string): Promise<void> {
+    const toSchoolYear = await this.getSchoolYearById(toSchoolYearId);
+    if (!toSchoolYear) return;
+
+    // Get holidays from the source school year
+    const sourceHolidays = await db
+      .select()
+      .from(calendarClosures)
+      .where(and(
+        eq(calendarClosures.schoolYearId, fromSchoolYearId),
+        eq(calendarClosures.active, true)
+      ));
+
+    // Create holidays for the new school year
+    const newHolidays = sourceHolidays.map(holiday => ({
+      schoolId: toSchoolYear.schoolId,
+      schoolYearId: toSchoolYearId,
+      name: holiday.name,
+      description: holiday.description,
+      startDate: holiday.startDate,
+      endDate: holiday.endDate,
+      duration: holiday.duration,
+      networkDefault: false,
+      active: true
+    }));
+
+    if (newHolidays.length > 0) {
+      await db.insert(calendarClosures).values(newHolidays);
+    }
+  }
+
   // Families
   async getFamiliesBySchool(schoolId: string): Promise<Family[]> {
     return await db

@@ -767,6 +767,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Import school year from network defaults
+  app.post('/api/schools/:schoolId/import-school-year', isAuthenticated, async (req: any, res) => {
+    try {
+      const { schoolId } = req.params;
+      const { networkYearId, importType } = req.body;
+      
+      // Get the network school year
+      const networkYear = await storage.getSchoolYearById(networkYearId);
+      if (!networkYear) {
+        return res.status(404).json({ message: "Network school year not found" });
+      }
+      
+      // Create the school-specific year
+      const schoolYear = await storage.createSchoolYear({
+        schoolId,
+        name: networkYear.name,
+        startDate: networkYear.startDate,
+        endDate: networkYear.endDate,
+        isActive: false,
+        networkDefault: false
+      });
+      
+      // Handle holiday import based on type
+      if (importType === 'system_holidays') {
+        // Import system default holidays for this year
+        await storage.importSystemHolidaysForSchoolYear(schoolYear.id);
+      } else if (importType === 'current_year_holidays') {
+        // Copy holidays from current active year
+        const activeYear = await storage.getActiveSchoolYear(schoolId);
+        if (activeYear) {
+          await storage.copyHolidaysFromSchoolYear(activeYear.id, schoolYear.id);
+        }
+      }
+      // For 'no_holidays', we don't add any holidays
+      
+      res.status(201).json(schoolYear);
+    } catch (error) {
+      console.error("Error importing school year:", error);
+      res.status(500).json({ message: "Failed to import school year" });
+    }
+  });
+
   // Academic Calendar routes
   app.get('/api/school-years/:yearId/calendar', isAuthenticated, async (req: any, res) => {
     try {

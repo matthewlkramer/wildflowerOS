@@ -1232,6 +1232,8 @@ export default function SchoolSettingsPage() {
   const [selectedSchoolYear, setSelectedSchoolYear] = useState<any>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [selectedNetworkYear, setSelectedNetworkYear] = useState<string>("");
+  const [schoolStartDate, setSchoolStartDate] = useState("");
+  const [schoolEndDate, setSchoolEndDate] = useState("");
   const [addingSubsidy, setAddingSubsidy] = useState(false);
   const [showSSJ, setShowSSJ] = useState(true);
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
@@ -1689,13 +1691,17 @@ export default function SchoolSettingsPage() {
     mutationFn: async (networkYearId: string) => {
       return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
         networkYearId,
-        importType: 'system_holidays'
+        importType: 'system_holidays',
+        schoolStartDate,
+        schoolEndDate
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
       setShowImportDialog(false);
       setSelectedNetworkYear("");
+      setSchoolStartDate("");
+      setSchoolEndDate("");
       toast({
         title: "School year imported",
         description: "School year imported with system default holidays.",
@@ -1714,13 +1720,17 @@ export default function SchoolSettingsPage() {
     mutationFn: async (networkYearId: string) => {
       return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
         networkYearId,
-        importType: 'current_year_holidays'
+        importType: 'current_year_holidays',
+        schoolStartDate,
+        schoolEndDate
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
       setShowImportDialog(false);
       setSelectedNetworkYear("");
+      setSchoolStartDate("");
+      setSchoolEndDate("");
       toast({
         title: "School year imported",
         description: "School year imported with current year holidays.",
@@ -1739,13 +1749,17 @@ export default function SchoolSettingsPage() {
     mutationFn: async (networkYearId: string) => {
       return apiRequest('POST', `/api/schools/${schoolId}/import-school-year`, {
         networkYearId,
-        importType: 'no_holidays'
+        importType: 'no_holidays',
+        schoolStartDate,
+        schoolEndDate
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/schools", schoolId, "school-years"] });
       setShowImportDialog(false);
       setSelectedNetworkYear("");
+      setSchoolStartDate("");
+      setSchoolEndDate("");
       toast({
         title: "School year imported",
         description: "School year imported with no holidays.",
@@ -3468,8 +3482,43 @@ export default function SchoolSettingsPage() {
                           })()}
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* School Date Selection */}
                         {selectedNetworkYear && (
+                          <div className="space-y-4">
+                            <div className="border-t pt-4">
+                              <Label>Set Your School's Actual Dates</Label>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="schoolStartDate">
+                                  School Start Date
+                                </Label>
+                                <Input
+                                  id="schoolStartDate"
+                                  type="date"
+                                  value={schoolStartDate}
+                                  onChange={(e) => setSchoolStartDate(e.target.value)}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="schoolEndDate">
+                                  School End Date
+                                </Label>
+                                <Input
+                                  id="schoolEndDate"
+                                  type="date"
+                                  value={schoolEndDate}
+                                  onChange={(e) => setSchoolEndDate(e.target.value)}
+                                  className="mt-1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        {selectedNetworkYear && schoolStartDate && schoolEndDate && (
                           <div className="space-y-4">
                             <div className="border-t pt-4">
                               <Label>Choose how to handle holidays:</Label>
@@ -3519,6 +3568,8 @@ export default function SchoolSettingsPage() {
                             onClick={() => {
                               setShowImportDialog(false);
                               setSelectedNetworkYear("");
+                              setSchoolStartDate("");
+                              setSchoolEndDate("");
                             }}
                           >
                             Cancel

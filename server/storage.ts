@@ -1158,20 +1158,32 @@ export class DatabaseStorage implements IStorage {
         isNull(calendarClosures.schoolYearId)
       ));
 
-    // Create school-specific holidays for this school year
-    const schoolHolidays = networkHolidays.map(holiday => ({
-      schoolId: schoolYear.schoolId,
-      schoolYearId: schoolYearId,
-      name: holiday.name,
-      description: holiday.description,
-      // Handle date conversion properly
-      startDate: holiday.startDate ? new Date(holiday.startDate) : null,
-      endDate: holiday.endDate ? new Date(holiday.endDate) : null,
-      date: holiday.date ? new Date(holiday.date) : null,
-      duration: holiday.duration || 1,
-      networkDefault: false,
-      active: true
-    }));
+    // Create school-specific holidays for this school year, filtering out those outside school year dates
+    const schoolHolidays = networkHolidays
+      .filter(holiday => {
+        // Check if holiday falls within school year dates
+        const holidayDate = holiday.startDate || holiday.date;
+        if (!holidayDate) return false;
+        
+        const holidayDateObj = new Date(holidayDate);
+        const schoolStartDate = new Date(schoolYear.startDate);
+        const schoolEndDate = new Date(schoolYear.endDate);
+        
+        return holidayDateObj >= schoolStartDate && holidayDateObj <= schoolEndDate;
+      })
+      .map(holiday => ({
+        schoolId: schoolYear.schoolId,
+        schoolYearId: schoolYearId,
+        name: holiday.name,
+        description: holiday.description,
+        // Handle date conversion properly
+        startDate: holiday.startDate ? new Date(holiday.startDate) : null,
+        endDate: holiday.endDate ? new Date(holiday.endDate) : null,
+        date: holiday.date ? new Date(holiday.date) : null,
+        duration: holiday.duration || 1,
+        networkDefault: false,
+        active: true
+      }));
 
     if (schoolHolidays.length > 0) {
       await db.insert(calendarClosures).values(schoolHolidays);
@@ -1191,20 +1203,32 @@ export class DatabaseStorage implements IStorage {
         eq(calendarClosures.active, true)
       ));
 
-    // Create holidays for the new school year
-    const newHolidays = sourceHolidays.map(holiday => ({
-      schoolId: toSchoolYear.schoolId,
-      schoolYearId: toSchoolYearId,
-      name: holiday.name,
-      description: holiday.description,
-      // Handle date conversion properly
-      startDate: holiday.startDate ? new Date(holiday.startDate) : null,
-      endDate: holiday.endDate ? new Date(holiday.endDate) : null,
-      date: holiday.date ? new Date(holiday.date) : null,
-      duration: holiday.duration || 1,
-      networkDefault: false,
-      active: true
-    }));
+    // Create holidays for the new school year, filtering out those outside school year dates
+    const newHolidays = sourceHolidays
+      .filter(holiday => {
+        // Check if holiday falls within school year dates
+        const holidayDate = holiday.startDate || holiday.date;
+        if (!holidayDate) return false;
+        
+        const holidayDateObj = new Date(holidayDate);
+        const schoolStartDate = new Date(toSchoolYear.startDate);
+        const schoolEndDate = new Date(toSchoolYear.endDate);
+        
+        return holidayDateObj >= schoolStartDate && holidayDateObj <= schoolEndDate;
+      })
+      .map(holiday => ({
+        schoolId: toSchoolYear.schoolId,
+        schoolYearId: toSchoolYearId,
+        name: holiday.name,
+        description: holiday.description,
+        // Handle date conversion properly
+        startDate: holiday.startDate ? new Date(holiday.startDate) : null,
+        endDate: holiday.endDate ? new Date(holiday.endDate) : null,
+        date: holiday.date ? new Date(holiday.date) : null,
+        duration: holiday.duration || 1,
+        networkDefault: false,
+        active: true
+      }));
 
     if (newHolidays.length > 0) {
       await db.insert(calendarClosures).values(newHolidays);

@@ -771,7 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/schools/:schoolId/import-school-year', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;
-      const { networkYearId, importType } = req.body;
+      const { networkYearId, importType, schoolStartDate, schoolEndDate } = req.body;
       
       // Get the network school year
       const networkYear = await storage.getSchoolYearById(networkYearId);
@@ -779,12 +779,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Network school year not found" });
       }
       
-      // Create the school-specific year
+      // Create the school-specific year with custom dates
       const schoolYear = await storage.createSchoolYear({
         schoolId,
         name: networkYear.name,
-        startDate: networkYear.startDate,
-        endDate: networkYear.endDate,
+        startDate: new Date(schoolStartDate),
+        endDate: new Date(schoolEndDate),
         isActive: false,
         networkDefault: false
       });

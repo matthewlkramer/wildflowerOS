@@ -212,11 +212,11 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             </div>
           </div>
           
-          <div className="flex items-center space-x-2 sm:space-x-4 lg:space-x-6">
+          <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-6">
             {/* Role Switcher */}
             <div className="flex items-center">
               <Select value={currentUserRole?.roleName?.split('_')[0] || ""} onValueChange={handleRoleSwitch}>
-                <SelectTrigger className="w-20 sm:w-24 lg:w-32 border-gray-300 text-xs sm:text-sm">
+                <SelectTrigger className="w-24 sm:w-28 lg:w-32 border-gray-300 text-xs sm:text-sm">
                   <div className="flex items-center truncate">
                     {currentUserRole && (
                       <span className="truncate text-xs sm:text-sm">{getContextDisplayName()}</span>
@@ -247,7 +247,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               </Select>
             </div>
 
-            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3 lg:space-x-3">
               {/* Notifications */}
               <Button variant="ghost" size="sm" className="relative p-1 sm:p-2">
                 <Bell className="h-4 w-4 sm:h-5 sm:w-5" />

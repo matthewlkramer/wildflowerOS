@@ -57,6 +57,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
   const [showEmulationDialog, setShowEmulationDialog] = useState(false);
+  const [showSchoolEmulationDialog, setShowSchoolEmulationDialog] = useState(false);
   
   const roleLabels = getRoleLabels(t);
   const { toast } = useToast();
@@ -92,6 +93,12 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     enabled: showSchoolSelector,
   });
 
+  // Fetch schools for emulation
+  const { data: schools = [] } = useQuery<any[]>({
+    queryKey: ['/api/schools'],
+    enabled: showSchoolEmulationDialog,
+  });
+
   // Role switching mutation
   const switchRoleMutation = useMutation({
     mutationFn: async (roleId: string) => {
@@ -125,9 +132,10 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['/api/user/current-role'] });
       setShowEmulationDialog(false);
+      setShowSchoolEmulationDialog(false);
       toast({
         title: "Role emulation activated",
-        description: `Now emulating ${data.emulatingRole} role`,
+        description: `Now emulating ${data.emulatingRole || 'unknown'} role`,
       });
       window.location.reload();
     },
@@ -456,7 +464,10 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => emulateRoleMutation.mutate({ roleType: 'educator', schoolId: '0eb4ca76-8714-4a51-908d-76a157d11961' })}
+                onClick={() => {
+                  setShowEmulationDialog(false);
+                  setShowSchoolEmulationDialog(true);
+                }}
                 className="justify-start"
               >
                 <GraduationCap className="h-4 w-4 mr-2" />
@@ -476,6 +487,52 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                 className="justify-start"
               >
                 Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* School Selection Dialog for Educator Emulation */}
+    <Dialog open={showSchoolEmulationDialog} onOpenChange={setShowSchoolEmulationDialog}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Select School for Educator Emulation</DialogTitle>
+          <DialogDescription>
+            Choose which school you want to emulate as an educator.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">School</label>
+            <div className="space-y-2">
+              {schools.length > 0 ? (
+                schools.map((school) => (
+                  <Button 
+                    key={school.id}
+                    variant="outline" 
+                    onClick={() => emulateRoleMutation.mutate({ roleType: 'educator', schoolId: school.id })}
+                    className="justify-start w-full"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    {school.name}
+                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No schools available for emulation
+                </div>
+              )}
+              <Button 
+                variant="ghost" 
+                onClick={() => {
+                  setShowSchoolEmulationDialog(false);
+                  setShowEmulationDialog(true);
+                }}
+                className="w-full"
+              >
+                Back
               </Button>
             </div>
           </div>

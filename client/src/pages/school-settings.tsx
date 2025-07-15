@@ -3471,7 +3471,7 @@ export default function SchoolSettingsPage() {
                               <div className="space-y-6">
                                 {/* Network Year Selection */}
                                 <div className="space-y-4">
-                                  <Label>Select Network School Year to Import</Label>
+                                  <Label>Select School Year to Create</Label>
                                   {(() => {
                                     const availableYears = networkSchoolYears.filter(networkYear => 
                                       !schoolYears.some(schoolYear => schoolYear.name === networkYear.name)
@@ -3567,10 +3567,7 @@ export default function SchoolSettingsPage() {
                                         disabled={importWithCurrentYearHolidaysMutation.isPending}
                                         className="justify-start h-auto p-4"
                                       >
-                                        <div className="text-left">
-                                          <div className="font-medium">Add with the same holidays we used this year</div>
-                                          <div className="text-sm text-gray-500">Copy holidays from your current active year (but with updated dates)</div>
-                                        </div>
+                                        Add with the same holidays we used this year
                                       </Button>
                                       <Button 
                                         variant="outline"
@@ -3579,8 +3576,8 @@ export default function SchoolSettingsPage() {
                                         className="justify-start h-auto p-4"
                                       >
                                         <div className="text-left">
-                                          <div className="font-medium">Add with no holidays (I'll enter them later)</div>
-                                          <div className="text-sm text-gray-500">Import without any holidays</div>
+                                          <div className="font-medium">Add with no holidays</div>
+                                          <div className="text-sm text-gray-500">I'll add them later</div>
                                         </div>
                                       </Button>
                                     </div>

@@ -1217,6 +1217,11 @@ export class DatabaseStorage implements IStorage {
           networkDefault: false,
           active: true
         };
+      })
+      .filter(holiday => {
+        // Filter out holidays with invalid dates to prevent database errors
+        const hasValidDate = holiday.startDate || holiday.date;
+        return hasValidDate;
       });
 
     if (schoolHolidays.length > 0) {
@@ -1298,7 +1303,7 @@ export class DatabaseStorage implements IStorage {
         };
       })
       .filter(holiday => {
-        // Check if holiday falls within school year dates
+        // Check if holiday falls within school year dates and has valid date
         const holidayDate = holiday.startDate || holiday.date;
         if (!holidayDate) return false;
         

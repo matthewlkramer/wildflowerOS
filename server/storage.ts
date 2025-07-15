@@ -1308,7 +1308,39 @@ export class DatabaseStorage implements IStorage {
 
   // Messages and Channels
   async getChannelsByUser(userId: string): Promise<Channel[]> {
-    const results = await db
+    // Get user's roles to determine channel visibility
+    const userRoles = await this.getUserRoles(userId);
+    const roleNames = userRoles.map(r => r.name);
+    
+    // Determine user's role category for visibility rules
+    const isParent = roleNames.some(name => name.startsWith('parent'));
+    const isEducator = roleNames.some(name => name.startsWith('educator'));
+    const isBoardMember = roleNames.some(name => name.startsWith('board'));
+    const isPartner = roleNames.some(name => name.startsWith('partner'));
+    const isSysAdmin = roleNames.some(name => name.startsWith('sysadmin'));
+    
+    // Build visibility query based on role
+    let visibilityConditions;
+    
+    if (isSysAdmin || isPartner) {
+      // System admins and partners can see all channels
+      visibilityConditions = undefined; // No additional restrictions
+    } else if (isParent) {
+      // Parents can only see: public channels, school channels they belong to, classroom channels for their children, their family channel
+      visibilityConditions = or(
+        eq(channels.type, "public"),
+        and(eq(channels.scope, "family"), eq(channels.familyId, sql`(SELECT family_id FROM some_user_family_table WHERE user_id = ${userId})`))
+      );
+    } else {
+      // Educators and board members can see: public, semi_public, school/classroom channels from their schools
+      visibilityConditions = or(
+        eq(channels.type, "public"),
+        eq(channels.type, "semi_public")
+      );
+    }
+
+    // Get channels user is member of or has visibility to
+    const memberChannels = await db
       .select({
         id: channels.id,
         name: channels.name,
@@ -1330,7 +1362,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(channelMembers.userId, userId))
       .orderBy(desc(channels.updatedAt));
 
-    return results.map(channel => ({
+    return memberChannels.map(channel => ({
       ...channel,
       familyId: null // Add missing field for type compatibility
     }));
@@ -1409,6 +1441,80 @@ export class DatabaseStorage implements IStorage {
   async createMessage(message: InsertMessage): Promise<Message> {
     const [newMessage] = await db.insert(messages).values(message).returning();
     return newMessage;
+  }
+
+  // Default subscription logic based on role
+  async assignDefaultChannelSubscriptions(userId: string): Promise<void> {
+    const userRoles = await this.getUserRoles(userId);
+    const roleNames = userRoles.map(r => r.name);
+    
+    // Check role categories
+    const isEducator = roleNames.some(name => name.startsWith('educator'));
+    const isEducatorAdmin = roleNames.some(name => name.includes('educator_admin'));
+    const isBoardMember = roleNames.some(name => name.startsWith('board'));
+    const isPartner = roleNames.some(name => name.startsWith('partner'));
+    const isSysAdmin = roleNames.some(name => name.startsWith('sysadmin'));
+    
+    // Everyone gets subscribed to 'general'
+    await this.subscribeToChannelByName(userId, 'general');
+    
+    // Educator admins get subscribed to teacherleaders
+    if (isEducatorAdmin) {
+      await this.subscribeToChannelByName(userId, 'teacherleaders');
+    }
+    
+    // Board members get subscribed to boardmembers
+    if (isBoardMember) {
+      await this.subscribeToChannelByName(userId, 'boardmembers');
+    }
+    
+    // Partners and system admins get foundation channels
+    if (isPartner || isSysAdmin) {
+      const foundationChannels = [
+        'foundation-ops', 'foundation-mktgcomms', 'foundation-tech', 
+        'foundation-radicle', 'foundation-chartergrowth', 'foundation', 
+        'foundation-partners', 'foundation-random'
+      ];
+      for (const channelName of foundationChannels) {
+        await this.subscribeToChannelByName(userId, channelName);
+      }
+    }
+    
+    // TODO: Subscribe educators to age-level channels they teach
+    // TODO: Subscribe families to their school and classroom channels
+  }
+
+  async subscribeToChannelByName(userId: string, channelName: string): Promise<void> {
+    const channel = await db
+      .select({ id: channels.id })
+      .from(channels)
+      .where(eq(channels.name, channelName))
+      .limit(1);
+      
+    if (channel.length > 0) {
+      await this.subscribeUserToChannel(userId, channel[0].id);
+    }
+  }
+
+  async subscribeUserToChannel(userId: string, channelId: string): Promise<void> {
+    const existingMembership = await db
+      .select()
+      .from(channelMembers)
+      .where(
+        and(
+          eq(channelMembers.channelId, channelId),
+          eq(channelMembers.userId, userId)
+        )
+      );
+
+    if (existingMembership.length === 0) {
+      await db.insert(channelMembers).values({
+        channelId: channelId,
+        userId: userId,
+        joinedAt: new Date(),
+        lastReadAt: new Date(),
+      });
+    }
   }
 
   // Channel membership management

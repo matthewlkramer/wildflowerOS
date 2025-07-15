@@ -379,7 +379,7 @@ export const channels = pgTable("channels", {
   description: text("description"),
   type: varchar("type", { 
     enum: [
-      "public", "private", "board", "advisory", "dm", "task_comments"
+      "public", "semi_public", "private", "board", "advisory", "dm", "task_comments"
     ]
   }).notNull(),
   scope: varchar("scope", {
@@ -428,7 +428,7 @@ export const channelTemplates = pgTable("channel_templates", {
   description: text("description"),
   type: varchar("type", { 
     enum: [
-      "public", "private", "board", "advisory", "dm", "task_comments"
+      "public", "semi_public", "private", "board", "advisory", "dm", "task_comments"
     ]
   }).notNull(),
   scope: varchar("scope", {

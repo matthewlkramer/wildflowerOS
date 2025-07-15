@@ -11,6 +11,10 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 14, 2025
+- **✅ Enhanced messaging interface for more compact channel display**
+  - **Removed subtitle from chat header** - eliminated channel description/type line below channel name
+  - **More compact interface** - channels can now be packed closer together without visual clutter
+  - **Streamlined header** - shows only essential channel name and icon for cleaner appearance
 - **✅ COMPLETED: Comprehensive network school year and holiday management system**
   - **Network school years automatically generate holidays** when created based on system holiday rules
   - **Holiday pills display all holidays** on each school year card (removed overflow limit)

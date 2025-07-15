@@ -137,11 +137,6 @@ export default function EnhancedMessagesPage() {
                     <h2 className="font-semibold text-lg lg:text-base">
                       {getChannelDisplayName(selectedChannel)}
                     </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedChannel.description || 
-                       (selectedChannel.type === 'public' ? 'Public channel' : 
-                        selectedChannel.type === 'private' ? 'Private channel' : 'Direct message')}
-                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

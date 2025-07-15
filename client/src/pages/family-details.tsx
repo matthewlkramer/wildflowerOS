@@ -80,9 +80,6 @@ export default function FamilyDetailsPage() {
   });
   const [familyEditForm, setFamilyEditForm] = useState({
     name: "",
-    email: "",
-    phone: "",
-    address: "",
     notes: ""
   });
 
@@ -216,9 +213,6 @@ export default function FamilyDetailsPage() {
     if (family) {
       setFamilyEditForm({
         name: family.name || "",
-        email: family.email || "",
-        phone: family.phone || "",
-        address: family.address || "",
         notes: family.notes || ""
       });
       setEditingFamily(true);
@@ -429,37 +423,10 @@ export default function FamilyDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-sm font-medium text-gray-700">Family Name</Label>
-                      <p className="mt-1">{family.name || "Not provided"}</p>
-                    </div>
-                    <div>
-                      <Label className="text-sm font-medium text-gray-700">Contact Email</Label>
-                      <p className="mt-1">{family.email || "Not provided"}</p>
-                    </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Family Name</Label>
+                    <p className="mt-1">{family.name || "Not provided"}</p>
                   </div>
-                  
-                  {family.email && (
-                    <div className="flex items-center">
-                      <Mail className="mr-2 h-4 w-4 text-gray-400" />
-                      <span>{family.email}</span>
-                    </div>
-                  )}
-                  
-                  {family.phone && (
-                    <div className="flex items-center">
-                      <Phone className="mr-2 h-4 w-4 text-gray-400" />
-                      <span>{family.phone}</span>
-                    </div>
-                  )}
-                  
-                  {family.address && (
-                    <div className="flex items-center">
-                      <MapPin className="mr-2 h-4 w-4 text-gray-400" />
-                      <span>{family.address}</span>
-                    </div>
-                  )}
                   
                   {family.notes && (
                     <div>
@@ -853,31 +820,6 @@ export default function FamilyDetailsPage() {
                   id="familyName"
                   value={familyEditForm.name}
                   onChange={(e) => setFamilyEditForm(prev => ({ ...prev, name: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={familyEditForm.email}
-                  onChange={(e) => setFamilyEditForm(prev => ({ ...prev, email: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={familyEditForm.phone}
-                  onChange={(e) => setFamilyEditForm(prev => ({ ...prev, phone: e.target.value }))}
-                />
-              </div>
-              <div>
-                <Label htmlFor="address">Address</Label>
-                <Textarea
-                  id="address"
-                  value={familyEditForm.address}
-                  onChange={(e) => setFamilyEditForm(prev => ({ ...prev, address: e.target.value }))}
                 />
               </div>
               <div>

@@ -270,9 +270,6 @@ export const families = pgTable("families", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 200 }),
   lastName: varchar("last_name", { length: 100 }), // Family last name for channel naming
-  address: text("address"),
-  phone: varchar("phone", { length: 40 }),
-  email: varchar("email", { length: 255 }),
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

@@ -2161,5 +2161,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== CHANNEL TEST ENDPOINTS ========================
+  
+  // Channel Test Endpoint (no auth for testing)
+  app.get('/api/channel-test', async (req: Request, res: Response) => {
+    try {
+      const channels = await storage.getAllChannels();
+      res.json(channels);
+    } catch (error) {
+      console.error('Error getting channels:', error);
+      res.status(500).json({ error: 'Failed to get channels' });
+    }
+  });
+
   return httpServer;
 }

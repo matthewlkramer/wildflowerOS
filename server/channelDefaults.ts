@@ -267,33 +267,22 @@ export const schoolChannelTemplates: SchoolChannelTemplate[] = [
   },
 ];
 
-// Classroom channel templates
+// Classroom channel templates - 1 channel per classroom using msgDisplayName-ageLevel
 export interface ClassroomChannelTemplate {
   namePattern: string;
   description: string;
   type: "public" | "private";
   scope: "classroom";
-  levels: string[];
   canDelete: boolean;
   canArchive: boolean;
 }
 
 export const classroomChannelTemplates: ClassroomChannelTemplate[] = [
   {
-    namePattern: "{schoolPrefix}-primary",
-    description: "Primary classroom discussions",
-    type: "public",
+    namePattern: "{msgDisplayName}-{level}",
+    description: "{schoolName} {level} classroom",
+    type: "private",
     scope: "classroom",
-    levels: ["primary"],
-    canDelete: false,
-    canArchive: false,
-  },
-  {
-    namePattern: "{schoolPrefix}-elementary",
-    description: "Elementary classroom discussions",
-    type: "public",
-    scope: "classroom",
-    levels: ["lower_elem", "upper_elem"],
     canDelete: false,
     canArchive: false,
   },

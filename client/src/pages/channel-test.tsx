@@ -14,7 +14,7 @@ interface Channel {
   familyId?: string;
 }
 
-export function ChannelTest() {
+function ChannelTest() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [message, setMessage] = useState('');
 
@@ -78,7 +78,8 @@ export function ChannelTest() {
 
   const expectedClassroomChannels = [
     'wildrose-primary',
-    'wildrose-elementary'
+    'wildrose-toddler',
+    'wildrose-infant',
   ];
 
   const networkChannels = channels.filter(ch => ch.scope === 'network');
@@ -218,8 +219,8 @@ export function ChannelTest() {
             </div>
             
             <div>
-              <h4 className="font-semibold">Classroom Channels (2):</h4>
-              <p className="text-sm text-gray-600">wildrose-primary, wildrose-elementary</p>
+              <h4 className="font-semibold">Classroom Channels (1 per classroom):</h4>
+              <p className="text-sm text-gray-600">msgDisplayName-ageLevel format (e.g., wildrose-primary, wildrose-toddler)</p>
             </div>
             
             <div>
@@ -232,3 +233,5 @@ export function ChannelTest() {
     </div>
   );
 }
+
+export default ChannelTest;

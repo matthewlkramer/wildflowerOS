@@ -1530,7 +1530,7 @@ export class DatabaseStorage implements IStorage {
       .select({ 
         level: classrooms.level,
         schoolId: classrooms.schoolId,
-        schoolShortName: schools.shortName,
+        msgDisplayName: schools.msgDisplayName,
         schoolName: schools.name 
       })
       .from(classrooms)
@@ -1541,41 +1541,42 @@ export class DatabaseStorage implements IStorage {
     if (classroomInfo.length === 0) return;
     
     const classroom = classroomInfo[0];
-    const schoolPrefix = classroom.schoolShortName || classroom.schoolName.toLowerCase().replace(/\s+/g, '');
+    const displayName = classroom.msgDisplayName || classroom.schoolName?.toLowerCase().replace(/\s+/g, '') || 'school';
     
+    // Create 1 channel per classroom using msgDisplayName-ageLevel pattern
     for (const template of classroomChannelTemplates) {
-      if (template.levels.includes(classroom.level)) {
-        const channelName = template.namePattern
-          .replace('{schoolPrefix}', schoolPrefix)
-          .replace('{level}', classroom.level);
-        
-        const existingChannel = await db
-          .select()
-          .from(channels)
-          .where(
-            and(
-              eq(channels.name, channelName),
-              eq(channels.classroomId, classroomId),
-              eq(channels.scope, "classroom")
-            )
-          );
-        
-        if (existingChannel.length === 0) {
-          await db.insert(channels).values({
-            name: channelName,
-            description: template.description.replace('{level}', classroom.level),
-            type: template.type,
-            scope: "classroom",
-            schoolId: classroom.schoolId,
-            classroomId: classroomId,
-            familyId: null,
-            legalEntityId: null,
-            taskId: null,
-            isArchived: false,
-            canDelete: template.canDelete,
-            canArchive: template.canArchive,
-          });
-        }
+      const channelName = template.namePattern
+        .replace('{msgDisplayName}', displayName)
+        .replace('{level}', classroom.level);
+      
+      const existingChannel = await db
+        .select()
+        .from(channels)
+        .where(
+          and(
+            eq(channels.name, channelName),
+            eq(channels.classroomId, classroomId),
+            eq(channels.scope, "classroom")
+          )
+        );
+      
+      if (existingChannel.length === 0) {
+        await db.insert(channels).values({
+          name: channelName,
+          description: template.description
+            .replace('{schoolName}', classroom.schoolName || 'School')
+            .replace('{level}', classroom.level),
+          type: template.type,
+          scope: "classroom",
+          schoolId: classroom.schoolId,
+          classroomId: classroomId,
+          familyId: null,
+          legalEntityId: null,
+          taskId: null,
+          isArchived: false,
+          canDelete: template.canDelete,
+          canArchive: template.canArchive,
+        });
       }
     }
   }

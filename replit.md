@@ -49,6 +49,11 @@ Preferred communication style: Simple, everyday language.
   - Reduced avatar size (h-6 w-6 on mobile, h-8 w-8 on larger screens)
   - Minimized spacing between elements (space-x-1 on mobile, increasing with screen size)
   - Hidden chevron icon on very small screens for cleaner mobile appearance
+- **Replaced mobile text logo with actual Wildflower app icon**
+  - Mobile navigation now shows the generated-icon.png instead of "WildflowerOS" text
+  - Desktop retains the "WildflowerOS" text for clarity and branding
+  - Made right navigation bigger with improved role selector width (w-28 to w-36)
+  - Restored full-size icons and consistent spacing throughout mobile navigation
 - **Enhanced mobile bottom navigation to solve horizontal crowding**
   - Implemented smart "More" dropdown menu for secondary navigation items
   - Core items always visible: Dashboard, Families, Classrooms  

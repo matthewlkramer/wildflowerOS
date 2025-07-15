@@ -210,11 +210,11 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
             <div className="flex-shrink-0">
               {/* Mobile logo */}
               <div className="sm:hidden">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="16" cy="16" r="14" fill="#3B82F6" stroke="#1E40AF" strokeWidth="2"/>
-                  <path d="M16 8c-1.5 0-3 0.5-4 1.5-1 1-1.5 2.5-1.5 4s0.5 3 1.5 4l4 4 4-4c1-1 1.5-2.5 1.5-4s-0.5-3-1.5-4c-1-1-2.5-1.5-4-1.5z" fill="white"/>
-                  <circle cx="16" cy="13.5" r="2" fill="#3B82F6"/>
-                </svg>
+                <img 
+                  src="/generated-icon.png" 
+                  alt="Wildflower Schools" 
+                  className="w-8 h-8 rounded-lg"
+                />
               </div>
               {/* Desktop text */}
               <h1 className="hidden sm:block text-xl lg:text-2xl font-bold text-primary">WildflowerOS</h1>

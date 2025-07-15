@@ -2343,7 +2343,7 @@ export default function SchoolSettingsPage() {
                       <TabsList className="grid w-full grid-cols-5">
                         <TabsTrigger value="roles" className="flex items-center">
                           <Users className="mr-2 h-4 w-4" />
-                          Roles
+                          Admin Roles
                         </TabsTrigger>
                         <TabsTrigger value="school-years" className="flex items-center">
                           <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
@@ -2869,7 +2869,7 @@ export default function SchoolSettingsPage() {
             </TabsTrigger>
             <TabsTrigger value="roles" className="flex items-center px-1 sm:px-3">
               <Settings className="mr-1 sm:mr-2 h-4 w-4" />
-              <span className="text-xs sm:text-sm">Roles</span>
+              <span className="text-xs sm:text-sm">Admin Roles</span>
             </TabsTrigger>
             <TabsTrigger value="assignments" className="flex items-center px-1 sm:px-3">
               <Users className="mr-1 sm:mr-2 h-4 w-4" />
@@ -3094,9 +3094,9 @@ export default function SchoolSettingsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>School Roles</CardTitle>
+                    <CardTitle>School Admin Roles</CardTitle>
                     <p className="text-sm text-gray-600">
-                      Manage and customize roles available at this school. These roles form the foundation for staff assignments.
+                      Manage and customize administrative roles available at this school. These roles form the foundation for staff assignments.
                     </p>
                   </div>
                   <div className="flex items-center space-x-4">

@@ -1237,14 +1237,29 @@ export class DatabaseStorage implements IStorage {
         eq(calendarClosures.active, true)
       ));
 
-    // Get network default holidays for the same year to get updated dates
+    // Find the matching network school year to get updated holiday dates
+    const networkSchoolYear = await db
+      .select()
+      .from(schoolYears)
+      .where(and(
+        eq(schoolYears.name, toSchoolYear.name),
+        eq(schoolYears.networkDefault, true)
+      ))
+      .limit(1);
+
+    if (networkSchoolYear.length === 0) {
+      console.log(`No network school year found for ${toSchoolYear.name}`);
+      return;
+    }
+
+    // Get network default holidays for the new school year to get updated dates
     const networkHolidays = await db
       .select()
       .from(calendarClosures)
       .where(and(
         eq(calendarClosures.networkDefault, true),
-        isNull(calendarClosures.schoolId),
-        isNull(calendarClosures.schoolYearId)
+        eq(calendarClosures.schoolYearId, networkSchoolYear[0].id),
+        isNull(calendarClosures.schoolId)
       ));
 
     // Create a map of network holidays by name for quick lookup
@@ -1255,7 +1270,7 @@ export class DatabaseStorage implements IStorage {
     // Create holidays for the new school year with updated dates from network defaults
     const newHolidays = sourceHolidays
       .map(holiday => {
-        // Try to find matching network holiday to get updated dates
+        // Try to find matching network holiday to get updated dates for the new year
         const networkHoliday = networkHolidayMap.get(holiday.name);
         
         // Safely handle date conversion with validation
@@ -1270,7 +1285,7 @@ export class DatabaseStorage implements IStorage {
           schoolYearId: toSchoolYearId,
           name: holiday.name,
           description: holiday.description,
-          // Use network holiday dates if available, otherwise use original dates
+          // Use network holiday dates for the new year if available, otherwise use original dates
           startDate: networkHoliday?.startDate ? safeDate(networkHoliday.startDate) : 
                      safeDate(holiday.startDate),
           endDate: networkHoliday?.endDate ? safeDate(networkHoliday.endDate) : 

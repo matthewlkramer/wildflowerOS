@@ -3465,11 +3465,6 @@ export default function SchoolSettingsPage() {
                                         <div className="flex items-center justify-between">
                                           <div>
                                             <p className="font-medium">{year.name}</p>
-                                            {year.startDate && year.endDate && (
-                                              <p className="text-sm text-gray-500">
-                                                {new Date(year.startDate).toLocaleDateString()} - {new Date(year.endDate).toLocaleDateString()}
-                                              </p>
-                                            )}
                                           </div>
                                           <Badge variant="outline">Network Default</Badge>
                                         </div>

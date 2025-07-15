@@ -2730,42 +2730,37 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getClassroomsWithSchedulesForTuition(schoolId: string): Promise<any[]> {
-    const classrooms = await db
-      .select({
-        classroom: classrooms,
-        schedules: classroomSchedules
-      })
+    // First get all classrooms for the school
+    const schoolClassrooms = await db
+      .select()
       .from(classrooms)
-      .leftJoin(classroomSchedules, and(
-        eq(classroomSchedules.classroomId, classrooms.id),
-        eq(classroomSchedules.isActive, true),
-        eq(classroomSchedules.networkDefault, false)
-      ))
       .where(and(
         eq(classrooms.schoolId, schoolId),
         eq(classrooms.isActive, true)
       ))
       .orderBy(asc(classrooms.name));
 
-    // Group schedules by classroom
-    const groupedData = classrooms.reduce((acc: any, row) => {
-      const classroomId = row.classroom.id;
-      
-      if (!acc[classroomId]) {
-        acc[classroomId] = {
-          ...row.classroom,
-          schedules: []
-        };
-      }
-      
-      if (row.schedules) {
-        acc[classroomId].schedules.push(row.schedules);
-      }
-      
-      return acc;
-    }, {});
+    // For each classroom, get its schedules
+    const classroomsWithSchedules = await Promise.all(
+      schoolClassrooms.map(async (classroom) => {
+        const schedules = await db
+          .select()
+          .from(classroomSchedules)
+          .where(and(
+            eq(classroomSchedules.classroomId, classroom.id),
+            eq(classroomSchedules.isActive, true),
+            eq(classroomSchedules.networkDefault, false)
+          ))
+          .orderBy(asc(classroomSchedules.name));
 
-    return Object.values(groupedData);
+        return {
+          ...classroom,
+          schedules
+        };
+      })
+    );
+
+    return classroomsWithSchedules;
   }
 
   async updateTuitionPlan(id: string, data: Partial<InsertTuitionPlan>): Promise<TuitionPlan> {

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Hash, Lock, Users, Plus, Send, Smile, Paperclip, MoreVertical } from "lucide-react";
+import { Hash, Lock, Users, Plus, Send, Smile, Paperclip, MoreVertical, ArrowLeft, MessageCircle } from "lucide-react";
 import type { Channel, Message } from "@shared/schema";
 
 interface MessagesPageProps {}
@@ -29,6 +29,7 @@ export default function MessagesPage({}: MessagesPageProps) {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [messageContent, setMessageContent] = useState("");
   const [showNewChannelDialog, setShowNewChannelDialog] = useState(false);
+  const [showChannelList, setShowChannelList] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -163,17 +164,19 @@ export default function MessagesPage({}: MessagesPageProps) {
 
   return (
     <AppLayout user={user} currentRole={currentRole}>
-      <div className="flex h-[calc(100vh-4rem)] bg-white dark:bg-gray-900">
-        {/* Sidebar - Channel List */}
-        <div className="w-80 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div className="flex h-[calc(100vh-8rem)] lg:h-[calc(100vh-4rem)] bg-white dark:bg-gray-900">
+        {/* Channel List - Mobile: Full screen, Desktop: Sidebar */}
+        <div className={`${
+          showChannelList ? 'flex' : 'hidden'
+        } lg:flex w-full lg:w-80 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col`}>
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Messages</h1>
+              <h1 className="text-xl lg:text-lg font-semibold text-gray-900 dark:text-white">Messages</h1>
               <Dialog open={showNewChannelDialog} onOpenChange={setShowNewChannelDialog}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="ghost">
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-5 w-5 lg:h-4 lg:w-4" />
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
@@ -199,12 +202,15 @@ export default function MessagesPage({}: MessagesPageProps) {
 
           {/* Channels List */}
           <ScrollArea className="flex-1">
-            <div className="p-2 space-y-1">
+            <div className="p-2 space-y-2">
               {channels.map((channel) => (
                 <div
                   key={channel.id}
-                  onClick={() => setSelectedChannel(channel)}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                  onClick={() => {
+                    setSelectedChannel(channel);
+                    setShowChannelList(false); // Hide channel list on mobile when selecting
+                  }}
+                  className={`flex items-center gap-3 p-4 lg:p-3 rounded-lg cursor-pointer transition-colors ${
                     selectedChannel?.id === channel.id
                       ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
                       : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
@@ -213,30 +219,52 @@ export default function MessagesPage({}: MessagesPageProps) {
                   {getChannelIcon(channel.type)}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium truncate">
+                      <span className="font-medium text-base lg:text-sm truncate">
                         {channel.name || `${channel.type} channel`}
                       </span>
                       <Badge variant="secondary" className="ml-2 text-xs">
                         {channel.type}
                       </Badge>
                     </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-1">
+                      Tap to open conversation
+                    </p>
                   </div>
                 </div>
               ))}
+              
+              {channels.length === 0 && (
+                <div className="text-center py-8">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                  <p className="text-gray-600 dark:text-gray-400">No channels yet</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Create a channel to start messaging</p>
+                </div>
+              )}
             </div>
           </ScrollArea>
         </div>
 
         {/* Main Chat Area */}
         {selectedChannel ? (
-          <div className="flex-1 flex flex-col">
+          <div className={`${
+            showChannelList ? 'hidden' : 'flex'
+          } lg:flex flex-1 flex-col w-full`}>
             {/* Chat Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  {/* Back button for mobile */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="lg:hidden"
+                    onClick={() => setShowChannelList(true)}
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
                   {getChannelIcon(selectedChannel.type)}
                   <div>
-                    <h2 className="font-semibold text-gray-900 dark:text-white">
+                    <h2 className="font-semibold text-lg lg:text-base text-gray-900 dark:text-white">
                       {selectedChannel.name || `${selectedChannel.type} channel`}
                     </h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -299,46 +327,57 @@ export default function MessagesPage({}: MessagesPageProps) {
             </ScrollArea>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-              <div className="flex gap-2">
+            <div className="p-3 lg:p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+              <div className="flex gap-3 items-end">
                 <div className="flex-1 relative">
                   <Textarea
                     value={messageContent}
                     onChange={(e) => setMessageContent(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder={`Message ${selectedChannel.name || 'this channel'}...`}
-                    className="min-h-[44px] max-h-32 resize-none pr-20 dark:bg-gray-800 dark:border-gray-600"
+                    className="min-h-[48px] lg:min-h-[44px] max-h-32 resize-none pr-16 lg:pr-20 dark:bg-gray-800 dark:border-gray-600 text-base lg:text-sm rounded-xl"
                     rows={1}
                   />
                   <div className="absolute right-2 bottom-2 flex gap-1">
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Smile className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="h-7 w-7 lg:h-6 lg:w-6 p-0">
+                      <Smile className="h-5 w-5 lg:h-4 lg:w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                      <Paperclip className="h-4 w-4" />
+                    <Button variant="ghost" size="sm" className="h-7 w-7 lg:h-6 lg:w-6 p-0">
+                      <Paperclip className="h-5 w-5 lg:h-4 lg:w-4" />
                     </Button>
                   </div>
                 </div>
                 <Button
                   onClick={handleSendMessage}
                   disabled={!messageContent.trim() || sendMessageMutation.isPending}
-                  className="self-end"
+                  className="h-12 w-12 lg:h-10 lg:w-10 p-0 rounded-full"
+                  size="sm"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="h-5 w-5 lg:h-4 lg:w-4" />
                 </Button>
               </div>
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-gray-800">
-            <div className="text-center">
-              <Hash className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+          <div className={`${
+            showChannelList ? 'hidden' : 'flex'
+          } lg:flex flex-1 items-center justify-center bg-gray-50 dark:bg-gray-800`}>
+            <div className="text-center px-4">
+              <MessageCircle className="h-16 w-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
               <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
-                Select a channel
+                No channel selected
               </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                Choose a channel from the sidebar to start messaging
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                Choose a channel to start messaging
               </p>
+              <Button 
+                onClick={() => setShowChannelList(true)}
+                className="lg:hidden"
+                variant="outline"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to channels
+              </Button>
             </div>
           </div>
         )}

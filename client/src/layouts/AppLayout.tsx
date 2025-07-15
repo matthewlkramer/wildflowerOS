@@ -11,7 +11,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children, user, currentSchool, currentRole }: AppLayoutProps) {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       <TopNavigation user={user} currentSchool={currentSchool} currentRole={currentRole} />
       
       <div className="flex-1 flex pt-16">

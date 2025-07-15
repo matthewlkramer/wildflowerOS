@@ -94,21 +94,21 @@ export default function FamiliesPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "enrolled": return "bg-green-100 text-green-800";
-      case "prospective": return "bg-yellow-100 text-yellow-800";
-      case "withdrawn": return "bg-gray-100 text-gray-800";
-      case "graduated": return "bg-blue-100 text-blue-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "enrolled": return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+      case "prospective": return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400";
+      case "withdrawn": return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+      case "graduated": return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
     }
   };
 
   const getClassroomColor = (level: string) => {
     switch (level) {
-      case "primary": return "bg-blue-100 text-blue-800";
-      case "toddler": return "bg-green-100 text-green-800";
-      case "lower_elem": return "bg-purple-100 text-purple-800";
-      case "upper_elem": return "bg-orange-100 text-orange-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "primary": return "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400";
+      case "toddler": return "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400";
+      case "lower_elem": return "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400";
+      case "upper_elem": return "bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400";
+      default: return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
     }
   };
 
@@ -133,13 +133,13 @@ export default function FamiliesPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       <TopNavigation user={user} currentSchool={null} currentRole={currentRole} />
       
       <div className="flex-1 flex pt-16">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <div className="p-4 lg:p-6 pb-20">
             <div className="max-w-6xl mx-auto">
               {/* Page Header */}

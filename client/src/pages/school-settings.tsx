@@ -633,43 +633,43 @@ function SystemHolidaysOverview() {
             Add Holiday
           </Button>
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
           Common school holidays with standard rules that new schools can inherit.
         </p>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="overflow-x-auto border rounded-lg">
+          <div className="overflow-x-auto border dark:border-gray-700 rounded-lg">
             <table className="w-full border-collapse">
-              <thead className="bg-gray-50">
-                <tr className="border-b">
-                  <th className="text-left p-3 font-medium">Holiday Name</th>
-                  <th className="text-left p-3 font-medium">Rule</th>
-                  <th className="text-left p-3 font-medium">Description</th>
-                  <th className="text-left p-3 font-medium">Actions</th>
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr className="border-b dark:border-gray-700">
+                  <th className="text-left p-3 font-medium text-gray-900 dark:text-white">Holiday Name</th>
+                  <th className="text-left p-3 font-medium text-gray-900 dark:text-white">Rule</th>
+                  <th className="text-left p-3 font-medium text-gray-900 dark:text-white">Description</th>
+                  <th className="text-left p-3 font-medium text-gray-900 dark:text-white">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-gray-500">
+                    <td colSpan={4} className="p-8 text-center text-gray-500 dark:text-gray-400">
                       Loading holidays...
                     </td>
                   </tr>
                 ) : systemHolidays.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="p-8 text-center text-gray-500">
+                    <td colSpan={4} className="p-8 text-center text-gray-500 dark:text-gray-400">
                       No system holidays found. Add some holidays to get started.
                     </td>
                   </tr>
                 ) : (
                   systemHolidays.map((holiday: any) => (
-                    <tr key={holiday.id} className="border-b hover:bg-gray-50">
-                      <td className="p-3 font-medium">{holiday.name}</td>
-                      <td className="p-3 text-sm text-gray-600">
+                    <tr key={holiday.id} className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <td className="p-3 font-medium text-gray-900 dark:text-white">{holiday.name}</td>
+                      <td className="p-3 text-sm text-gray-600 dark:text-gray-400">
                         {holiday.rule || 'No rule set'}
                       </td>
-                      <td className="p-3 text-sm text-gray-600">{holiday.description}</td>
+                      <td className="p-3 text-sm text-gray-600 dark:text-gray-400">{holiday.description}</td>
                     <td className="p-3">
                       <div className="flex space-x-2">
                         <Button 
@@ -2206,13 +2206,13 @@ export default function SchoolSettingsPage() {
   const currentSchoolForNav = school;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
       <TopNavigation user={user} currentSchool={currentSchoolForNav} currentRole={currentRole} />
       
       <div className="flex-1 flex">
         <Sidebar currentRole={currentRole} />
         
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <div className="p-4 lg:p-6 pb-20">
       
       {/* School Selector Dialog for Educators without School ID */}
@@ -2231,7 +2231,7 @@ export default function SchoolSettingsPage() {
                 {availableEducators.map((educator: any, index: number) => (
                   <div
                     key={`educator-${index}-${educator.userId}`}
-                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    className="flex items-center justify-between p-3 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
                     onClick={() => {
                       console.log('Selected educator:', educator);
                       setSelectedSchoolId(educator.schoolId);

@@ -33,8 +33,8 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
       icon: Users,
       label: "Total Students",
       value: stats?.totalStudents || 0,
-      color: "text-blue-600",
-      bgColor: "bg-blue-50",
+      color: "text-blue-600 dark:text-blue-400",
+      bgColor: "bg-blue-50 dark:bg-blue-900/20",
       link: "/families",
       linkText: "View details",
       trend: "+12% this month",
@@ -44,8 +44,8 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
       icon: GraduationCap,
       label: "Active Classrooms",
       value: stats?.activeClassrooms || 0,
-      color: "text-green-600",
-      bgColor: "bg-green-50",
+      color: "text-green-600 dark:text-green-400",
+      bgColor: "bg-green-50 dark:bg-green-900/20",
       link: "/settings",
       linkText: "Manage classrooms",
       trend: "2 new this year",
@@ -55,8 +55,8 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
       icon: AlertTriangle,
       label: "Pending Tasks",
       value: stats?.pendingTasks || 0,
-      color: "text-orange-600",
-      bgColor: "bg-orange-50",
+      color: "text-orange-600 dark:text-orange-400",
+      bgColor: "bg-orange-50 dark:bg-orange-900/20",
       link: "/tasks",
       linkText: "View tasks",
       trend: "-8% this week",
@@ -66,8 +66,8 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
       icon: DollarSign,
       label: "Monthly Revenue",
       value: `$${stats?.monthlyRevenue?.toLocaleString() || "0"}`,
-      color: "text-emerald-600",
-      bgColor: "bg-emerald-50",
+      color: "text-emerald-600 dark:text-emerald-400",
+      bgColor: "bg-emerald-50 dark:bg-emerald-900/20",
       link: "/billing",
       linkText: "View billing",
       trend: "+$2.4k this month",
@@ -91,15 +91,15 @@ export default function StatsCards({ schoolId }: StatsCardsProps) {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-500">
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     {stat.label}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stat.value}
                   </p>
                   <div className="flex items-center justify-end mt-1">
                     <TrendIcon className={`h-3 w-3 mr-1 ${stat.trendUp ? 'text-green-500' : 'text-red-500'}`} />
-                    <span className={`text-xs ${stat.trendUp ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`text-xs ${stat.trendUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {stat.trend}
                     </span>
                   </div>

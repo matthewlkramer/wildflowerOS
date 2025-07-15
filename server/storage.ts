@@ -1174,13 +1174,16 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Get network default holidays that match BOTH network_default=true AND the specific school year ID
+    // Also ensure dates are not null to avoid invalid date errors
     const networkHolidays = await db
       .select()
       .from(calendarClosures)
       .where(and(
         eq(calendarClosures.networkDefault, true),
         eq(calendarClosures.schoolYearId, networkSchoolYear[0].id),
-        isNull(calendarClosures.schoolId)
+        isNull(calendarClosures.schoolId),
+        isNotNull(calendarClosures.startDate),
+        isNotNull(calendarClosures.endDate)
       ));
       
     console.log(`Found ${networkHolidays.length} network holidays for school year ${schoolYear.name}`);
@@ -1240,16 +1243,33 @@ export class DatabaseStorage implements IStorage {
       });
 
     if (schoolHolidays.length > 0) {
-      console.log('About to insert holidays:', schoolHolidays.map(h => ({
+      console.log('About to insert holidays:', JSON.stringify(schoolHolidays.map(h => ({
         name: h.name,
         startDate: h.startDate,
         endDate: h.endDate,
         startDateType: typeof h.startDate,
         endDateType: typeof h.endDate,
         startDateValid: h.startDate && !isNaN(h.startDate.getTime()),
-        endDateValid: h.endDate && !isNaN(h.endDate.getTime())
-      })));
-      await db.insert(calendarClosures).values(schoolHolidays);
+        endDateValid: h.endDate && !isNaN(h.endDate.getTime()),
+        startDateISO: h.startDate ? h.startDate.toISOString() : 'null',
+        endDateISO: h.endDate ? h.endDate.toISOString() : 'null'
+      })), null, 2));
+      
+      // Try to insert each holiday individually to find the problematic one
+      for (const holiday of schoolHolidays) {
+        try {
+          console.log(`Inserting holiday: ${holiday.name}`);
+          await db.insert(calendarClosures).values(holiday);
+          console.log(`Successfully inserted: ${holiday.name}`);
+        } catch (error) {
+          console.error(`Failed to insert holiday ${holiday.name}:`, error);
+          console.error('Holiday data:', JSON.stringify({
+            ...holiday,
+            startDateISO: holiday.startDate?.toISOString(),
+            endDateISO: holiday.endDate?.toISOString()
+          }, null, 2));
+        }
+      }
     }
   }
 

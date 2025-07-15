@@ -237,9 +237,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if user is a system admin
       const userRoles = await storage.getUserRoles(user.id);
+      const roleDefinitions = await storage.getRoleDefinitions();
       const isSystemAdmin = userRoles.some(role => {
-        const roleDefinition = role.roleId;
-        return role.roleName?.startsWith('sysadmin') && role.active;
+        const roleDefinition = roleDefinitions.find(rd => rd.id === role.roleId);
+        return roleDefinition?.name?.startsWith('sysadmin') && role.active;
       });
       
       if (!isSystemAdmin) {
@@ -250,7 +251,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const originalRoleId = req.session.currentRoleId;
       
       // Create a synthetic role for emulation
-      const roleDefinitions = await storage.getRoleDefinitions();
       const emulatedRoleDefinition = roleDefinitions.find(rd => rd.name.startsWith(roleType));
       
       if (!emulatedRoleDefinition) {
@@ -317,7 +317,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check if user is a system admin
       const userRoles = await storage.getUserRoles(user.id);
-      const isSystemAdmin = userRoles.some(role => role.roleName?.startsWith('sysadmin') && role.active);
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const isSystemAdmin = userRoles.some(role => {
+        const roleDefinition = roleDefinitions.find(rd => rd.id === role.roleId);
+        return roleDefinition?.name?.startsWith('sysadmin') && role.active;
+      });
       
       if (!isSystemAdmin) {
         return res.status(403).json({ message: "Only system administrators can clear emulation" });

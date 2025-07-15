@@ -1308,38 +1308,7 @@ export class DatabaseStorage implements IStorage {
 
   // Messages and Channels
   async getChannelsByUser(userId: string): Promise<Channel[]> {
-    // Get user's roles to determine channel visibility
-    const userRoles = await this.getUserRoles(userId);
-    const roleNames = userRoles.map(r => r.name);
-    
-    // Determine user's role category for visibility rules
-    const isParent = roleNames.some(name => name.startsWith('parent'));
-    const isEducator = roleNames.some(name => name.startsWith('educator'));
-    const isBoardMember = roleNames.some(name => name.startsWith('board'));
-    const isPartner = roleNames.some(name => name.startsWith('partner'));
-    const isSysAdmin = roleNames.some(name => name.startsWith('sysadmin'));
-    
-    // Build visibility query based on role
-    let visibilityConditions;
-    
-    if (isSysAdmin || isPartner) {
-      // System admins and partners can see all channels
-      visibilityConditions = undefined; // No additional restrictions
-    } else if (isParent) {
-      // Parents can only see: public channels, school channels they belong to, classroom channels for their children, their family channel
-      visibilityConditions = or(
-        eq(channels.type, "public"),
-        and(eq(channels.scope, "family"), eq(channels.familyId, sql`(SELECT family_id FROM some_user_family_table WHERE user_id = ${userId})`))
-      );
-    } else {
-      // Educators and board members can see: public, semi_public, school/classroom channels from their schools
-      visibilityConditions = or(
-        eq(channels.type, "public"),
-        eq(channels.type, "semi_public")
-      );
-    }
-
-    // Get channels user is member of or has visibility to
+    // Get channels user is member of
     const memberChannels = await db
       .select({
         id: channels.id,

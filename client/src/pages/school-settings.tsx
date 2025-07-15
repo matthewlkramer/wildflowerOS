@@ -3431,7 +3431,7 @@ export default function SchoolSettingsPage() {
                       <DialogHeader>
                         <DialogTitle className="flex items-center">
                           <Download className="mr-2 h-5 w-5" />
-                          Import School Year
+                          Add New School Year
                         </DialogTitle>
                         <DialogDescription>
                           Select a network default school year to import and choose how to handle holidays.

@@ -794,10 +794,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Import system default holidays for this year
         await storage.importSystemHolidaysForSchoolYear(schoolYear.id);
       } else if (importType === 'current_year_holidays') {
-        // Copy holidays from current active year
+        // Copy holidays from most recent school year (active or latest)
         const activeYear = await storage.getActiveSchoolYear(schoolId);
         if (activeYear) {
           await storage.copyHolidaysFromSchoolYear(activeYear.id, schoolYear.id);
+        } else {
+          // If no active year, get the most recent school year
+          const recentYear = await storage.getMostRecentSchoolYear(schoolId);
+          if (recentYear) {
+            await storage.copyHolidaysFromSchoolYear(recentYear.id, schoolYear.id);
+          }
         }
       }
       // For 'no_holidays', we don't add any holidays

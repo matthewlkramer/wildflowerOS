@@ -11,12 +11,15 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
-- **✅ FIXED: School year import "Invalid time value" error and text updates**
+- **✅ FIXED: School year import "Invalid time value" error and comprehensive date handling**
   - **Database cleanup** - Removed 13 template holidays with NULL dates that were causing database insert errors
   - **Text updates** - Changed "Select Network School Year to Import" to "Select School Year to Create" and confirmed "I'll add them later" text
   - **Enhanced data validation** - Added filtering to prevent holidays with invalid dates from being inserted
   - **Root cause resolved** - Template holidays without school_year_id and with NULL dates were causing the timestamp conversion error
-  - **CONFIRMED WORKING** - School year import system now functions without database errors
+  - **Fixed date field redundancy** - Removed deprecated `date` field from calendar_closures schema, now using only `startDate` and `endDate`
+  - **Fixed end date formatting** - All holidays now properly span from 00:00:00 to 23:59:59 of their respective days (52 records updated)
+  - **Enhanced timezone handling** - Updated holiday service to use local timezone date parsing instead of UTC for consistent cross-timezone operations
+  - **CONFIRMED WORKING** - School year import system now functions without database errors with proper date handling
 - **✅ COMPLETED: School year import functionality with holiday management**
   - **Import dialog interface** - Shows radio button selection for available network default years that haven't been imported yet
   - **Four import options** - "Add with system default holidays", "Add with current year holidays", "Add with no holidays", and "Cancel"

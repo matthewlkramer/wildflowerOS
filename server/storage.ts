@@ -1059,16 +1059,36 @@ export class DatabaseStorage implements IStorage {
 
   // Calendar closures
   async getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]> {
-    const holidays = await db
-      .select()
-      .from(calendarClosures)
-      .where(
-        and(
-          eq(calendarClosures.schoolYearId, schoolYearId),
-          eq(calendarClosures.networkDefault, true),
-          isNull(calendarClosures.schoolId) // Only network defaults, not school-specific
-        )
-      );
+    // First, check if this is a network default school year or school-specific year
+    const schoolYear = await this.getSchoolYearById(schoolYearId);
+    if (!schoolYear) return [];
+
+    let holidays;
+    
+    if (schoolYear.networkDefault && !schoolYear.schoolId) {
+      // For network default school years, get network default holidays
+      holidays = await db
+        .select()
+        .from(calendarClosures)
+        .where(
+          and(
+            eq(calendarClosures.schoolYearId, schoolYearId),
+            eq(calendarClosures.networkDefault, true),
+            isNull(calendarClosures.schoolId)
+          )
+        );
+    } else {
+      // For school-specific school years, get school-specific holidays
+      holidays = await db
+        .select()
+        .from(calendarClosures)
+        .where(
+          and(
+            eq(calendarClosures.schoolYearId, schoolYearId),
+            eq(calendarClosures.active, true)
+          )
+        );
+    }
     
     // Sort in academic year order starting with Labor Day (September)
     const academicYearOrder = [

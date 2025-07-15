@@ -58,6 +58,420 @@ import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 
 // Network School Year Holidays Component
+function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
+  const { toast } = useToast();
+  const [editingHoliday, setEditingHoliday] = useState<any>(null);
+  const [addingHoliday, setAddingHoliday] = useState(false);
+  const [holidayForm, setHolidayForm] = useState({
+    name: "",
+    description: "",
+    startDate: "",
+    endDate: "",
+    duration: 1
+  });
+
+  // Fetch holidays for this school year
+  const { data: holidays = [], isLoading } = useQuery({
+    queryKey: ["/api/school-years", schoolYearId, "closures"],
+    enabled: !!schoolYearId,
+  });
+
+  // Create holiday mutation
+  const createHolidayMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('POST', `/api/calendar-closures`, {
+        ...data,
+        schoolYearId,
+        networkDefault: false,
+        active: true
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYearId, "closures"] });
+      setAddingHoliday(false);
+      setHolidayForm({ name: "", description: "", startDate: "", endDate: "", duration: 1 });
+      toast({
+        title: "Holiday created",
+        description: "Holiday has been created successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating holiday",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update holiday mutation
+  const updateHolidayMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('PATCH', `/api/calendar-closures/${data.id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYearId, "closures"] });
+      setEditingHoliday(null);
+      setHolidayForm({ name: "", description: "", startDate: "", endDate: "", duration: 1 });
+      toast({
+        title: "Holiday updated",
+        description: "Holiday has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating holiday",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete holiday mutation
+  const deleteHolidayMutation = useMutation({
+    mutationFn: async (holidayId: string) => {
+      return apiRequest('DELETE', `/api/calendar-closures/${holidayId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/school-years", schoolYearId, "closures"] });
+      toast({
+        title: "Holiday deleted",
+        description: "Holiday has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting holiday",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditHoliday = (holiday: any) => {
+    setEditingHoliday(holiday);
+    setHolidayForm({
+      name: holiday.name || "",
+      description: holiday.description || "",
+      startDate: holiday.startDate ? new Date(holiday.startDate).toISOString().split('T')[0] : "",
+      endDate: holiday.endDate ? new Date(holiday.endDate).toISOString().split('T')[0] : "",
+      duration: holiday.duration || 1
+    });
+  };
+
+  const handleUpdateHoliday = () => {
+    if (!holidayForm.name || !holidayForm.startDate || !holidayForm.endDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateHolidayMutation.mutate({
+      id: editingHoliday.id,
+      name: holidayForm.name,
+      description: holidayForm.description,
+      startDate: holidayForm.startDate,
+      endDate: holidayForm.endDate,
+      duration: holidayForm.duration
+    });
+  };
+
+  const handleCreateHoliday = () => {
+    if (!holidayForm.name || !holidayForm.startDate || !holidayForm.endDate) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createHolidayMutation.mutate({
+      name: holidayForm.name,
+      description: holidayForm.description,
+      startDate: holidayForm.startDate,
+      endDate: holidayForm.endDate,
+      duration: holidayForm.duration
+    });
+  };
+
+  const handleDeleteHoliday = (holidayId: string) => {
+    if (confirm("Are you sure you want to delete this holiday? This action cannot be undone.")) {
+      deleteHolidayMutation.mutate(holidayId);
+    }
+  };
+
+  const handleStartDateChange = (startDate: string) => {
+    setHolidayForm(prev => ({
+      ...prev,
+      startDate,
+      endDate: startDate // Default end date to same as start date
+    }));
+  };
+
+  if (!schoolYearId) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-medium text-gray-900">Associated Holidays</h4>
+        <div className="flex items-center space-x-2">
+          <span className="text-xs text-gray-500">{holidays.length} holidays</span>
+          <Button
+            size="sm"
+            onClick={() => setAddingHoliday(true)}
+            disabled={addingHoliday}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Holiday
+          </Button>
+        </div>
+      </div>
+      
+      {isLoading ? (
+        <div className="text-center py-4 text-gray-500">Loading holidays...</div>
+      ) : (
+        <div className="space-y-2">
+          {/* Add Holiday Form */}
+          {addingHoliday && (
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h5 className="text-sm font-medium text-gray-900">Add New Holiday</h5>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setAddingHoliday(false);
+                    setHolidayForm({ name: "", description: "", startDate: "", endDate: "", duration: 1 });
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs">Name *</Label>
+                  <Input
+                    value={holidayForm.name}
+                    onChange={(e) => setHolidayForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g., Labor Day"
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Description</Label>
+                  <Input
+                    value={holidayForm.description}
+                    onChange={(e) => setHolidayForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Optional description"
+                    className="h-8"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-xs">Start Date *</Label>
+                  <Input
+                    type="date"
+                    value={holidayForm.startDate}
+                    onChange={(e) => handleStartDateChange(e.target.value)}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">End Date *</Label>
+                  <Input
+                    type="date"
+                    value={holidayForm.endDate}
+                    onChange={(e) => setHolidayForm(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="h-8"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">Duration (days)</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="30"
+                    value={holidayForm.duration}
+                    onChange={(e) => setHolidayForm(prev => ({ ...prev, duration: parseInt(e.target.value) || 1 }))}
+                    className="h-8"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setAddingHoliday(false);
+                    setHolidayForm({ name: "", description: "", startDate: "", endDate: "", duration: 1 });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleCreateHoliday}
+                  disabled={createHolidayMutation.isPending}
+                >
+                  {createHolidayMutation.isPending ? "Creating..." : "Create Holiday"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Holiday List */}
+          {holidays.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <div className="text-sm">No holidays found for this school year.</div>
+              <div className="text-xs mt-1">Click "Add Holiday" to create your first holiday.</div>
+            </div>
+          ) : (
+            holidays
+              .sort((a: any, b: any) => {
+                // Sort by start date
+                const dateA = new Date(a.startDate);
+                const dateB = new Date(b.startDate);
+                return dateA.getTime() - dateB.getTime();
+              })
+              .map((holiday: any) => (
+                <div key={holiday.id} className="bg-white border border-gray-200 rounded-lg p-4">
+                  {editingHoliday?.id === holiday.id ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-sm font-medium text-gray-900">Edit Holiday</h5>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingHoliday(null);
+                            setHolidayForm({ name: "", description: "", startDate: "", endDate: "", duration: 1 });
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-xs">Name *</Label>
+                          <Input
+                            value={holidayForm.name}
+                            onChange={(e) => setHolidayForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Labor Day"
+                            className="h-8"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Description</Label>
+                          <Input
+                            value={holidayForm.description}
+                            onChange={(e) => setHolidayForm(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Optional description"
+                            className="h-8"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div>
+                          <Label className="text-xs">Start Date *</Label>
+                          <Input
+                            type="date"
+                            value={holidayForm.startDate}
+                            onChange={(e) => handleStartDateChange(e.target.value)}
+                            className="h-8"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">End Date *</Label>
+                          <Input
+                            type="date"
+                            value={holidayForm.endDate}
+                            onChange={(e) => setHolidayForm(prev => ({ ...prev, endDate: e.target.value }))}
+                            className="h-8"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Duration (days)</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="30"
+                            value={holidayForm.duration}
+                            onChange={(e) => setHolidayForm(prev => ({ ...prev, duration: parseInt(e.target.value) || 1 }))}
+                            className="h-8"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingHoliday(null);
+                            setHolidayForm({ name: "", description: "", startDate: "", endDate: "", duration: 1 });
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleUpdateHoliday}
+                          disabled={updateHolidayMutation.isPending}
+                        >
+                          {updateHolidayMutation.isPending ? "Updating..." : "Update Holiday"}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <h5 className="text-sm font-medium text-gray-900">{holiday.name}</h5>
+                          <span className="text-xs text-gray-500">
+                            {holiday.duration} day{holiday.duration !== 1 ? 's' : ''}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-4 mt-1">
+                          <span className="text-xs text-gray-600">
+                            {new Date(holiday.startDate).toLocaleDateString()} - {new Date(holiday.endDate).toLocaleDateString()}
+                          </span>
+                          {holiday.description && (
+                            <span className="text-xs text-gray-500">{holiday.description}</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditHoliday(holiday)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleDeleteHoliday(holiday.id)}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function NetworkSchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
   const { toast } = useToast();
   const [editingHoliday, setEditingHoliday] = useState<any>(null);
@@ -3382,41 +3796,49 @@ export default function SchoolSettingsPage() {
 
                           {/* Edit School Year Dialog */}
                           <Dialog open={editingSchoolYear !== null} onOpenChange={(open) => !open && setEditingSchoolYear(null)}>
-                            <DialogContent>
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>Edit School Year</DialogTitle>
                                 <DialogDescription>
-                                  Update the school year information and dates.
+                                  Update the school year information, dates, and associated holidays.
                                 </DialogDescription>
                               </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <Label>Year Name</Label>
-                                  <Input
-                                    value={schoolYearForm.name}
-                                    onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
-                                    placeholder="e.g., 2024-2025"
-                                  />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-6">
+                                {/* School Year Basic Info */}
+                                <div className="space-y-4">
+                                  <h4 className="text-sm font-medium text-gray-900">School Year Information</h4>
                                   <div>
-                                    <Label>Start Date</Label>
+                                    <Label>Year Name</Label>
                                     <Input
-                                      type="date"
-                                      value={schoolYearForm.startDate}
-                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                      value={schoolYearForm.name}
+                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, name: e.target.value }))}
+                                      placeholder="e.g., 2024-2025"
                                     />
                                   </div>
-                                  <div>
-                                    <Label>End Date</Label>
-                                    <Input
-                                      type="date"
-                                      value={schoolYearForm.endDate}
-                                      onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
-                                    />
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <Label>Start Date</Label>
+                                      <Input
+                                        type="date"
+                                        value={schoolYearForm.startDate}
+                                        onChange={(e) => setSchoolYearForm(prev => ({ ...prev, startDate: e.target.value }))}
+                                      />
+                                    </div>
+                                    <div>
+                                      <Label>End Date</Label>
+                                      <Input
+                                        type="date"
+                                        value={schoolYearForm.endDate}
+                                        onChange={(e) => setSchoolYearForm(prev => ({ ...prev, endDate: e.target.value }))}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
-                                <div className="flex justify-end space-x-2">
+
+                                {/* Associated Holidays */}
+                                <SchoolYearHolidays schoolYearId={editingSchoolYear?.id || ''} />
+
+                                <div className="flex justify-end space-x-2 pt-4 border-t">
                                   <Button variant="outline" onClick={() => setEditingSchoolYear(null)}>
                                     Cancel
                                   </Button>

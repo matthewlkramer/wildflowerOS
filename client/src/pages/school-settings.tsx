@@ -2186,7 +2186,20 @@ export default function SchoolSettingsPage() {
 
   const formatRole = (role: string) => {
     if (!role) return "";
-    return role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+    
+    // Handle special Teacher Leader role
+    if (role === 'teacher_leader') {
+      return 'Teacher Leader';
+    }
+    
+    // Remove "educator_" prefix for educator roles
+    let displayRole = role;
+    if (role.startsWith('educator_')) {
+      displayRole = role.substring(9); // Remove "educator_" prefix
+    }
+    
+    // Convert underscores to spaces and capitalize each word
+    return displayRole.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   };
 
   const formatLevel = (level: string) => {

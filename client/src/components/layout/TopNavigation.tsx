@@ -61,6 +61,20 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Guard against undefined user
+  if (!user) {
+    return (
+      <nav className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed top-0 left-0 right-0 z-50 h-16">
+        <div className="px-4 h-full flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="text-xl font-bold text-gray-900 dark:text-white">WildflowerOS</div>
+          </div>
+          <div className="animate-pulse">Loading...</div>
+        </div>
+      </nav>
+    );
+  }
+
   // Fetch user roles
   const { data: userRoles = [] } = useQuery<UserRole[]>({
     queryKey: ['/api/user/roles'],
@@ -310,7 +324,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
               <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="p-1 flex items-center space-x-1">
-                  {user.profileImageUrl ? (
+                  {user?.profileImageUrl ? (
                     <img 
                       className="h-8 w-8 rounded-full object-cover" 
                       src={user.profileImageUrl} 
@@ -319,7 +333,7 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-primary text-white dark:text-gray-200 flex items-center justify-center">
                       <span className="text-sm font-medium">
-                        {user.firstName?.[0] || 'U'}{user.lastName?.[0] || ''}
+                        {user?.firstName?.[0] || 'U'}{user?.lastName?.[0] || ''}
                       </span>
                     </div>
                   )}

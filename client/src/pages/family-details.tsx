@@ -712,42 +712,44 @@ export default function FamilyDetailsPage() {
                       return (
                         <div key={child.id} className="p-4 border rounded-lg">
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">{child.firstName} {child.lastName}</h4>
-                              <p className="text-sm text-gray-600">
-                                Born: {new Date(child.birthDate).toLocaleDateString()} • Age: {formatAgeDisplay(child.birthDate)}
-                              </p>
-                              {child.genderId && (
+                            <Link href={`/children/${child.id}`} className="flex-1 cursor-pointer">
+                              <div className="hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded transition-colors">
+                                <h4 className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">{child.firstName} {child.lastName}</h4>
                                 <p className="text-sm text-gray-600">
-                                  Gender: {genders.find((g: any) => g.id === child.genderId)?.name || "Unknown"}
-                                  {child.genderOther && ` (${child.genderOther})`}
+                                  Born: {new Date(child.birthDate).toLocaleDateString()} • Age: {formatAgeDisplay(child.birthDate)}
                                 </p>
-                              )}
-                              {child.raceEthnicityIds && child.raceEthnicityIds.length > 0 && (
-                                <p className="text-sm text-gray-600">
-                                  Race/Ethnicity: {getLabelForIds(child.raceEthnicityIds, raceEthnicities, "name")}
-                                  {child.raceEthnicityOther && ` (${child.raceEthnicityOther})`}
-                                </p>
-                              )}
-                              {child.primaryLanguageIds && child.primaryLanguageIds.length > 0 && (
-                                <p className="text-sm text-gray-600">
-                                  Languages: {getLabelForIds(child.primaryLanguageIds, languages, "nameEnglish")}
-                                  {child.primaryLanguageOther && ` (${child.primaryLanguageOther})`}
-                                </p>
-                              )}
-                              {enrollment && (
-                                <div className="mt-2 flex items-center space-x-2">
-                                  <Badge className={getStatusColor(enrollment.status)}>
-                                    {enrollment.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                  </Badge>
-                                  {enrollment.classroom && (
-                                    <Badge className={getClassroomColor(enrollment.classroom.level)}>
-                                      {enrollment.classroom.name}
+                                {child.genderId && (
+                                  <p className="text-sm text-gray-600">
+                                    Gender: {genders.find((g: any) => g.id === child.genderId)?.name || "Unknown"}
+                                    {child.genderOther && ` (${child.genderOther})`}
+                                  </p>
+                                )}
+                                {child.raceEthnicityIds && child.raceEthnicityIds.length > 0 && (
+                                  <p className="text-sm text-gray-600">
+                                    Race/Ethnicity: {getLabelForIds(child.raceEthnicityIds, raceEthnicities, "name")}
+                                    {child.raceEthnicityOther && ` (${child.raceEthnicityOther})`}
+                                  </p>
+                                )}
+                                {child.primaryLanguageIds && child.primaryLanguageIds.length > 0 && (
+                                  <p className="text-sm text-gray-600">
+                                    Languages: {getLabelForIds(child.primaryLanguageIds, languages, "nameEnglish")}
+                                    {child.primaryLanguageOther && ` (${child.primaryLanguageOther})`}
+                                  </p>
+                                )}
+                                {enrollment && (
+                                  <div className="mt-2 flex items-center space-x-2">
+                                    <Badge className={getStatusColor(enrollment.status)}>
+                                      {enrollment.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                     </Badge>
-                                  )}
-                                </div>
-                              )}
-                            </div>
+                                    {enrollment.classroom && (
+                                      <Badge className={getClassroomColor(enrollment.classroom.level)}>
+                                        {enrollment.classroom.name}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </Link>
                             <div className="flex space-x-2">
                               <Link href={`/children/${child.id}`}>
                                 <Button variant="outline" size="sm" title="View child details">

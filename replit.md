@@ -30,6 +30,10 @@ Preferred communication style: Simple, everyday language.
     - Duration 1 holidays: end at 23:59:59 of same day (Labor Day, MLK Day, Good Friday, etc.)
     - Duration 2 holidays: end at 23:59:59 of second day (Rosh Hashanah)
     - Duration 9 holidays: end at 23:59:59 of ninth day (Winter Break: Dec 24 - Jan 1)
+  - **COMPREHENSIVE END DATE FIX** - Updated all 76 holiday records to ensure proper date alignment:
+    - Used DATE() function to ensure end dates are exactly on the correct day
+    - Fixed timezone display issues that were showing next-day end dates
+    - All 63 single-day holidays now end at 23:59:59 of their start date
 - **✅ COMPLETED: School year import functionality with holiday management**
   - **Import dialog interface** - Shows radio button selection for available network default years that haven't been imported yet
   - **Four import options** - "Add with system default holidays", "Add with current year holidays", "Add with no holidays", and "Cancel"

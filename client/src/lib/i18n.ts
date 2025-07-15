@@ -94,7 +94,6 @@ const resources = {
       // Dashboard
       welcome: "Welcome",
       overview: "Overview",
-      recent_activity: "Recent Activity",
       quick_actions: "Quick Actions",
       statistics: "Statistics",
       students: "Students",

@@ -328,6 +328,109 @@ export const children = pgTable("children", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Child health and medical information (persistent across enrollments)
+export const childHealthProfiles = pgTable("child_health_profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  childId: uuid("child_id").notNull().references(() => children.id, { onDelete: "cascade" }),
+  
+  // Medical providers
+  pediatricianName: varchar("pediatrician_name", { length: 255 }),
+  pediatricianPhone: varchar("pediatrician_phone", { length: 20 }),
+  pediatricianAddress: text("pediatrician_address"),
+  
+  // Emergency medical info
+  preferredHospital: varchar("preferred_hospital", { length: 255 }),
+  hospitalAddress: text("hospital_address"),
+  hospitalPhone: varchar("hospital_phone", { length: 20 }),
+  
+  // Health conditions and allergies
+  allergies: text("allergies"), // JSON array or text list of allergies
+  medications: text("medications"), // Current medications
+  medicalConditions: text("medical_conditions"), // Ongoing conditions like asthma, diabetes, etc.
+  dietaryRestrictions: text("dietary_restrictions"),
+  
+  // Emergency contacts (beyond family)
+  emergencyContact1Name: varchar("emergency_contact_1_name", { length: 255 }),
+  emergencyContact1Phone: varchar("emergency_contact_1_phone", { length: 20 }),
+  emergencyContact1Relationship: varchar("emergency_contact_1_relationship", { length: 100 }),
+  emergencyContact2Name: varchar("emergency_contact_2_name", { length: 255 }),
+  emergencyContact2Phone: varchar("emergency_contact_2_phone", { length: 20 }),
+  emergencyContact2Relationship: varchar("emergency_contact_2_relationship", { length: 100 }),
+  
+  // Additional health info
+  bloodType: varchar("blood_type", { length: 10 }),
+  insuranceProvider: varchar("insurance_provider", { length: 255 }),
+  insurancePolicyNumber: varchar("insurance_policy_number", { length: 100 }),
+  insuranceGroupNumber: varchar("insurance_group_number", { length: 100 }),
+  
+  // Special needs or accommodations
+  specialNeeds: text("special_needs"),
+  accommodationsRequired: text("accommodations_required"),
+  
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: uuid("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Child learning and special needs profiles (persistent across enrollments)
+export const childLearningProfiles = pgTable("child_learning_profiles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  childId: uuid("child_id").notNull().references(() => children.id, { onDelete: "cascade" }),
+  
+  // Learning diagnoses and assessments
+  learningDiagnoses: text("learning_diagnoses"), // JSON or text list of diagnosed learning differences
+  developmentalDelays: text("developmental_delays"),
+  cognitiveAssessments: text("cognitive_assessments"), // Results from psychological/educational testing
+  speechLanguageNeeds: text("speech_language_needs"),
+  occupationalTherapyNeeds: text("occupational_therapy_needs"),
+  physicalTherapyNeeds: text("physical_therapy_needs"),
+  
+  // Special education plans
+  hasIEP: boolean("has_iep").notNull().default(false),
+  iepStartDate: timestamp("iep_start_date"),
+  iepEndDate: timestamp("iep_end_date"),
+  iepGoals: text("iep_goals"),
+  iepAccommodations: text("iep_accommodations"),
+  iepServices: text("iep_services"), // Related services provided
+  
+  has504Plan: boolean("has_504_plan").notNull().default(false),
+  plan504StartDate: timestamp("plan_504_start_date"),
+  plan504EndDate: timestamp("plan_504_end_date"),
+  plan504Accommodations: text("plan_504_accommodations"),
+  
+  // Behavioral and social-emotional needs
+  behaviorPlan: text("behavior_plan"),
+  socialEmotionalNeeds: text("social_emotional_needs"),
+  sensoryNeeds: text("sensory_needs"),
+  communicationNeeds: text("communication_needs"),
+  
+  // Support strategies and interventions
+  classroomAccommodations: text("classroom_accommodations"),
+  assistiveTechnology: text("assistive_technology"),
+  supportServices: text("support_services"), // External therapies, tutoring, etc.
+  
+  // Assessment and evaluation info
+  lastEvaluationDate: timestamp("last_evaluation_date"),
+  nextEvaluationDue: timestamp("next_evaluation_due"),
+  evaluatingPsychologist: varchar("evaluating_psychologist", { length: 255 }),
+  caseManager: varchar("case_manager", { length: 255 }),
+  caseManagerContact: varchar("case_manager_contact", { length: 100 }),
+  
+  // Transition planning
+  transitionPlan: text("transition_plan"),
+  postSecondaryGoals: text("post_secondary_goals"),
+  
+  // Notes and additional information
+  parentConcerns: text("parent_concerns"),
+  teacherObservations: text("teacher_observations"),
+  strengthsInterests: text("strengths_interests"),
+  additionalNotes: text("additional_notes"),
+  
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  updatedBy: uuid("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const guardians = pgTable("guardians", {
   id: uuid("id").primaryKey().defaultRandom(),
   familyId: uuid("family_id").notNull().references(() => families.id),
@@ -352,6 +455,68 @@ export const enrollments = pgTable("enrollments", {
   }).notNull(),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
+  
+  // Tuition information
+  tuitionAmount: decimal("tuition_amount", { precision: 10, scale: 2 }), // Monthly tuition amount
+  tuitionFrequency: varchar("tuition_frequency", { 
+    enum: ["monthly", "quarterly", "annually", "weekly"] 
+  }).default("monthly"),
+  financialAidAmount: decimal("financial_aid_amount", { precision: 10, scale: 2 }), // Aid/discount amount
+  finalTuitionAmount: decimal("final_tuition_amount", { precision: 10, scale: 2 }), // After aid calculation
+  
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Enrollment documents table for enrollment-specific documents
+export const enrollmentDocuments = pgTable("enrollment_documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  enrollmentId: uuid("enrollment_id").notNull().references(() => enrollments.id, { onDelete: "cascade" }),
+  documentType: varchar("document_type", { 
+    enum: [
+      "enrollment_contract", "tuition_agreement", "photo_release", 
+      "media_consent", "pickup_authorization", "transportation_waiver",
+      "field_trip_permission", "technology_agreement"
+    ]
+  }).notNull(),
+  documentName: varchar("document_name", { length: 255 }).notNull(),
+  filePath: varchar("file_path", { length: 500 }),
+  fileUrl: varchar("file_url", { length: 500 }),
+  mimeType: varchar("mime_type", { length: 100 }),
+  fileSize: integer("file_size"),
+  uploadedBy: uuid("uploaded_by").references(() => users.id),
+  isRequired: boolean("is_required").notNull().default(true),
+  isSubmitted: boolean("is_submitted").notNull().default(false),
+  submittedDate: timestamp("submitted_date"),
+  expirationDate: timestamp("expiration_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Child documents table for medical and personal documents
+export const childDocuments = pgTable("child_documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  childId: uuid("child_id").notNull().references(() => children.id, { onDelete: "cascade" }),
+  documentType: varchar("document_type", { 
+    enum: [
+      "medical_records", "immunization_records", "birth_certificate", 
+      "custody_agreement", "emergency_contact_form", "allergy_information", 
+      "medication_authorization", "physical_exam", "dental_exam",
+      "vision_hearing_screening", "tuberculosis_test", "lead_screening"
+    ]
+  }).notNull(),
+  documentName: varchar("document_name", { length: 255 }).notNull(),
+  filePath: varchar("file_path", { length: 500 }),
+  fileUrl: varchar("file_url", { length: 500 }),
+  mimeType: varchar("mime_type", { length: 100 }),
+  fileSize: integer("file_size"),
+  uploadedBy: uuid("uploaded_by").references(() => users.id),
+  isRequired: boolean("is_required").notNull().default(true),
+  isSubmitted: boolean("is_submitted").notNull().default(false),
+  submittedDate: timestamp("submitted_date"),
+  expirationDate: timestamp("expiration_date"), // Important for medical records that expire
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1127,6 +1292,42 @@ export const childrenRelations = relations(children, ({ one, many }) => ({
   }),
   enrollments: many(enrollments),
   subsidyAssignments: many(childSubsidyAssignments),
+  healthProfile: one(childHealthProfiles),
+  learningProfile: one(childLearningProfiles),
+  documents: many(childDocuments),
+}));
+
+export const childHealthProfilesRelations = relations(childHealthProfiles, ({ one }) => ({
+  child: one(children, {
+    fields: [childHealthProfiles.childId],
+    references: [children.id],
+  }),
+  updatedByUser: one(users, {
+    fields: [childHealthProfiles.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const childLearningProfilesRelations = relations(childLearningProfiles, ({ one }) => ({
+  child: one(children, {
+    fields: [childLearningProfiles.childId],
+    references: [children.id],
+  }),
+  updatedByUser: one(users, {
+    fields: [childLearningProfiles.updatedBy],
+    references: [users.id],
+  }),
+}));
+
+export const childDocumentsRelations = relations(childDocuments, ({ one }) => ({
+  child: one(children, {
+    fields: [childDocuments.childId],
+    references: [children.id],
+  }),
+  uploadedByUser: one(users, {
+    fields: [childDocuments.uploadedBy],
+    references: [users.id],
+  }),
 }));
 
 export const guardiansRelations = relations(guardians, ({ one }) => ({
@@ -1140,7 +1341,7 @@ export const guardiansRelations = relations(guardians, ({ one }) => ({
   }),
 }));
 
-export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
+export const enrollmentsRelations = relations(enrollments, ({ one, many }) => ({
   child: one(children, {
     fields: [enrollments.childId],
     references: [children.id],
@@ -1156,6 +1357,18 @@ export const enrollmentsRelations = relations(enrollments, ({ one }) => ({
   schoolYear: one(schoolYears, {
     fields: [enrollments.schoolYearId],
     references: [schoolYears.id],
+  }),
+  documents: many(enrollmentDocuments),
+}));
+
+export const enrollmentDocumentsRelations = relations(enrollmentDocuments, ({ one }) => ({
+  enrollment: one(enrollments, {
+    fields: [enrollmentDocuments.enrollmentId],
+    references: [enrollments.id],
+  }),
+  uploadedByUser: one(users, {
+    fields: [enrollmentDocuments.uploadedBy],
+    references: [users.id],
   }),
 }));
 
@@ -1455,6 +1668,14 @@ export type Guardian = typeof guardians.$inferSelect;
 export type InsertGuardian = typeof guardians.$inferInsert;
 export type Enrollment = typeof enrollments.$inferSelect;
 export type InsertEnrollment = typeof enrollments.$inferInsert;
+export type EnrollmentDocument = typeof enrollmentDocuments.$inferSelect;
+export type InsertEnrollmentDocument = typeof enrollmentDocuments.$inferInsert;
+export type ChildHealthProfile = typeof childHealthProfiles.$inferSelect;
+export type InsertChildHealthProfile = typeof childHealthProfiles.$inferInsert;
+export type ChildDocument = typeof childDocuments.$inferSelect;
+export type InsertChildDocument = typeof childDocuments.$inferInsert;
+export type ChildLearningProfile = typeof childLearningProfiles.$inferSelect;
+export type InsertChildLearningProfile = typeof childLearningProfiles.$inferInsert;
 export type Task = typeof tasks.$inferSelect;
 export type InsertTask = typeof tasks.$inferInsert;
 export type Message = typeof messages.$inferSelect;

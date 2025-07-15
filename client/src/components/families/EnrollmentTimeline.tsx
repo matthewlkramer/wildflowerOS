@@ -1,7 +1,8 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, GraduationCap, School, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, GraduationCap, DollarSign, FileText, Upload, Check, AlertTriangle } from "lucide-react";
 import { formatAgeDisplay } from "@/lib/ageUtils";
 
 interface Enrollment {
@@ -10,6 +11,10 @@ interface Enrollment {
   status: string;
   startDate: string;
   endDate?: string;
+  tuitionAmount?: number;
+  tuitionFrequency?: string;
+  financialAidAmount?: number;
+  finalTuitionAmount?: number;
   school?: {
     id: string;
     name: string;
@@ -26,6 +31,17 @@ interface Enrollment {
     name: string;
   };
   notes?: string;
+  documents?: EnrollmentDocument[];
+}
+
+interface EnrollmentDocument {
+  id: string;
+  documentType: string;
+  documentName: string;
+  isRequired: boolean;
+  isSubmitted: boolean;
+  submittedDate?: string;
+  expirationDate?: string;
 }
 
 interface Child {
@@ -131,6 +147,41 @@ function calculateAgeAtEnrollment(birthDate: string, enrollmentDate: string) {
   }
   
   return { years, months };
+}
+
+function formatTuitionAmount(amount?: number, frequency?: string) {
+  if (!amount) return null;
+  
+  const formattedAmount = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+  
+  const frequencyLabel = frequency === 'monthly' ? '/month' : 
+                        frequency === 'quarterly' ? '/quarter' :
+                        frequency === 'annually' ? '/year' :
+                        frequency === 'weekly' ? '/week' : '';
+  
+  return `${formattedAmount}${frequencyLabel}`;
+}
+
+function formatDocumentType(type: string) {
+  return type.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+function getDocumentStatus(doc: EnrollmentDocument) {
+  if (doc.isSubmitted) {
+    if (doc.expirationDate && new Date(doc.expirationDate) < new Date()) {
+      return { status: 'expired', icon: AlertTriangle, color: 'text-red-500' };
+    }
+    return { status: 'submitted', icon: Check, color: 'text-green-500' };
+  }
+  if (doc.isRequired) {
+    return { status: 'required', icon: AlertTriangle, color: 'text-orange-500' };
+  }
+  return { status: 'optional', icon: FileText, color: 'text-gray-500' };
 }
 
 export default function EnrollmentTimeline({ child, enrollments }: EnrollmentTimelineProps) {

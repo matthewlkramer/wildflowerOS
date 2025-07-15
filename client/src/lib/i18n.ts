@@ -196,8 +196,6 @@ const resources = {
       
       // Time indicators
       hours_ago: "hours ago",
-      this_week: "This Week",
-      this_month: "This Month",
       no_data_available: "No data available",
       
       // Activity descriptions
@@ -398,8 +396,6 @@ const resources = {
       
       // Time indicators
       hours_ago: "horas atrás",
-      this_week: "Esta Semana",
-      this_month: "Este Mes",
       no_data_available: "No hay datos disponibles",
       
       // Activity descriptions

@@ -1234,6 +1234,11 @@ export default function SchoolSettingsPage() {
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
   
+  // Schedule management state
+  const [addingSchedule, setAddingSchedule] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState<any>(null);
+  const [deletingSchedule, setDeletingSchedule] = useState<any>(null);
+  
   // System administrator tab state
   const [systemAdminTab, setSystemAdminTab] = useState("non-school-users");
   
@@ -1295,6 +1300,20 @@ export default function SchoolSettingsPage() {
     amount: "",
     schedule: "monthly",
     description: ""
+  });
+  
+  // Schedule form state
+  const [scheduleForm, setScheduleForm] = useState({
+    name: "",
+    startTime: "",
+    endTime: "",
+    mondayOpen: false,
+    tuesdayOpen: false,
+    wednesdayOpen: false,
+    thursdayOpen: false,
+    fridayOpen: false,
+    saturdayOpen: false,
+    sundayOpen: false,
   });
 
   const [subsidyForm, setSubsidyForm] = useState({
@@ -1374,6 +1393,12 @@ export default function SchoolSettingsPage() {
   // Fetch public subsidies
   const { data: publicSubsidies = [] } = useQuery({
     queryKey: ["/api/schools", effectiveSchoolId, "public-subsidies"],
+    enabled: !!effectiveSchoolId,
+  });
+
+  // Fetch classroom schedules
+  const { data: classroomSchedules = [] } = useQuery({
+    queryKey: ["/api/schools", effectiveSchoolId, "schedules"],
     enabled: !!effectiveSchoolId,
   });
 
@@ -1638,6 +1663,94 @@ export default function SchoolSettingsPage() {
     },
   });
 
+  // Schedule mutations
+  const addScheduleMutation = useMutation({
+    mutationFn: async (scheduleData: any) => {
+      return apiRequest('POST', `/api/schools/${effectiveSchoolId}/schedules`, scheduleData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", effectiveSchoolId, "schedules"] });
+      setAddingSchedule(false);
+      setScheduleForm({
+        name: "",
+        startTime: "",
+        endTime: "",
+        mondayOpen: false,
+        tuesdayOpen: false,
+        wednesdayOpen: false,
+        thursdayOpen: false,
+        fridayOpen: false,
+        saturdayOpen: false,
+        sundayOpen: false,
+      });
+      toast({
+        title: "Schedule created",
+        description: "New schedule has been created successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating schedule",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateScheduleMutation = useMutation({
+    mutationFn: async (scheduleData: any) => {
+      return apiRequest('PATCH', `/api/schedules/${scheduleData.id}`, scheduleData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", effectiveSchoolId, "schedules"] });
+      setEditingSchedule(null);
+      setScheduleForm({
+        name: "",
+        startTime: "",
+        endTime: "",
+        mondayOpen: false,
+        tuesdayOpen: false,
+        wednesdayOpen: false,
+        thursdayOpen: false,
+        fridayOpen: false,
+        saturdayOpen: false,
+        sundayOpen: false,
+      });
+      toast({
+        title: "Schedule updated",
+        description: "Schedule has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error updating schedule",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteScheduleMutation = useMutation({
+    mutationFn: async (scheduleId: string) => {
+      return apiRequest('DELETE', `/api/schedules/${scheduleId}`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", effectiveSchoolId, "schedules"] });
+      setDeletingSchedule(null);
+      toast({
+        title: "Schedule deleted",
+        description: "Schedule has been deleted successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error deleting schedule",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Set active school year mutation
   const setActiveSchoolYearMutation = useMutation({
     mutationFn: async (yearId: string) => {
@@ -1870,6 +1983,48 @@ export default function SchoolSettingsPage() {
 
   const handleAddSubsidy = () => {
     addSubsidyMutation.mutate(subsidyForm);
+  };
+
+  // Schedule handler functions
+  const handleAddSchedule = () => {
+    addScheduleMutation.mutate({
+      ...scheduleForm,
+      schoolId: effectiveSchoolId
+    });
+  };
+
+  const handleEditSchedule = (schedule: any) => {
+    setScheduleForm({
+      name: schedule.name,
+      startTime: schedule.startTime,
+      endTime: schedule.endTime,
+      mondayOpen: schedule.mondayOpen,
+      tuesdayOpen: schedule.tuesdayOpen,
+      wednesdayOpen: schedule.wednesdayOpen,
+      thursdayOpen: schedule.thursdayOpen,
+      fridayOpen: schedule.fridayOpen,
+      saturdayOpen: schedule.saturdayOpen,
+      sundayOpen: schedule.sundayOpen,
+    });
+    setEditingSchedule(schedule);
+  };
+
+  const handleUpdateSchedule = () => {
+    updateScheduleMutation.mutate({
+      id: editingSchedule.id,
+      ...scheduleForm,
+    });
+  };
+
+  const handleDeleteSchedule = (schedule: any) => {
+    setDeletingSchedule(schedule);
+  };
+
+  const confirmDeleteSchedule = () => {
+    if (deletingSchedule) {
+      deleteScheduleMutation.mutate(deletingSchedule.id);
+      setDeletingSchedule(null);
+    }
   };
 
   const handleViewCalendar = (year: any) => {
@@ -3633,131 +3788,265 @@ export default function SchoolSettingsPage() {
 
           {/* Schedules Tab */}
           <TabsContent value="schedules" className="space-y-6">
-            {/* Daily Schedule */}
+            {/* Schedule Management */}
             <Card>
               <CardHeader>
-                <CardTitle>Daily Schedule Options</CardTitle>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Classroom Schedules</CardTitle>
+                    <p className="text-sm text-gray-600">
+                      Manage operating schedules for your classrooms and programs
+                    </p>
+                  </div>
+                  <Dialog open={addingSchedule} onOpenChange={setAddingSchedule}>
+                    <DialogTrigger asChild>
+                      <Button>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create Schedule
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create New Schedule</DialogTitle>
+                        <DialogDescription>
+                          Create a schedule template with operating hours and days
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Schedule Name</Label>
+                          <Input
+                            value={scheduleForm.name}
+                            onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Primary Full Day, Elementary Extended"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Start Time</Label>
+                            <Input
+                              type="time"
+                              value={scheduleForm.startTime}
+                              onChange={(e) => setScheduleForm(prev => ({ ...prev, startTime: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>End Time</Label>
+                            <Input
+                              type="time"
+                              value={scheduleForm.endTime}
+                              onChange={(e) => setScheduleForm(prev => ({ ...prev, endTime: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Operating Days</Label>
+                          <div className="grid grid-cols-7 gap-2 mt-2">
+                            {[
+                              { key: 'mondayOpen', label: 'Mon' },
+                              { key: 'tuesdayOpen', label: 'Tue' },
+                              { key: 'wednesdayOpen', label: 'Wed' },
+                              { key: 'thursdayOpen', label: 'Thu' },
+                              { key: 'fridayOpen', label: 'Fri' },
+                              { key: 'saturdayOpen', label: 'Sat' },
+                              { key: 'sundayOpen', label: 'Sun' }
+                            ].map(day => (
+                              <div key={day.key} className="flex flex-col items-center">
+                                <label className="text-xs font-medium mb-1">{day.label}</label>
+                                <input
+                                  type="checkbox"
+                                  checked={scheduleForm[day.key as keyof typeof scheduleForm] as boolean}
+                                  onChange={(e) => setScheduleForm(prev => ({ 
+                                    ...prev, 
+                                    [day.key]: e.target.checked 
+                                  }))}
+                                  className="h-4 w-4 text-primary rounded border-gray-300"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setAddingSchedule(false)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleAddSchedule}
+                            disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime}
+                          >
+                            Create Schedule
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Edit Schedule Dialog */}
+                  <Dialog open={editingSchedule !== null} onOpenChange={(open) => !open && setEditingSchedule(null)}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Edit Schedule</DialogTitle>
+                        <DialogDescription>
+                          Update the schedule template with new operating hours and days
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div>
+                          <Label>Schedule Name</Label>
+                          <Input
+                            value={scheduleForm.name}
+                            onChange={(e) => setScheduleForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="e.g., Primary Full Day, Elementary Extended"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Start Time</Label>
+                            <Input
+                              type="time"
+                              value={scheduleForm.startTime}
+                              onChange={(e) => setScheduleForm(prev => ({ ...prev, startTime: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <Label>End Time</Label>
+                            <Input
+                              type="time"
+                              value={scheduleForm.endTime}
+                              onChange={(e) => setScheduleForm(prev => ({ ...prev, endTime: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label>Operating Days</Label>
+                          <div className="grid grid-cols-7 gap-2 mt-2">
+                            {[
+                              { key: 'mondayOpen', label: 'Mon' },
+                              { key: 'tuesdayOpen', label: 'Tue' },
+                              { key: 'wednesdayOpen', label: 'Wed' },
+                              { key: 'thursdayOpen', label: 'Thu' },
+                              { key: 'fridayOpen', label: 'Fri' },
+                              { key: 'saturdayOpen', label: 'Sat' },
+                              { key: 'sundayOpen', label: 'Sun' }
+                            ].map(day => (
+                              <div key={day.key} className="flex flex-col items-center">
+                                <label className="text-xs font-medium mb-1">{day.label}</label>
+                                <input
+                                  type="checkbox"
+                                  checked={scheduleForm[day.key as keyof typeof scheduleForm] as boolean}
+                                  onChange={(e) => setScheduleForm(prev => ({ 
+                                    ...prev, 
+                                    [day.key]: e.target.checked 
+                                  }))}
+                                  className="h-4 w-4 text-primary rounded border-gray-300"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" onClick={() => setEditingSchedule(null)}>
+                            Cancel
+                          </Button>
+                          <Button 
+                            onClick={handleUpdateSchedule}
+                            disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime || updateScheduleMutation.isPending}
+                          >
+                            {updateScheduleMutation.isPending ? "Updating..." : "Update Schedule"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  {/* Delete Schedule Confirmation Dialog */}
+                  <AlertDialog open={deletingSchedule !== null} onOpenChange={(open) => !open && setDeletingSchedule(null)}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Schedule</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to delete "{deletingSchedule?.name}"? This action cannot be undone and will affect any classrooms using this schedule.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setDeletingSchedule(null)}>
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={confirmDeleteSchedule}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Delete Schedule
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900">Primary Program</h4>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-blue-800">Full Day</span>
-                          <Badge className="bg-blue-100 text-blue-800">8:00 AM - 3:00 PM</Badge>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {classroomSchedules.map((schedule: any) => (
+                    <div key={schedule.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium">{schedule.name}</h4>
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditSchedule(schedule)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteSchedule(schedule)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
-                        <p className="text-sm text-blue-600 mt-1">7 hours of programming</p>
                       </div>
-                      <div className="p-3 bg-green-50 rounded-lg">
+                      <div className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="font-medium text-green-800">Half Day Morning</span>
-                          <Badge className="bg-green-100 text-green-800">8:00 AM - 12:00 PM</Badge>
+                          <span className="text-sm font-medium">Operating Hours:</span>
+                          <Badge variant="outline">
+                            {schedule.startTime} - {schedule.endTime}
+                          </Badge>
                         </div>
-                        <p className="text-sm text-green-600 mt-1">4 hours of programming</p>
-                      </div>
-                      <div className="p-3 bg-yellow-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-yellow-800">Extended Day</span>
-                          <Badge className="bg-yellow-100 text-yellow-800">8:00 AM - 5:00 PM</Badge>
-                        </div>
-                        <p className="text-sm text-yellow-600 mt-1">Includes aftercare</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="font-medium text-gray-900">Toddler Program</h4>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-purple-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-purple-800">Full Day</span>
-                          <Badge className="bg-purple-100 text-purple-800">8:00 AM - 3:00 PM</Badge>
-                        </div>
-                        <p className="text-sm text-purple-600 mt-1">7 hours with nap time</p>
-                      </div>
-                      <div className="p-3 bg-pink-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-pink-800">Half Day</span>
-                          <Badge className="bg-pink-100 text-pink-800">8:00 AM - 12:00 PM</Badge>
-                        </div>
-                        <p className="text-sm text-pink-600 mt-1">4 hours morning program</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 pt-6 border-t">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-medium text-gray-900">Weekly Schedule</h4>
-                    <Button variant="outline" size="sm">
-                      <Edit className="mr-2 h-4 w-4" />
-                      Edit Schedule
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-5 gap-2 text-center">
-                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].map((day) => (
-                      <div key={day} className="p-3 border rounded-lg">
-                        <h5 className="font-medium text-sm">{day}</h5>
-                        <div className="mt-2 space-y-1">
-                          <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                            Morning Circle
-                          </div>
-                          <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                            Work Time
-                          </div>
-                          <div className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
-                            Outdoor Time
-                          </div>
-                          {day === 'Friday' && (
-                            <div className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                              Art & Music
+                        <div className="text-sm text-gray-600">
+                          <div className="flex items-center justify-between">
+                            <span>Days:</span>
+                            <div className="flex space-x-1">
+                              {schedule.mondayOpen && <Badge variant="secondary" className="text-xs">M</Badge>}
+                              {schedule.tuesdayOpen && <Badge variant="secondary" className="text-xs">T</Badge>}
+                              {schedule.wednesdayOpen && <Badge variant="secondary" className="text-xs">W</Badge>}
+                              {schedule.thursdayOpen && <Badge variant="secondary" className="text-xs">T</Badge>}
+                              {schedule.fridayOpen && <Badge variant="secondary" className="text-xs">F</Badge>}
+                              {schedule.saturdayOpen && <Badge variant="secondary" className="text-xs">S</Badge>}
+                              {schedule.sundayOpen && <Badge variant="secondary" className="text-xs">S</Badge>}
                             </div>
-                          )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-gray-500 mt-2">
+                          Created: {new Date(schedule.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    </div>
+                  ))}
 
-            {/* Enrollment Periods */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Enrollment Periods</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Open Enrollment</h4>
-                        <p className="text-sm text-gray-600">January 15 - March 15, 2025</p>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                  {classroomSchedules.length === 0 && (
+                    <div className="col-span-full text-center py-8">
+                      <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-gray-600">No schedules configured yet</p>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Create schedule templates to define operating hours and days for your classrooms
+                      </p>
+                      <Button onClick={() => setAddingSchedule(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Create First Schedule
+                      </Button>
                     </div>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Priority Enrollment (Returning Families)</h4>
-                        <p className="text-sm text-gray-600">December 1 - January 14, 2025</p>
-                      </div>
-                      <Badge className="bg-gray-100 text-gray-800">Upcoming</Badge>
-                    </div>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium">Rolling Enrollment</h4>
-                        <p className="text-sm text-gray-600">March 16 - August 31, 2025</p>
-                      </div>
-                      <Badge className="bg-blue-100 text-blue-800">Planned</Badge>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

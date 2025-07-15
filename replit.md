@@ -11,11 +11,19 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 14, 2025
-- **✅ Enhanced messaging interface for more compact channel display**
-  - **Removed subtitle from chat header** - eliminated channel description/type line below channel name
-  - **Removed placeholder text** - eliminated "Select a channel" and "Choose a channel" subtitle text
-  - **More compact interface** - channels can now be packed closer together without visual clutter
-  - **Streamlined header** - shows only essential channel name and icon for cleaner appearance
+- **✅ Comprehensive messaging interface redesign with organized folder structure**
+  - **Renamed age-level channels** - added "tl-" prefix to all teacher leader channels (tl-infants-and-toddlers, tl-primary, etc.)
+  - **Organized channel structure** - implemented hierarchical folder system with collapsible sections
+  - **Top-level channels** - general, new-to-wildflower, cheers, and wildflower-principles appear at top without folders
+  - **Educator folder** - contains teacherleaders, all tl- channels, and support-at for teacher-focused discussions
+  - **Foundation folder** - contains all foundation- prefixed channels for network operations
+  - **Board folder** - dedicated section for boardmembers channel
+  - **Starring functionality** - users can star/unstar channels with hover-to-show star icons
+  - **Compact design** - reduced padding, smaller icons, single-spaced layout, removed semi-public badges
+  - **Sections for organization** - dedicated areas for unreads, starred channels, and direct messages
+  - **Folder expand/collapse** - users can expand or collapse folder sections as needed
+  - **Reduced sidebar width** - narrowed channel list from 320px to 240px for more chat space
+  - **Removed subtitle text** - eliminated "Tap to open conversation" and similar clutter text
   - **Fixed channel loading error** - resolved undefined role name issue preventing channels from displaying
 - **✅ COMPLETED: Comprehensive network school year and holiday management system**
   - **Network school years automatically generate holidays** when created based on system holiday rules

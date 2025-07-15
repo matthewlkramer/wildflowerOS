@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Hash, Lock, Users, Plus, Send, Smile, Paperclip, MoreVertical, ArrowLeft, MessageCircle } from "lucide-react";
+import { Hash, Lock, Users, Plus, Send, Smile, Paperclip, MoreVertical, ArrowLeft, MessageCircle, Star, ChevronDown, ChevronRight, Inbox, MessageSquare, Mail } from "lucide-react";
 import type { Channel, Message } from "@shared/schema";
 
 interface MessagesPageProps {}
@@ -30,6 +30,13 @@ export default function MessagesPage({}: MessagesPageProps) {
   const [messageContent, setMessageContent] = useState("");
   const [showNewChannelDialog, setShowNewChannelDialog] = useState(false);
   const [showChannelList, setShowChannelList] = useState(true);
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
+    educator: true,
+    foundation: true,
+    board: true,
+  });
+  const [starredChannels, setStarredChannels] = useState<Set<string>>(new Set());
+  const [hoveredChannel, setHoveredChannel] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -158,6 +165,46 @@ export default function MessagesPage({}: MessagesPageProps) {
     return message.senderName || `User ${message.senderId.substring(0, 8)}`;
   };
 
+  const toggleFolder = (folderName: string) => {
+    setExpandedFolders(prev => ({
+      ...prev,
+      [folderName]: !prev[folderName]
+    }));
+  };
+
+  const toggleStar = (channelId: string) => {
+    setStarredChannels(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(channelId)) {
+        newSet.delete(channelId);
+      } else {
+        newSet.add(channelId);
+      }
+      return newSet;
+    });
+  };
+
+  const organizeChannels = (channels: Channel[]) => {
+    const organized = {
+      unreads: [],
+      starred: channels.filter(c => starredChannels.has(c.id)),
+      direct: [],
+      top: channels.filter(c => ['general', 'new-to-wildflower', 'cheers', 'wildflower-principles'].includes(c.name)),
+      educator: channels.filter(c => c.name === 'teacherleaders' || c.name.startsWith('tl-') || c.name.startsWith('support-')),
+      foundation: channels.filter(c => c.name.startsWith('foundation-')),
+      board: channels.filter(c => c.name.startsWith('boardmembers')),
+      other: channels.filter(c => 
+        !['general', 'new-to-wildflower', 'cheers', 'wildflower-principles'].includes(c.name) && 
+        c.name !== 'teacherleaders' && 
+        !c.name.startsWith('tl-') && 
+        !c.name.startsWith('foundation-') &&
+        !c.name.startsWith('boardmembers') &&
+        !c.name.startsWith('support-')
+      )
+    };
+    return organized;
+  };
+
   if (!user) {
     return <div>Loading...</div>;
   }
@@ -168,7 +215,7 @@ export default function MessagesPage({}: MessagesPageProps) {
         {/* Channel List - Mobile: Full screen, Desktop: Sidebar */}
         <div className={`${
           showChannelList ? 'flex' : 'hidden'
-        } lg:flex w-full lg:w-80 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col`}>
+        } lg:flex w-full lg:w-60 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex-col`}>
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
@@ -202,34 +249,130 @@ export default function MessagesPage({}: MessagesPageProps) {
 
           {/* Channels List */}
           <ScrollArea className="flex-1">
-            <div className="p-2 space-y-2">
-              {channels.map((channel) => (
-                <div
-                  key={channel.id}
-                  onClick={() => {
-                    setSelectedChannel(channel);
-                    setShowChannelList(false); // Hide channel list on mobile when selecting
-                  }}
-                  className={`flex items-center gap-3 p-4 lg:p-3 rounded-lg cursor-pointer transition-colors ${
-                    selectedChannel?.id === channel.id
-                      ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {getChannelIcon(channel.type)}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium text-base lg:text-sm truncate">
-                        {channel.name || `${channel.type} channel`}
-                      </span>
-                      <Badge variant="secondary" className="ml-2 text-xs">
-                        {channel.type}
-                      </Badge>
-                    </div>
-
+            <div className="p-1 space-y-1">
+              {(() => {
+                const organized = organizeChannels(channels);
+                
+                const renderChannel = (channel: Channel) => (
+                  <div
+                    key={channel.id}
+                    onClick={() => {
+                      setSelectedChannel(channel);
+                      setShowChannelList(false);
+                    }}
+                    onMouseEnter={() => setHoveredChannel(channel.id)}
+                    onMouseLeave={() => setHoveredChannel(null)}
+                    className={`flex items-center gap-2 px-2 py-1 rounded cursor-pointer transition-colors ${
+                      selectedChannel?.id === channel.id
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {getChannelIcon(channel.type)}
+                    <span className="font-medium text-sm truncate flex-1">
+                      {channel.name}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleStar(channel.id);
+                      }}
+                      className={`p-1 rounded transition-opacity ${
+                        starredChannels.has(channel.id) || hoveredChannel === channel.id
+                          ? 'opacity-100'
+                          : 'opacity-0'
+                      }`}
+                    >
+                      <Star
+                        className={`h-3 w-3 ${
+                          starredChannels.has(channel.id)
+                            ? 'fill-yellow-400 text-yellow-400'
+                            : 'text-gray-400 hover:text-yellow-400'
+                        }`}
+                      />
+                    </button>
                   </div>
-                </div>
-              ))}
+                );
+
+                const renderFolder = (title: string, channels: Channel[], icon: React.ReactNode) => (
+                  <div key={title} className="space-y-1">
+                    <div 
+                      className="flex items-center gap-2 px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer"
+                      onClick={() => toggleFolder(title)}
+                    >
+                      {expandedFolders[title] ? 
+                        <ChevronDown className="h-3 w-3" /> : 
+                        <ChevronRight className="h-3 w-3" />
+                      }
+                      {icon}
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</span>
+                    </div>
+                    {expandedFolders[title] && (
+                      <div className="ml-4 space-y-1">
+                        {channels.map(renderChannel)}
+                      </div>
+                    )}
+                  </div>
+                );
+
+                return (
+                  <>
+                    {/* Unreads Section */}
+                    {organized.unreads.length > 0 && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 px-2 py-1">
+                          <Inbox className="h-3 w-3" />
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Unreads</span>
+                        </div>
+                        <div className="ml-4 space-y-1">
+                          {organized.unreads.map(renderChannel)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Starred Section */}
+                    {organized.starred.length > 0 && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 px-2 py-1">
+                          <Star className="h-3 w-3" />
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Starred</span>
+                        </div>
+                        <div className="ml-4 space-y-1">
+                          {organized.starred.map(renderChannel)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Direct Messages Section */}
+                    {organized.direct.length > 0 && (
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 px-2 py-1">
+                          <Mail className="h-3 w-3" />
+                          <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Direct messages</span>
+                        </div>
+                        <div className="ml-4 space-y-1">
+                          {organized.direct.map(renderChannel)}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Top Channels - no folder */}
+                    {organized.top.map(renderChannel)}
+
+                    {/* Educator Folder */}
+                    {organized.educator.length > 0 && renderFolder('Educator', organized.educator, <Users className="h-3 w-3" />)}
+
+                    {/* Foundation Folder */}
+                    {organized.foundation.length > 0 && renderFolder('Foundation', organized.foundation, <Hash className="h-3 w-3" />)}
+
+                    {/* Board Folder */}
+                    {organized.board.length > 0 && renderFolder('Board', organized.board, <MessageSquare className="h-3 w-3" />)}
+
+                    {/* Other Channels */}
+                    {organized.other.map(renderChannel)}
+                  </>
+                );
+              })()}
               
               {channels.length === 0 && (
                 <div className="text-center py-8">

@@ -1164,9 +1164,11 @@ export class DatabaseStorage implements IStorage {
       schoolYearId: schoolYearId,
       name: holiday.name,
       description: holiday.description,
-      startDate: holiday.startDate,
-      endDate: holiday.endDate,
-      duration: holiday.duration,
+      // Handle date conversion properly
+      startDate: holiday.startDate ? new Date(holiday.startDate) : null,
+      endDate: holiday.endDate ? new Date(holiday.endDate) : null,
+      date: holiday.date ? new Date(holiday.date) : null,
+      duration: holiday.duration || 1,
       networkDefault: false,
       active: true
     }));
@@ -1195,9 +1197,11 @@ export class DatabaseStorage implements IStorage {
       schoolYearId: toSchoolYearId,
       name: holiday.name,
       description: holiday.description,
-      startDate: holiday.startDate,
-      endDate: holiday.endDate,
-      duration: holiday.duration,
+      // Handle date conversion properly
+      startDate: holiday.startDate ? new Date(holiday.startDate) : null,
+      endDate: holiday.endDate ? new Date(holiday.endDate) : null,
+      date: holiday.date ? new Date(holiday.date) : null,
+      duration: holiday.duration || 1,
       networkDefault: false,
       active: true
     }));

@@ -32,7 +32,7 @@ function ChannelTest() {
 
   const fetchChannels = async () => {
     try {
-      const response = await apiRequest('/api/channels');
+      const response = await apiRequest('/api/channels/my');
       setChannels(response);
     } catch (error) {
       console.error('Error fetching channels:', error);

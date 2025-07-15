@@ -268,19 +268,21 @@ export default function FamiliesPage() {
                             {/* Children */}
                             <div className="mt-4">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Children:</h4>
-                              <div className="space-y-2">
+                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                 {familyGroup.children.map((child: any, index: number) => (
                                   <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                    <div className="flex items-center space-x-3">
-                                      <GraduationCap className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                      <span className="font-medium text-gray-900 dark:text-gray-100">{child.firstName} {child.lastName}</span>
+                                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                      <GraduationCap className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                      <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                        {child.firstName} {child.lastName}
+                                      </span>
                                       {child.classroom && (
-                                        <Badge className={getClassroomColor(child.classroom.level)}>
+                                        <Badge className={`${getClassroomColor(child.classroom.level)} flex-shrink-0`}>
                                           {child.classroom.name}
                                         </Badge>
                                       )}
                                     </div>
-                                    <Badge className={getStatusColor(child.status)}>
+                                    <Badge className={`${getStatusColor(child.status)} flex-shrink-0 ml-2`}>
                                       {child.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                     </Badge>
                                   </div>

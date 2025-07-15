@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { UserRole } from "@shared/schema";
 import { Users, GraduationCap, Heart, Building2, Shield, Star, Bell, MessageCircle, ChevronDown, Settings, LogOut, User } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 // Import will be handled by public folder
 
 interface TopNavigationProps {
@@ -41,18 +43,21 @@ const roleIcons = {
   sysadmin: Shield,
 };
 
-const roleLabels = {
-  parent: "Parent",
-  educator: "Educator", 
-  board: "Board",
-  sysadmin: "Systems Admin",
-};
+const getRoleLabels = (t: any) => ({
+  parent: t("parent"),
+  educator: t("educator"), 
+  board: t("board_director"),
+  sysadmin: t("systems_administrator"),
+});
 
 export default function TopNavigation({ user, currentSchool, currentRole }: TopNavigationProps) {
+  const { t } = useTranslation();
   const [notificationCount] = useState(3);
   const [messageCount] = useState(7);
   const [showSchoolSelector, setShowSchoolSelector] = useState(false);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  
+  const roleLabels = getRoleLabels(t);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -297,6 +302,9 @@ export default function TopNavigation({ user, currentSchool, currentRole }: TopN
                   </Badge>
                 )}
               </Button>
+              
+              {/* Language Switcher */}
+              <LanguageSwitcher compact />
               
               {/* User Profile */}
               <DropdownMenu>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { MoreHorizontal } from "lucide-react";
@@ -17,22 +18,23 @@ interface MobileBottomNavProps {
 
 export default function MobileBottomNav({ currentRole }: MobileBottomNavProps) {
   const [location] = useLocation();
+  const { t } = useTranslation();
 
   // Main navigation items - always visible with labels
   const mainNavItems = [
-    { icon: "fas fa-home", label: "Dashboard", href: "/" },
-    { icon: "fas fa-users", label: "Families", href: "/families" },
-    { icon: "fas fa-chalkboard-teacher", label: "Classrooms", href: "/classrooms" },
-    { icon: "fas fa-comments", label: "Messages", href: "/messages" },
-    { icon: "fas fa-cog", label: "Settings", href: "/settings" },
+    { icon: "fas fa-home", label: t("dashboard"), href: "/" },
+    { icon: "fas fa-users", label: t("families"), href: "/families" },
+    { icon: "fas fa-chalkboard-teacher", label: t("classrooms"), href: "/classrooms" },
+    { icon: "fas fa-comments", label: t("messages"), href: "/messages" },
+    { icon: "fas fa-cog", label: t("settings"), href: "/settings" },
   ];
 
   // Secondary items - only these go in "More" menu
   const secondaryNavItems = [
-    { icon: "fas fa-tasks", label: "Tasks", href: "/tasks" },
-    { icon: "fas fa-user-plus", label: "Enrollment", href: "/enrollment" },
-    { icon: "fas fa-credit-card", label: "Billing", href: "/billing" },
-    { icon: "fas fa-book", label: "Knowledge", href: "/knowledge" },
+    { icon: "fas fa-tasks", label: t("tasks"), href: "/tasks" },
+    { icon: "fas fa-user-plus", label: t("enrollment"), href: "/enrollment" },
+    { icon: "fas fa-credit-card", label: t("billing"), href: "/billing" },
+    { icon: "fas fa-book", label: t("knowledge"), href: "/knowledge" },
   ];
 
   // Show settings for all roles - no need to hide based on role type
@@ -72,7 +74,7 @@ export default function MobileBottomNav({ currentRole }: MobileBottomNavProps) {
               )}
             >
               <MoreHorizontal className="h-5 w-5" />
-              <span className="text-xs mt-1">More</span>
+              <span className="text-xs mt-1">{t("more")}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="mb-2">

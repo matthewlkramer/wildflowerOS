@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 
 interface SidebarProps {
   currentRole?: any;
@@ -7,16 +8,17 @@ interface SidebarProps {
 
 export default function Sidebar({ currentRole }: SidebarProps) {
   const [location] = useLocation();
+  const { t } = useTranslation();
   
   const menuItems = [
-    { icon: "fas fa-home", label: "Dashboard", href: "/" },
-    { icon: "fas fa-users", label: "Families & Children", href: "/families" },
-    { icon: "fas fa-chalkboard-teacher", label: "Classrooms", href: "/classrooms" },
-    { icon: "fas fa-user-plus", label: "Enrollment", href: "/enrollment" },
-    { icon: "fas fa-comments", label: "Messages", href: "/messages" },
-    { icon: "fas fa-credit-card", label: "Billing & Finance", href: "/billing" },
-    { icon: "fas fa-tasks", label: "Tasks", href: "/tasks" },
-    { icon: "fas fa-book", label: "Knowledge Base", href: "/knowledge" },
+    { icon: "fas fa-home", label: t("dashboard"), href: "/" },
+    { icon: "fas fa-users", label: t("families"), href: "/families" },
+    { icon: "fas fa-chalkboard-teacher", label: t("classrooms"), href: "/classrooms" },
+    { icon: "fas fa-user-plus", label: t("enrollment"), href: "/enrollment" },
+    { icon: "fas fa-comments", label: t("messages"), href: "/messages" },
+    { icon: "fas fa-credit-card", label: t("billing"), href: "/billing" },
+    { icon: "fas fa-tasks", label: t("tasks"), href: "/tasks" },
+    { icon: "fas fa-book", label: t("knowledge"), href: "/knowledge" },
   ];
 
   // Show settings for all roles - no need to hide based on role type
@@ -52,7 +54,7 @@ export default function Sidebar({ currentRole }: SidebarProps) {
               )}
             >
               <i className="fas fa-cog mr-3"></i>
-              <span>Settings</span>
+              <span>{t("settings")}</span>
             </Link>
           </div>
         )}

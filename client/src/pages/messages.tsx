@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import AppLayout from "@/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ interface MessagesPageProps {}
 
 export default function MessagesPage({}: MessagesPageProps) {
   const { user, currentRole } = useAuth();
+  const { t } = useTranslation();
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   const [messageContent, setMessageContent] = useState("");
   const [showNewChannelDialog, setShowNewChannelDialog] = useState(false);
@@ -219,7 +221,7 @@ export default function MessagesPage({}: MessagesPageProps) {
           {/* Header */}
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl lg:text-lg font-semibold text-gray-900 dark:text-white">Messages</h1>
+              <h1 className="text-xl lg:text-lg font-semibold text-gray-900 dark:text-white">{t("messages")}</h1>
               <Dialog open={showNewChannelDialog} onOpenChange={setShowNewChannelDialog}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="ghost">
@@ -228,10 +230,10 @@ export default function MessagesPage({}: MessagesPageProps) {
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Create New Channel</DialogTitle>
+                    <DialogTitle>{t("create_channel")}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4 pt-4">
-                    <Input placeholder="Channel name" />
+                    <Input placeholder={t("channel_name")} />
                     <Button 
                       onClick={() => createChannelMutation.mutate({ 
                         name: "New Channel", 
@@ -239,7 +241,7 @@ export default function MessagesPage({}: MessagesPageProps) {
                       })}
                       disabled={createChannelMutation.isPending}
                     >
-                      Create Channel
+                      {t("create_channel")}
                     </Button>
                   </div>
                 </DialogContent>

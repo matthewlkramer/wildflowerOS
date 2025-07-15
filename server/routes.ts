@@ -2246,5 +2246,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Auto-assign current user to all network channels (no auth for testing)
+  app.post('/api/channel-test/join-network/:userId', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      await storage.assignUserToNetworkChannels(userId);
+      res.json({ message: 'User assigned to network channels successfully' });
+    } catch (error) {
+      console.error('Error assigning user to network channels:', error);
+      res.status(500).json({ error: 'Failed to assign user to network channels' });
+    }
+  });
+
   return httpServer;
 }

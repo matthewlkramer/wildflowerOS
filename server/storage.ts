@@ -1411,6 +1411,72 @@ export class DatabaseStorage implements IStorage {
     return newMessage;
   }
 
+  // Channel membership management
+  async assignUserToNetworkChannels(userId: string): Promise<void> {
+    // Get all network channels
+    const networkChannels = await db
+      .select({ id: channels.id })
+      .from(channels)
+      .where(eq(channels.scope, "network"));
+
+    // Assign user to each network channel if not already assigned
+    for (const channel of networkChannels) {
+      const existingMembership = await db
+        .select()
+        .from(channelMembers)
+        .where(
+          and(
+            eq(channelMembers.channelId, channel.id),
+            eq(channelMembers.userId, userId)
+          )
+        );
+
+      if (existingMembership.length === 0) {
+        await db.insert(channelMembers).values({
+          channelId: channel.id,
+          userId: userId,
+          joinedAt: new Date(),
+          lastReadAt: new Date(),
+        });
+      }
+    }
+  }
+
+  async assignUserToSchoolChannels(userId: string, schoolId: string): Promise<void> {
+    // Get all school channels for the specific school
+    const schoolChannels = await db
+      .select({ id: channels.id })
+      .from(channels)
+      .where(
+        and(
+          eq(channels.scope, "school"),
+          eq(channels.schoolId, schoolId)
+        )
+      );
+
+    // Assign user to each school channel if not already assigned
+    for (const channel of schoolChannels) {
+      const existingMembership = await db
+        .select()
+        .from(channelMembers)
+        .where(
+          and(
+            eq(channelMembers.channelId, channel.id),
+            eq(channelMembers.userId, userId)
+          )
+        );
+
+      if (existingMembership.length === 0) {
+        await db.insert(channelMembers).values({
+          channelId: channel.id,
+          userId: userId,
+          joinedAt: new Date(),
+          lastReadAt: new Date(),
+        });
+      }
+    }
+  }
+
   // Channel initialization and management
   async initializeNetworkChannels(): Promise<void> {
     const { networkDefaultChannels, networkTeacherChannels } = await import('./channelDefaults');

@@ -1301,9 +1301,29 @@ export class DatabaseStorage implements IStorage {
 
   // Family Adults (Users with parent roles)
   async getFamilyAdults(familyId: string): Promise<any[]> {
-    // For now, return empty array until we implement family-user associations
-    // This is a placeholder for connecting users with parent roles to specific families
-    return [];
+    try {
+      const result = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          phone: users.phone,
+          homeAddress: users.homeAddress,
+          profileImageUrl: users.profileImageUrl,
+          relationship: guardians.relationship,
+          guardianId: guardians.id
+        })
+        .from(guardians)
+        .innerJoin(users, eq(guardians.userId, users.id))
+        .where(eq(guardians.familyId, familyId))
+        .orderBy(users.firstName, users.lastName);
+      
+      return result;
+    } catch (error) {
+      console.error("Error fetching family adults:", error);
+      return [];
+    }
   }
 
   async getUsersWithParentRole(): Promise<User[]> {

@@ -17,6 +17,7 @@ export default function Sidebar({ currentRole }: SidebarProps) {
     { icon: "fas fa-user-plus", label: t("enrollment"), href: "/enrollment" },
     { icon: "fas fa-comments", label: t("messages"), href: "/messages" },
     { icon: "fas fa-credit-card", label: t("billing"), href: "/billing" },
+    { icon: "fas fa-user-tie", label: "Staff and Roles", href: "/staff-roles" },
     { icon: "fas fa-tasks", label: t("tasks"), href: "/tasks" },
     { icon: "fas fa-book", label: t("knowledge"), href: "/knowledge" },
   ];

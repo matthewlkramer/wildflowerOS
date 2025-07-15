@@ -31,6 +31,7 @@ export default function MobileBottomNav({ currentRole }: MobileBottomNavProps) {
 
   // Secondary items - only these go in "More" menu
   const secondaryNavItems = [
+    { icon: "fas fa-user-tie", label: "Staff and Roles", href: "/staff-roles" },
     { icon: "fas fa-tasks", label: t("tasks"), href: "/tasks" },
     { icon: "fas fa-user-plus", label: t("enrollment"), href: "/enrollment" },
     { icon: "fas fa-credit-card", label: t("billing"), href: "/billing" },

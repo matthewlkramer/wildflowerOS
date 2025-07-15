@@ -14,6 +14,7 @@ import FamilyDetailsPage from "@/pages/family-details";
 import FamilyBillingPage from "@/pages/family-billing";
 import ChildDetailsPage from "@/pages/child-details";
 import SchoolSettingsPage from "@/pages/school-settings";
+import StaffRolesPage from "@/pages/staff-roles";
 import MessagesPage from "@/pages/messages";
 import TasksPage from "@/pages/tasks";
 import EnhancedMessagesPage from "@/pages/enhanced-messages";
@@ -37,6 +38,7 @@ function Router() {
           <Route path="/enhanced-messages" component={EnhancedMessagesPage} />
           <Route path="/channel-test" component={ChannelTestPage} />
           <Route path="/tasks" component={TasksPage} />
+          <Route path="/staff-roles" component={StaffRolesPage} />
           <Route path="/settings" component={SchoolSettingsPage} />
           {/* Add more authenticated routes here */}
         </>

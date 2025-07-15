@@ -11,6 +11,17 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 15, 2025
+- **✅ COMPLETED: Created dedicated Staff and Roles navigation section**
+  - **New left navigation item** - "Staff and Roles" added between billing and tasks with user-tie icon
+  - **Dedicated staff-roles page** - Complete staff management interface with two-tab layout (Staff and Role Assignments)
+  - **Staff management moved** - Staff and Assign tabs removed from School Settings, relocated to dedicated page
+  - **Teacher Leader role display** - Maintains enhanced role combination logic for users with both educator_admin and educator_classroom_lead roles
+  - **Role assignment matrix** - Survey-based assignment system with staff self-assessment and formal discussion workflow
+  - **Clean role formatting** - Continues to remove "educator_" prefix and show only educator roles with proper capitalization
+  - **Mobile navigation support** - Added Staff and Roles to mobile bottom navigation secondary menu
+  - **Settings page cleanup** - Removed Staff and Assign tabs, updated description to focus on administrative roles, classrooms, schedules, and tuition
+  - **Default tab updated** - School Settings now defaults to "Admin Roles" tab instead of removed Staff tab
+  - **CONFIRMED WORKING** - Navigation reorganization provides cleaner separation between staff management and administrative settings
 - **✅ COMPLETED: Enhanced educator role display system with clean formatting**
   - **Role ID-based detection** - Frontend now uses specific role IDs instead of role names for reliable detection
   - **Dual role combination** - Users with both educator_admin (f438ae38-0c70-4182-9446-54903c001cd1) and educator_classroom_lead (3c208f41-5a1b-44c1-a941-293585f7e8da) roles display as single "Teacher Leader" badge

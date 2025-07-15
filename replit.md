@@ -26,6 +26,10 @@ Preferred communication style: Simple, everyday language.
     - Presidents Day: February 16 → February 17 (third Monday in February)  
     - Memorial Day: May 25 → May 26 (last Monday in May)
   - **UPDATED NETWORK DEFAULTS** - Fixed holiday dates in both school-specific and network default templates
+  - **CORRECTED END DATE CALCULATIONS** - Fixed holiday end dates to match the intended duration field:
+    - Duration 1 holidays: end at 23:59:59 of same day (Labor Day, MLK Day, Good Friday, etc.)
+    - Duration 2 holidays: end at 23:59:59 of second day (Rosh Hashanah)
+    - Duration 9 holidays: end at 23:59:59 of ninth day (Winter Break: Dec 24 - Jan 1)
 - **✅ COMPLETED: School year import functionality with holiday management**
   - **Import dialog interface** - Shows radio button selection for available network default years that haven't been imported yet
   - **Four import options** - "Add with system default holidays", "Add with current year holidays", "Add with no holidays", and "Cancel"

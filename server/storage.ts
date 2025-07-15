@@ -1306,25 +1306,6 @@ export class DatabaseStorage implements IStorage {
     return updatedTask;
   }
 
-  async getAllTasks(): Promise<Task[]> {
-    return await db
-      .select({
-        id: tasks.id,
-        title: tasks.title,
-        description: tasks.description,
-        status: tasks.status,
-        priority: tasks.priority,
-        assignedToId: tasks.assignedToId,
-        dueDate: tasks.dueDate,
-        createdById: tasks.createdById,
-        commentChannelId: tasks.commentChannelId,
-        createdAt: tasks.createdAt,
-        updatedAt: tasks.updatedAt,
-      })
-      .from(tasks)
-      .orderBy(desc(tasks.createdAt));
-  }
-
   // Messages and Channels
   async getChannelsByUser(userId: string): Promise<Channel[]> {
     const results = await db
@@ -1347,6 +1328,33 @@ export class DatabaseStorage implements IStorage {
       .from(channels)
       .innerJoin(channelMembers, eq(channelMembers.channelId, channels.id))
       .where(eq(channelMembers.userId, userId))
+      .orderBy(desc(channels.updatedAt));
+
+    return results.map(channel => ({
+      ...channel,
+      familyId: null // Add missing field for type compatibility
+    }));
+  }
+
+  async getAllChannels(): Promise<Channel[]> {
+    const results = await db
+      .select({
+        id: channels.id,
+        name: channels.name,
+        description: channels.description,
+        type: channels.type,
+        scope: channels.scope,
+        schoolId: channels.schoolId,
+        classroomId: channels.classroomId,
+        legalEntityId: channels.legalEntityId,
+        taskId: channels.taskId,
+        isArchived: channels.isArchived,
+        canDelete: channels.canDelete,
+        canArchive: channels.canArchive,
+        createdAt: channels.createdAt,
+        updatedAt: channels.updatedAt,
+      })
+      .from(channels)
       .orderBy(desc(channels.updatedAt));
 
     return results.map(channel => ({

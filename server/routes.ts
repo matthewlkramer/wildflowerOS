@@ -2200,11 +2200,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Channel Test Endpoint (no auth for testing)
   app.get('/api/channel-test', async (req: Request, res: Response) => {
     try {
+      console.log('Channel test endpoint called');
       const channels = await storage.getAllChannels();
+      console.log('Successfully retrieved channels:', channels.length);
       res.json(channels);
     } catch (error) {
       console.error('Error getting channels:', error);
-      res.status(500).json({ error: 'Failed to get channels' });
+      console.error('Error stack:', error instanceof Error ? error.stack : 'Unknown error');
+      res.status(500).json({ error: 'Failed to get channels', details: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Initialize network channels (no auth for testing)
+  app.post('/api/channel-test/initialize-network', async (req: Request, res: Response) => {
+    try {
+      await storage.initializeNetworkChannels();
+      res.json({ message: 'Network channels initialized successfully' });
+    } catch (error) {
+      console.error('Error initializing network channels:', error);
+      res.status(500).json({ error: 'Failed to initialize network channels' });
     }
   });
 

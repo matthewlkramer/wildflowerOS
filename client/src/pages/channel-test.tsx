@@ -20,11 +20,20 @@ function ChannelTest() {
 
   const initializeNetworkChannels = async () => {
     try {
-      const response = await apiRequest('/api/channels/initialize-network', {
+      const response = await fetch('/api/channel-test/initialize-network', {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
-      setMessage('Network channels initialized successfully');
-      fetchChannels();
+      const data = await response.json();
+      
+      if (response.ok) {
+        setMessage('Network channels initialized successfully');
+        fetchChannels();
+      } else {
+        setMessage(`Error: ${data.error || 'Failed to initialize channels'}`);
+      }
     } catch (error) {
       setMessage('Error initializing network channels');
     }

@@ -219,6 +219,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get schools for emulation
+  app.get('/api/schools', isAuthenticated, async (req: any, res) => {
+    try {
+      const schools = await storage.getSchools();
+      res.json(schools);
+    } catch (error) {
+      console.error("Error fetching schools:", error);
+      res.status(500).json({ message: "Failed to fetch schools" });
+    }
+  });
+
   // System admin role emulation system
   app.post('/api/admin/emulate-role', isAuthenticated, async (req: any, res) => {
     try {

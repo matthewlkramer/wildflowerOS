@@ -1624,6 +1624,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user demographic information
+  app.patch('/api/user/demographics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      const { birthDate, genderId, genderOther, raceEthnicityIds, raceEthnicityOther, primaryLanguageIds, primaryLanguageOther } = req.body;
+      
+      const updatedUser = await storage.updateUser(userId, {
+        birthDate: birthDate ? new Date(birthDate) : undefined,
+        genderId,
+        genderOther,
+        raceEthnicityIds,
+        raceEthnicityOther,
+        primaryLanguageIds,
+        primaryLanguageOther,
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user demographics:", error);
+      res.status(500).json({ message: "Failed to update user demographics" });
+    }
+  });
+
   app.get("/api/families/:familyId/enrollments", isAuthenticated, async (req, res) => {
     try {
       const enrollments = await storage.getEnrollmentsByFamily(req.params.familyId);

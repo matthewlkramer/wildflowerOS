@@ -58,6 +58,8 @@ import { useAuth } from "@/hooks/useAuth";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
+import { formatAgeDisplay } from "@/lib/ageUtils";
+import EnrollmentTimeline from "@/components/families/EnrollmentTimeline";
 
 export default function FamilyDetailsPage() {
   const { user } = useAuth();
@@ -717,7 +719,7 @@ export default function FamilyDetailsPage() {
                             <div>
                               <h4 className="font-medium">{child.firstName} {child.lastName}</h4>
                               <p className="text-sm text-gray-600">
-                                Born: {new Date(child.birthDate).toLocaleDateString()}
+                                Born: {new Date(child.birthDate).toLocaleDateString()} • Age: {formatAgeDisplay(child.birthDate)}
                               </p>
                               {child.genderId && (
                                 <p className="text-sm text-gray-600">
@@ -797,103 +799,34 @@ export default function FamilyDetailsPage() {
 
               {/* Enrollment Tab */}
               <TabsContent value="enrollment" className="space-y-6">
-                <Card>
-              <CardHeader>
-                <CardTitle>Enrollment Management</CardTitle>
-              </CardHeader>
-              <CardContent>
                 <div className="space-y-6">
-                  {children.map((child: any) => {
-                    const enrollment = enrollments.find((e: any) => e.childId === child.id);
-                    return (
-                      <div key={child.id} className="p-6 border rounded-lg">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-lg font-medium">{child.firstName} {child.lastName}</h4>
-                          {!enrollment && (
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button size="sm">
-                                  <Plus className="mr-2 h-4 w-4" />
-                                  Enroll
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Enroll {child.firstName} {child.lastName}</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-4">
-                                  <div>
-                                    <Label>Classroom</Label>
-                                    <Select onValueChange={(classroomId) => handleCreateEnrollment(child.id, classroomId)}>
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select classroom" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {classrooms.map((classroom: any) => (
-                                          <SelectItem key={classroom.id} value={classroom.id}>
-                                            {classroom.name} ({classroom.level})
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                              </DialogContent>
-                            </Dialog>
-                          )}
+                  {children.length === 0 ? (
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Educational Journey</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8">
+                          <GraduationCap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                          <p className="text-gray-600">No children to show enrollment for</p>
+                          <p className="text-sm text-gray-500">Add children in the Overview tab first</p>
                         </div>
-
-                        {enrollment ? (
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <Label className="text-sm font-medium text-gray-700">Status</Label>
-                              <div className="mt-1">
-                                <Badge className={getStatusColor(enrollment.status)}>
-                                  {enrollment.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                                </Badge>
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium text-gray-700">Classroom</Label>
-                              <div className="mt-1">
-                                {enrollment.classroom ? (
-                                  <Badge className={getClassroomColor(enrollment.classroom.level)}>
-                                    {enrollment.classroom.name}
-                                  </Badge>
-                                ) : (
-                                  <span className="text-gray-500">Not assigned</span>
-                                )}
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-sm font-medium text-gray-700">Start Date</Label>
-                              <p className="mt-1">
-                                {enrollment.startDate 
-                                  ? new Date(enrollment.startDate).toLocaleDateString()
-                                  : "Not set"
-                                }
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="text-center py-4">
-                            <p className="text-gray-500">Not enrolled</p>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {children.length === 0 && (
-                    <div className="text-center py-8">
-                      <GraduationCap className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                      <p className="text-gray-600">No children to enroll</p>
-                      <p className="text-sm text-gray-500">Add children in the Overview tab first</p>
-                    </div>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    children.map((child: any) => {
+                      // Get all enrollments for this child
+                      const childEnrollments = enrollments.filter((e: any) => e.childId === child.id);
+                      return (
+                        <EnrollmentTimeline
+                          key={child.id}
+                          child={child}
+                          enrollments={childEnrollments}
+                        />
+                      );
+                    })
                   )}
                 </div>
-              </CardContent>
-            </Card>
               </TabsContent>
 
               {/* Billing Tab */}

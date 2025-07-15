@@ -39,6 +39,13 @@ export const users = pgTable("users", {
   phone: varchar("phone", { length: 40 }),
   homeAddress: text("home_address"),
   profileImageUrl: varchar("profile_image_url", { length: 255 }),
+  birthDate: timestamp("birth_date"),
+  genderId: uuid("gender_id").references(() => genders.id),
+  genderOther: varchar("gender_other", { length: 100 }),
+  raceEthnicityIds: uuid("race_ethnicity_ids").array(),
+  raceEthnicityOther: varchar("race_ethnicity_other", { length: 100 }),
+  primaryLanguageIds: uuid("primary_language_ids").array(),
+  primaryLanguageOther: varchar("primary_language_other", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -814,7 +821,11 @@ export const finalRoleAssignments = pgTable("final_role_assignments", {
 
 // ======================== RELATIONS ========================
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
+  gender: one(genders, {
+    fields: [users.genderId],
+    references: [genders.id],
+  }),
   roles: many(userRoles),
   guardians: many(guardians),
   sentMessages: many(messages),

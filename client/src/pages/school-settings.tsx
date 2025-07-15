@@ -78,14 +78,20 @@ function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
     cacheTime: 0, // Don't cache
   });
 
+  // Debug log when holidays data changes
+  useEffect(() => {
+    console.log("DEBUG Frontend: holidays data updated:", holidays);
+    console.log("DEBUG Frontend: holidays length:", holidays?.length);
+    console.log("DEBUG Frontend: isLoading:", isLoading);
+  }, [holidays, isLoading]);
+
   // Force refetch when component mounts or schoolYearId changes
   useEffect(() => {
     if (schoolYearId) {
       console.log("DEBUG Frontend: Refetching holidays for schoolYearId:", schoolYearId);
-      console.log("DEBUG Frontend: holidays data:", holidays);
       refetch();
     }
-  }, [schoolYearId, refetch, holidays]);
+  }, [schoolYearId, refetch]);
 
   // Create holiday mutation
   const createHolidayMutation = useMutation({

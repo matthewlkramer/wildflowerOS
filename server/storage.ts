@@ -1061,11 +1061,19 @@ export class DatabaseStorage implements IStorage {
   async getCalendarClosuresBySchoolYear(schoolYearId: string): Promise<CalendarClosure[]> {
     // First, check if this is a network default school year or school-specific year
     const schoolYear = await this.getSchoolYearById(schoolYearId);
+    console.log(`DEBUG Storage: School year for ${schoolYearId}:`, { 
+      id: schoolYear?.id, 
+      name: schoolYear?.name, 
+      networkDefault: schoolYear?.networkDefault, 
+      schoolId: schoolYear?.schoolId 
+    });
+    
     if (!schoolYear) return [];
 
     let holidays;
     
     if (schoolYear.networkDefault && !schoolYear.schoolId) {
+      console.log('DEBUG Storage: Fetching network default holidays');
       // For network default school years, get network default holidays
       holidays = await db
         .select()
@@ -1078,6 +1086,7 @@ export class DatabaseStorage implements IStorage {
           )
         );
     } else {
+      console.log('DEBUG Storage: Fetching school-specific holidays');
       // For school-specific school years, get school-specific holidays
       holidays = await db
         .select()
@@ -1089,6 +1098,8 @@ export class DatabaseStorage implements IStorage {
           )
         );
     }
+    
+    console.log(`DEBUG Storage: Found ${holidays.length} holidays before sorting`);
     
     // Sort in academic year order starting with Labor Day (September)
     const academicYearOrder = [

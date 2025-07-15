@@ -889,7 +889,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/school-years/:schoolYearId/closures', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolYearId } = req.params;
+      console.log(`DEBUG: Fetching closures for school year: ${schoolYearId}`);
       const closures = await storage.getCalendarClosuresBySchoolYear(schoolYearId);
+      console.log(`DEBUG: Found ${closures.length} closures:`, closures.map(c => c.name));
       res.json(closures);
     } catch (error) {
       console.error("Error fetching school year closures:", error);

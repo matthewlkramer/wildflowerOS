@@ -71,10 +71,20 @@ function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
   });
 
   // Fetch holidays for this school year
-  const { data: holidays = [], isLoading } = useQuery({
+  const { data: holidays = [], isLoading, refetch } = useQuery({
     queryKey: ["/api/school-years", schoolYearId, "closures"],
     enabled: !!schoolYearId,
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Don't cache
   });
+
+  // Force refetch when component mounts or schoolYearId changes
+  useEffect(() => {
+    if (schoolYearId) {
+      console.log("DEBUG: Refetching holidays for schoolYearId:", schoolYearId);
+      refetch();
+    }
+  }, [schoolYearId, refetch]);
 
   // Create holiday mutation
   const createHolidayMutation = useMutation({

@@ -21,6 +21,7 @@ Preferred communication style: Simple, everyday language.
   - **Mobile navigation support** - Added Staff and Roles to mobile bottom navigation secondary menu
   - **Settings page cleanup** - Removed Staff and Assign tabs, updated description to focus on administrative roles, classrooms, schedules, and tuition
   - **Default tab updated** - School Settings now defaults to "Admin Roles" tab instead of removed Staff tab
+  - **Years tab filtering fixed** - School years in Settings now properly filter by schoolId to show only school-specific years, not network defaults
   - **CONFIRMED WORKING** - Navigation reorganization provides cleaner separation between staff management and administrative settings
 - **✅ COMPLETED: Enhanced educator role display system with clean formatting**
   - **Role ID-based detection** - Frontend now uses specific role IDs instead of role names for reliable detection

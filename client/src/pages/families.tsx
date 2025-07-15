@@ -271,8 +271,8 @@ export default function FamiliesPage() {
                             <div className="mt-4">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Children:</h4>
                               <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                                {familyGroup.children.map((child: any, index: number) => (
-                                  <Link key={index} href={`/children/${child.id}`}>
+                                {familyGroup.children.map((child: any) => (
+                                  <Link key={child.id} href={`/children/${child.id}`}>
                                     <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
                                       <div className="flex items-center space-x-3 min-w-0 flex-1">
                                         <GraduationCap className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />

@@ -21,6 +21,11 @@ Preferred communication style: Simple, everyday language.
   - **Enhanced timezone handling** - Updated holiday service to use local timezone date parsing instead of UTC for consistent cross-timezone operations
   - **CONFIRMED WORKING** - School year import system now functions without database errors with proper date handling
   - **SUCCESSFUL TEST** - User imported 2025-26 school year with 11 system holidays, all dates processed correctly
+  - **CORRECTED HOLIDAY DATES** - Fixed three federal holidays to use correct 2026 dates:
+    - MLK Day: January 19 → January 20 (third Monday in January)
+    - Presidents Day: February 16 → February 17 (third Monday in February)  
+    - Memorial Day: May 25 → May 26 (last Monday in May)
+  - **UPDATED NETWORK DEFAULTS** - Fixed holiday dates in both school-specific and network default templates
 - **✅ COMPLETED: School year import functionality with holiday management**
   - **Import dialog interface** - Shows radio button selection for available network default years that haven't been imported yet
   - **Four import options** - "Add with system default holidays", "Add with current year holidays", "Add with no holidays", and "Cancel"

@@ -106,6 +106,7 @@ export interface IStorage {
   // User operations (mandatory for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(userData: Partial<UpsertUser>): Promise<User>;
   updateUser(id: string, userData: Partial<UpsertUser>): Promise<User>;
   upsertUser(user: UpsertUser): Promise<User>;
   
@@ -350,6 +351,34 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(userData: Partial<UpsertUser>): Promise<User> {
+    // Remove id from userData if present to let UUID generate automatically
+    const { id, ...userDataWithoutId } = userData;
+    
+    const [user] = await db
+      .insert(users)
+      .values({
+        ...userDataWithoutId,
+        isActive: userDataWithoutId.isActive ?? true,
+      })
+      .returning();
+    
+    // Automatically create email address record for the login email if it doesn't exist
+    if (userData.email) {
+      await db
+        .insert(emailAddresses)
+        .values({
+          userId: user.id,
+          email: userData.email,
+          type: 'personal',
+          isPrimary: true,
+        })
+        .onConflictDoNothing();
+    }
+    
     return user;
   }
 

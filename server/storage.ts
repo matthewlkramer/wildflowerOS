@@ -449,7 +449,7 @@ export class DatabaseStorage implements IStorage {
   async getNetworkUsers(): Promise<User[]> {
     // Get users with partner or network-level roles (those not associated with a specific school)
     const networkUsers = await db
-      .select({
+      .selectDistinct({
         id: users.id,
         email: users.email,
         firstName: users.firstName,
@@ -467,12 +467,11 @@ export class DatabaseStorage implements IStorage {
           eq(userRoles.active, true),
           or(
             eq(roleDefinitions.name, 'partner'),
-            eq(roleDefinitions.name, 'sysadmin')
+            eq(roleDefinitions.name, 'sysadmin_administrator')
           ),
           isNull(userRoles.schoolId) // Network-level roles don't have school association
         )
-      )
-      .groupBy(users.id, users.email, users.firstName, users.lastName, users.isActive, users.createdAt, users.updatedAt);
+      );
 
     return networkUsers;
   }

@@ -5211,8 +5211,9 @@ function UserInvitationsTable() {
   });
 
   // Fetch user invitations
-  const { data: invitations = [], isLoading } = useQuery({
+  const { data: invitations = [], isLoading, error } = useQuery({
     queryKey: ["/api/user-invitations"],
+    retry: false,
   });
 
   // Create invitation mutation
@@ -5312,6 +5313,18 @@ function UserInvitationsTable() {
 
   if (isLoading) {
     return <div className="text-center py-8">Loading invitations...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-red-600 mb-2">Access Denied</p>
+        <p className="text-gray-600">
+          User invitations can only be managed by System Administrators. 
+          Please switch to System Administrator role to access this feature.
+        </p>
+      </div>
+    );
   }
 
   return (

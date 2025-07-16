@@ -2349,8 +2349,14 @@ export default function SchoolSettingsPage() {
       return;
     }
     
-    addTuitionPlanMutation.mutate({
+    // Convert "none" to null for schoolYearId
+    const formData = {
       ...tuitionForm,
+      schoolYearId: tuitionForm.schoolYearId === "none" ? null : tuitionForm.schoolYearId
+    };
+    
+    addTuitionPlanMutation.mutate({
+      ...formData,
       classroomId: selectedSchedule.classroom.id,
       classroomScheduleId: selectedSchedule.schedule.id
     });
@@ -4732,7 +4738,7 @@ export default function SchoolSettingsPage() {
                                           <SelectValue placeholder="Select school year (optional)" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                          <SelectItem value="">No specific year</SelectItem>
+                                          <SelectItem value="none">No specific year</SelectItem>
                                           {schoolYears.map((year: any) => (
                                             <SelectItem key={year.id} value={year.id}>
                                               {year.name}

@@ -96,7 +96,7 @@ export async function sendInvitationEmail(
 
   return await sendEmail({
     to: email,
-    from: 'noreply@wildflowerschools.org', // Use a verified sender domain
+    from: 'familysurvey@wildflowerschools.org', // Use verified sender from SendGrid account
     subject,
     text,
     html

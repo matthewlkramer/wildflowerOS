@@ -2871,7 +2871,7 @@ export default function SchoolSettingsPage() {
             {/* Render different interfaces based on user role */}
             {currentRole?.roleName?.startsWith('sysadmin') ? (
               // System Administrator View
-              (<div className="space-y-6">
+              <div className="space-y-6">
                 {/* System Admin Header */}
                 <div className="border-b border-gray-200 pb-5">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">System Administration</h3>
@@ -3267,8 +3267,8 @@ export default function SchoolSettingsPage() {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
-              </div>)
-            ) : (null)}
+              </div>
+            ) : null}
             
             {currentRole?.roleName?.startsWith('parent') ? (
               // Parent View
@@ -3448,7 +3448,7 @@ export default function SchoolSettingsPage() {
               </div>)
             ) : (
               // Educator/Default School-Level Settings View (existing functionality)
-              (<div className="space-y-6">
+              <div className="space-y-6">
                 {/* Page Header */}
                 <div className="mb-8">
                   <h1 className="text-3xl font-bold text-gray-900 flex items-center">
@@ -5270,7 +5270,486 @@ export default function SchoolSettingsPage() {
                     </Card>
                   </TabsContent>
                 </Tabs>
-              </div>)
+              </div>
+            )}
+            {currentRole?.roleName?.startsWith('parent') ? (
+              // Parent View
+              <div className="space-y-6">
+                {/* Parent Header */}
+                <div className="border-b border-gray-200 pb-5">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Family Settings</h3>
+                  <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                    Manage your family's enrollment, billing, and communication preferences.
+                  </p>
+                </div>
+                {/* Parent-specific content */}
+                <Tabs defaultValue="family-info" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="family-info" className="flex items-center">
+                      <Users className="mr-2 h-4 w-4" />
+                      Family Info
+                    </TabsTrigger>
+                    <TabsTrigger value="enrollment" className="flex items-center">
+                      <Home className="mr-2 h-4 w-4" />
+                      Enrollment
+                    </TabsTrigger>
+                    <TabsTrigger value="billing" className="flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      Billing
+                    </TabsTrigger>
+                    <TabsTrigger value="communication" className="flex items-center">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Communication
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="family-info" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Family Information</CardTitle>
+                        <p className="text-sm text-gray-600">Update your family's contact information and preferences.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Family information management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="enrollment" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Enrollment Status</CardTitle>
+                        <p className="text-sm text-gray-600">View and manage your children's enrollment.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Enrollment management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="billing" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Billing & Payments</CardTitle>
+                        <p className="text-sm text-gray-600">Manage payment methods and view billing history.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Billing management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="communication" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Communication Preferences</CardTitle>
+                        <p className="text-sm text-gray-600">Set your communication preferences for school updates.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Communication preferences will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : currentRole?.roleName?.startsWith('board') ? (
+              // Board Member View
+              <div className="space-y-6">
+                {/* Board Header */}
+                <div className="border-b border-gray-200 pb-5">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Board Governance</h3>
+                  <p className="mt-2 max-w-4xl text-sm text-gray-500">
+                    Access board meeting materials, financial reports, and governance documents.
+                  </p>
+                </div>
+                {/* Board-specific content */}
+                <Tabs defaultValue="meetings" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="meetings" className="flex items-center">
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Meetings
+                    </TabsTrigger>
+                    <TabsTrigger value="documents" className="flex items-center">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Documents
+                    </TabsTrigger>
+                    <TabsTrigger value="finances" className="flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      Finances
+                    </TabsTrigger>
+                    <TabsTrigger value="policies" className="flex items-center">
+                      <Shield className="mr-2 h-4 w-4" />
+                      Policies
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="meetings" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Board Meetings</CardTitle>
+                        <p className="text-sm text-gray-600">View meeting schedules, agendas, and minutes.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Board meeting management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="documents" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Board Documents</CardTitle>
+                        <p className="text-sm text-gray-600">Access bylaws, resolutions, and governance documents.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Document repository will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="finances" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Financial Oversight</CardTitle>
+                        <p className="text-sm text-gray-600">Review budgets, financial statements, and audit reports.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Financial reporting will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  <TabsContent value="policies" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>School Policies</CardTitle>
+                        <p className="text-sm text-gray-600">Review and approve school policies and procedures.</p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          Policy management will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : (
+              // Educator/Default School-Level Settings View (existing functionality)
+              <div className="space-y-6">
+                {/* Page Header */}
+                <div className="mb-8">
+                  <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                    <Settings className="mr-3 h-8 w-8 text-primary" />
+                    School Settings
+                  </h1>
+                  <p className="mt-2 text-gray-600">
+                    Manage administrative roles, classrooms, schedules, and tuition plans for {school?.name || "your school"}
+                  </p>
+                </div>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-6">
+                    <TabsTrigger value="roles" className="flex items-center px-1 sm:px-3">
+                      <Settings className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Admin Roles</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="classrooms" className="flex items-center px-1 sm:px-3">
+                      <Home className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Rooms</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="school-years" className="flex items-center px-1 sm:px-3">
+                      <Calendar className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Years</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="schedules" className="flex items-center px-1 sm:px-3">
+                      <Clock className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Schedule</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="tuition" className="flex items-center px-1 sm:px-3">
+                      <DollarSign className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Tuition</span>
+                    </TabsTrigger>
+                    <TabsTrigger value="subsidies" className="flex items-center px-1 sm:px-3">
+                      <School className="mr-1 sm:mr-2 h-4 w-4" />
+                      <span className="text-xs sm:text-sm">Subsidy</span>
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Admin Roles Tab */}
+                  <TabsContent value="roles" className="space-y-6">
+                    {/* School Roles Management */}
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>School Roles Management</CardTitle>
+                            <p className="text-sm text-gray-600 mt-1">Manage administrative roles for your school</p>
+                          </div>
+                          <Dialog open={showRoleDialog} onOpenChange={setShowRoleDialog}>
+                            <DialogTrigger asChild>
+                              <Button size="sm">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Role
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-md">
+                              <DialogHeader>
+                                <DialogTitle>Add Administrative Role</DialogTitle>
+                                <DialogDescription>Assign an administrative role to a user</DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div className="space-y-2">
+                                  <Label>Select User</Label>
+                                  <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Choose a user" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {availableEducators?.map((educator: any) => (
+                                        <SelectItem key={educator.id} value={educator.id}>
+                                          {educator.firstName} {educator.lastName} ({educator.email})
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label>Select Role</Label>
+                                  <Select value={selectedRoleId} onValueChange={setSelectedRoleId}>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Choose a role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {adminRoles.map((role) => (
+                                        <SelectItem key={role.id} value={role.id}>
+                                          {role.displayName || role.name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                                <div className="flex justify-end space-x-2">
+                                  <Button variant="outline" onClick={() => setShowRoleDialog(false)}>
+                                    Cancel
+                                  </Button>
+                                  <Button onClick={handleAddRole} disabled={!selectedUserId || !selectedRoleId || assignRoleMutation.isPending}>
+                                    {assignRoleMutation.isPending ? "Adding..." : "Add Role"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingRoles ? (
+                          <div className="space-y-2">
+                            <Skeleton className="h-12 w-full" />
+                            <Skeleton className="h-12 w-full" />
+                          </div>
+                        ) : schoolRoles?.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            No administrative roles assigned yet. Click "Add Role" to get started.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {groupRolesByUser(schoolRoles || []).map((userGroup) => (
+                              <div key={userGroup.userId} className="border rounded-lg p-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <Avatar className="h-10 w-10">
+                                      <AvatarImage src={userGroup.profileImageUrl || undefined} />
+                                      <AvatarFallback>
+                                        {userGroup.firstName?.[0]}{userGroup.lastName?.[0]}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                      <div className="font-medium">
+                                        {userGroup.firstName} {userGroup.lastName}
+                                      </div>
+                                      <div className="text-sm text-gray-500">{userGroup.email}</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-2">
+                                    {userGroup.roles.map((role) => (
+                                      <Badge key={role.roleId} variant="secondary">
+                                        {role.roleName}
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Classrooms Tab */}
+                  <TabsContent value="classrooms" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Classroom Management</CardTitle>
+                        <p className="text-sm text-gray-600">Manage classrooms for your school</p>
+                      </CardHeader>
+                      <CardContent>
+                        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button size="sm" className="mb-4">
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Classroom
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Add New Classroom</DialogTitle>
+                              <DialogDescription>Create a new classroom for your school</DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="name" className="text-right">
+                                  Name
+                                </Label>
+                                <Input
+                                  id="name"
+                                  value={classroomForm.name}
+                                  onChange={(e) => setClassroomForm({ ...classroomForm, name: e.target.value })}
+                                  className="col-span-3"
+                                  placeholder="e.g., Sunshine Room"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="level" className="text-right">
+                                  Level
+                                </Label>
+                                <Select
+                                  value={classroomForm.level}
+                                  onValueChange={(value) => setClassroomForm({ ...classroomForm, level: value })}
+                                >
+                                  <SelectTrigger className="col-span-3">
+                                    <SelectValue placeholder="Select level" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="infant">Infant (0-18 months)</SelectItem>
+                                    <SelectItem value="toddler">Toddler (18 months - 3 years)</SelectItem>
+                                    <SelectItem value="primary">Primary (3-6 years)</SelectItem>
+                                    <SelectItem value="lower_elem">Lower Elementary (6-9 years)</SelectItem>
+                                    <SelectItem value="upper_elem">Upper Elementary (9-12 years)</SelectItem>
+                                    <SelectItem value="junior_high">Junior High (12-15 years)</SelectItem>
+                                    <SelectItem value="high_school">High School (15-18 years)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <Label htmlFor="capacity" className="text-right">
+                                  Capacity
+                                </Label>
+                                <Input
+                                  id="capacity"
+                                  type="number"
+                                  value={classroomForm.capacity}
+                                  onChange={(e) => setClassroomForm({ ...classroomForm, capacity: parseInt(e.target.value) || 0 })}
+                                  className="col-span-3"
+                                  placeholder="e.g., 24"
+                                />
+                              </div>
+                            </div>
+                            <div className="flex justify-end gap-3">
+                              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                                Cancel
+                              </Button>
+                              <Button onClick={handleCreateClassroom} disabled={createClassroomMutation.isPending}>
+                                {createClassroomMutation.isPending ? "Creating..." : "Create Classroom"}
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+
+                        {isLoadingClassrooms ? (
+                          <div className="space-y-3">
+                            <Skeleton className="h-20 w-full" />
+                            <Skeleton className="h-20 w-full" />
+                          </div>
+                        ) : classrooms?.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            No classrooms created yet. Click "Add Classroom" to get started.
+                          </div>
+                        ) : (
+                          <div className="grid gap-4">
+                            {classrooms?.map((classroom: any) => (
+                              <Card key={classroom.id}>
+                                <CardContent className="flex items-center justify-between p-4">
+                                  <div>
+                                    <h4 className="font-medium">{classroom.name}</h4>
+                                    <p className="text-sm text-gray-500">
+                                      {classroom.level} • Capacity: {classroom.capacity}
+                                    </p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleEditClassroom(classroom)}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => handleDeleteClassroom(classroom.id)}
+                                    >
+                                      <Trash className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* School Years Tab */}
+                  <TabsContent value="school-years" className="space-y-6">
+                    <SchoolYears />
+                    <AcademicCalendarOverview 
+                      schoolYears={schoolYears || []}
+                      isLoading={isLoadingSchoolYears}
+                    />
+                  </TabsContent>
+
+                  {/* Schedules Tab */}
+                  <TabsContent value="schedules" className="space-y-6">
+                    <ClassroomSchedules />
+                  </TabsContent>
+
+                  {/* Tuition Tab */}
+                  <TabsContent value="tuition" className="space-y-6">
+                    <TuitionPlans />
+                  </TabsContent>
+
+                  {/* Public Subsidies Tab */}
+                  <TabsContent value="subsidies" className="space-y-6">
+                    <PublicSubsidies schoolId={school?.id} />
+                  </TabsContent>
+                </Tabs>
+              </div>
             )}
           </div>
         </main>

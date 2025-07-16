@@ -178,27 +178,51 @@ export default function ClassroomDetailPage() {
               <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
                 <CardContent className="p-4">
                   <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                    <Button className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" variant="ghost">
+                    <Button 
+                      onClick={() => setActiveTab('attendance')}
+                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
+                      variant="ghost"
+                    >
                       <UserCheck className="h-5 w-5" />
                       <span className="text-xs">Attendance</span>
                     </Button>
-                    <Button className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" variant="ghost">
+                    <Button 
+                      onClick={() => setActiveTab('observations')}
+                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
+                      variant="ghost"
+                    >
                       <ClipboardList className="h-5 w-5" />
                       <span className="text-xs">Observe</span>
                     </Button>
-                    <Button className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" variant="ghost">
+                    <Button 
+                      onClick={() => setActiveTab('lessons')}
+                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
+                      variant="ghost"
+                    >
                       <BookOpen className="h-5 w-5" />
                       <span className="text-xs">Lessons</span>
                     </Button>
-                    <Button className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" variant="ghost">
+                    <Button 
+                      onClick={() => setActiveTab('photos')}
+                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
+                      variant="ghost"
+                    >
                       <Camera className="h-5 w-5" />
                       <span className="text-xs">Photos</span>
                     </Button>
-                    <Button className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" variant="ghost">
+                    <Button 
+                      onClick={() => setActiveTab('notes')}
+                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
+                      variant="ghost"
+                    >
                       <FileText className="h-5 w-5" />
                       <span className="text-xs">Notes</span>
                     </Button>
-                    <Button className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" variant="ghost">
+                    <Button 
+                      onClick={() => setActiveTab('conferences')}
+                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
+                      variant="ghost"
+                    >
                       <CalendarIcon className="h-5 w-5" />
                       <span className="text-xs">Conferences</span>
                     </Button>
@@ -208,7 +232,7 @@ export default function ClassroomDetailPage() {
 
               {/* Main Content Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
+                <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7">
                   <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
                   <TabsTrigger value="attendance" className="text-xs sm:text-sm">
                     <span className="hidden sm:inline">Attendance</span>
@@ -219,6 +243,7 @@ export default function ClassroomDetailPage() {
                     <span className="hidden sm:inline">Observations</span>
                     <span className="sm:hidden">Observe</span>
                   </TabsTrigger>
+                  <TabsTrigger value="notes" className="text-xs sm:text-sm">Notes</TabsTrigger>
                   <TabsTrigger value="photos" className="text-xs sm:text-sm">Photos</TabsTrigger>
                   <TabsTrigger value="conferences" className="text-xs sm:text-sm">
                     <span className="hidden sm:inline">Conferences</span>
@@ -228,10 +253,10 @@ export default function ClassroomDetailPage() {
 
                 {/* Overview Tab */}
                 <TabsContent value="overview" className="space-y-6">
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     
                     {/* Today's Snapshot */}
-                    <Card className="lg:col-span-2">
+                    <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center">
                           <Activity className="mr-2 h-5 w-5" />
@@ -264,28 +289,33 @@ export default function ClassroomDetailPage() {
                       </CardContent>
                     </Card>
 
-                    {/* Quick Links */}
+                    {/* Recent Activity */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>Quick Actions</CardTitle>
+                        <CardTitle>Recent Activity</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        <Button className="w-full justify-start" variant="outline">
-                          <UserCheck className="mr-2 h-4 w-4" />
-                          Take Attendance
-                        </Button>
-                        <Button className="w-full justify-start" variant="outline">
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          New Observation
-                        </Button>
-                        <Button className="w-full justify-start" variant="outline">
-                          <BookOpen className="mr-2 h-4 w-4" />
-                          Plan Lesson
-                        </Button>
-                        <Button className="w-full justify-start" variant="outline">
-                          <Camera className="mr-2 h-4 w-4" />
-                          Upload Photos
-                        </Button>
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <UserCheck className="h-4 w-4 text-green-600" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">Attendance taken</div>
+                            <div className="text-xs text-gray-500">10 minutes ago</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <ClipboardList className="h-4 w-4 text-purple-600" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">Observation recorded</div>
+                            <div className="text-xs text-gray-500">1 hour ago</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <BookOpen className="h-4 w-4 text-blue-600" />
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">Lesson planned</div>
+                            <div className="text-xs text-gray-500">2 hours ago</div>
+                          </div>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
@@ -478,6 +508,41 @@ export default function ClassroomDetailPage() {
                         <Button>
                           <Camera className="mr-2 h-4 w-4" />
                           Start Photo Management
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Notes Tab */}
+                <TabsContent value="notes" className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <FileText className="mr-2 h-5 w-5" />
+                          Classroom Notes
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm">
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Add Note
+                          </Button>
+                        </div>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-12">
+                        <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
+                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                          Note Taking System
+                        </h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                          Quick tablet-friendly notes about classroom activities, student behavior, and daily observations
+                        </p>
+                        <Button>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Start Taking Notes
                         </Button>
                       </div>
                     </CardContent>

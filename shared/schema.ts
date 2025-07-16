@@ -12,6 +12,7 @@ import {
   unique,
   uniqueIndex,
   foreignKey,
+  date,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
@@ -2121,3 +2122,97 @@ export const insertUserInvitationSchema = createInsertSchema(userInvitationsTabl
 // User invitation types
 export type UserInvitation = typeof userInvitationsTable.$inferSelect;
 export type InsertUserInvitation = typeof userInvitationsTable.$inferInsert;
+
+// ======================== PUBLIC SUBSIDIES ========================
+
+export const subsidyPrograms = pgTable('subsidy_programs', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  state: varchar('state', { length: 2 }).notNull(), // Two-letter state code
+  programName: varchar('program_name', { length: 255 }).notNull(),
+  programCode: varchar('program_code', { length: 100 }), // Optional unique identifier
+  description: text('description'),
+  networkDefault: boolean('network_default').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const subsidyProgramVersions = pgTable('subsidy_program_versions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  programId: uuid('program_id').references(() => subsidyPrograms.id),
+  versionName: varchar('version_name', { length: 255 }), // e.g., "2024 Q4 Update"
+  startDate: date('start_date').notNull(),
+  endDate: date('end_date'),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow()
+});
+
+export const subsidyDocuments = pgTable('subsidy_documents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  versionId: uuid('version_id').references(() => subsidyProgramVersions.id),
+  documentType: varchar('document_type', { length: 50 }).notNull(), // 'rates', 'copays', 'eligibility', 'other'
+  fileName: varchar('file_name', { length: 255 }).notNull(),
+  filePath: text('file_path').notNull(),
+  uploadedAt: timestamp('uploaded_at').defaultNow()
+});
+
+export const subsidyProviderRates = pgTable('subsidy_provider_rates', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  versionId: uuid('version_id').references(() => subsidyProgramVersions.id),
+  county: varchar('county', { length: 100 }).notNull(),
+  providerType: varchar('provider_type', { length: 50 }).notNull(), // 'family_child_care', 'child_care_center'
+  ageGroup: varchar('age_group', { length: 50 }).notNull(), // 'infant', 'toddler', 'preschool', 'school_age'
+  rateType: varchar('rate_type', { length: 20 }).notNull(), // 'hourly', 'daily', 'weekly', 'monthly'
+  baseRate: decimal('base_rate', { precision: 10, scale: 2 }).notNull(),
+  qualityTier1Rate: decimal('quality_tier1_rate', { precision: 10, scale: 2 }), // 15% quality differential
+  qualityTier2Rate: decimal('quality_tier2_rate', { precision: 10, scale: 2 }), // 20% quality differential
+  effectiveDate: date('effective_date').notNull()
+});
+
+export const subsidyFamilyCopays = pgTable('subsidy_family_copays', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  versionId: uuid('version_id').references(() => subsidyProgramVersions.id),
+  familySize: integer('family_size').notNull(),
+  incomeMin: decimal('income_min', { precision: 10, scale: 2 }).notNull(),
+  incomeMax: decimal('income_max', { precision: 10, scale: 2 }).notNull(),
+  copayAmount: decimal('copay_amount', { precision: 10, scale: 2 }).notNull(),
+  copayFrequency: varchar('copay_frequency', { length: 20 }).notNull().default('biweekly'), // 'weekly', 'biweekly', 'monthly'
+  effectiveDate: date('effective_date').notNull()
+});
+
+export const subsidyEligibilityLimits = pgTable('subsidy_eligibility_limits', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  versionId: uuid('version_id').references(() => subsidyProgramVersions.id),
+  familySize: integer('family_size').notNull(),
+  entranceLimitPercent: integer('entrance_limit_percent').notNull(), // e.g., 47
+  entranceLimitAmount: decimal('entrance_limit_amount', { precision: 10, scale: 2 }).notNull(),
+  exitLimitPercent: integer('exit_limit_percent').notNull(), // e.g., 67
+  exitLimitAmount: decimal('exit_limit_amount', { precision: 10, scale: 2 }).notNull(),
+  eligibilityExitLimitPercent: integer('eligibility_exit_limit_percent').notNull(), // e.g., 85
+  eligibilityExitLimitAmount: decimal('eligibility_exit_limit_amount', { precision: 10, scale: 2 }).notNull(),
+  effectiveDate: date('effective_date').notNull()
+});
+
+// For tracking special rules and variations
+export const subsidySpecialRules = pgTable('subsidy_special_rules', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  versionId: uuid('version_id').references(() => subsidyProgramVersions.id),
+  ruleType: varchar('rule_type', { length: 100 }).notNull(), // 'mfip_exception', 'geographic_variation', etc.
+  description: text('description').notNull(),
+  metadata: jsonb('metadata') // Store complex rule data as JSON
+});
+
+// Types
+export type SubsidyProgram = typeof subsidyPrograms.$inferSelect;
+export type InsertSubsidyProgram = typeof subsidyPrograms.$inferInsert;
+export type SubsidyProgramVersion = typeof subsidyProgramVersions.$inferSelect;
+export type InsertSubsidyProgramVersion = typeof subsidyProgramVersions.$inferInsert;
+export type SubsidyDocument = typeof subsidyDocuments.$inferSelect;
+export type InsertSubsidyDocument = typeof subsidyDocuments.$inferInsert;
+export type SubsidyProviderRate = typeof subsidyProviderRates.$inferSelect;
+export type InsertSubsidyProviderRate = typeof subsidyProviderRates.$inferInsert;
+export type SubsidyFamilyCopay = typeof subsidyFamilyCopays.$inferSelect;
+export type InsertSubsidyFamilyCopay = typeof subsidyFamilyCopays.$inferInsert;
+export type SubsidyEligibilityLimit = typeof subsidyEligibilityLimits.$inferSelect;
+export type InsertSubsidyEligibilityLimit = typeof subsidyEligibilityLimits.$inferInsert;
+export type SubsidySpecialRule = typeof subsidySpecialRules.$inferSelect;
+export type InsertSubsidySpecialRule = typeof subsidySpecialRules.$inferInsert;

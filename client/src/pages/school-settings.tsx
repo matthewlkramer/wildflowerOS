@@ -2880,7 +2880,7 @@ export default function SchoolSettingsPage() {
                 </div>
                 {/* System Admin Top Level Tabs */}
                 <Tabs value={systemAdminTab} onValueChange={setSystemAdminTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="non-school-users" className="flex items-center">
                       <Users className="mr-2 h-4 w-4" />
                       Non-School Users
@@ -2892,6 +2892,10 @@ export default function SchoolSettingsPage() {
                     <TabsTrigger value="sensible-defaults" className="flex items-center">
                       <Settings className="mr-2 h-4 w-4" />
                       Sensible Defaults
+                    </TabsTrigger>
+                    <TabsTrigger value="public-subsidies" className="flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      Public Subsidies
                     </TabsTrigger>
                   </TabsList>
 
@@ -3103,6 +3107,10 @@ export default function SchoolSettingsPage() {
                         </Card>
                       </TabsContent>
                     </Tabs>
+                  </TabsContent>
+
+                  <TabsContent value="public-subsidies" className="space-y-6">
+                    <PublicSubsidies schoolId={schoolId || ''} />
                   </TabsContent>
                 </Tabs>
                 {/* Add Network School Year Dialog */}

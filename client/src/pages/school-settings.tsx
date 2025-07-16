@@ -56,6 +56,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
+import { PublicSubsidies } from "@/components/settings/PublicSubsidies";
 
 // Network School Year Holidays Component
 function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
@@ -3267,7 +3268,14 @@ export default function SchoolSettingsPage() {
                   </AlertDialogContent>
                 </AlertDialog>
               </div>)
-            ) : currentRole?.roleName?.startsWith('parent') ? (
+            ) : (null)}
+            
+            {/* Public Subsidies Tab Content */}
+            <TabsContent value="public-subsidies">
+              <PublicSubsidies />
+            </TabsContent>
+            
+            {currentRole?.roleName?.startsWith('parent') ? (
               // Parent View
               (<div className="space-y-6">
                 {/* Parent Header */}

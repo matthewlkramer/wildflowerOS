@@ -3137,6 +3137,64 @@ export class DatabaseStorage implements IStorage {
       .orderBy(asc(classroomSchedules.name));
   }
 
+  async getClassroomSchedulesBySchoolWithClassrooms(schoolId: string): Promise<any[]> {
+    const schedules = await db
+      .select({
+        id: classroomSchedules.id,
+        classroomId: classroomSchedules.classroomId,
+        schoolId: classroomSchedules.schoolId,
+        schoolYearId: classroomSchedules.schoolYearId,
+        name: classroomSchedules.name,
+        level: classroomSchedules.level,
+        networkDefault: classroomSchedules.networkDefault,
+        startDate: classroomSchedules.startDate,
+        endDate: classroomSchedules.endDate,
+        isActive: classroomSchedules.isActive,
+        mondayOpen: classroomSchedules.mondayOpen,
+        tuesdayOpen: classroomSchedules.tuesdayOpen,
+        wednesdayOpen: classroomSchedules.wednesdayOpen,
+        thursdayOpen: classroomSchedules.thursdayOpen,
+        fridayOpen: classroomSchedules.fridayOpen,
+        saturdayOpen: classroomSchedules.saturdayOpen,
+        sundayOpen: classroomSchedules.sundayOpen,
+        startTime: classroomSchedules.startTime,
+        endTime: classroomSchedules.endTime,
+        createdAt: classroomSchedules.createdAt,
+        updatedAt: classroomSchedules.updatedAt,
+        classroom: {
+          id: classrooms.id,
+          name: classrooms.name,
+          level: classrooms.level,
+          ageRange: classrooms.ageRange
+        }
+      })
+      .from(classroomSchedules)
+      .leftJoin(classrooms, eq(classroomSchedules.classroomId, classrooms.id))
+      .where(and(
+        eq(classroomSchedules.schoolId, schoolId),
+        eq(classroomSchedules.networkDefault, false)
+      ))
+      .orderBy(asc(classroomSchedules.name));
+
+    // Group schedules by ID to handle multiple classroom assignments
+    const groupedSchedules = schedules.reduce((acc: any, schedule: any) => {
+      if (!acc[schedule.id]) {
+        acc[schedule.id] = {
+          ...schedule,
+          classrooms: []
+        };
+      }
+      if (schedule.classroom && schedule.classroom.id) {
+        acc[schedule.id].classrooms.push(schedule.classroom);
+      }
+      delete acc[schedule.id].classroom;
+      delete acc[schedule.id].classroomId;
+      return acc;
+    }, {});
+
+    return Object.values(groupedSchedules);
+  }
+
   async getNetworkDefaultSchedules(): Promise<ClassroomSchedule[]> {
     return await db
       .select()

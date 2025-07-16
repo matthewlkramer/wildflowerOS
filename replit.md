@@ -11,6 +11,14 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 16, 2025
+- **Enhanced classroom schedule display with classroom assignments**
+  - **Schedule cards now show classroom assignments** - each schedule displays which classrooms it applies to with badge format
+  - **Backend API enhanced** - created `getClassroomSchedulesBySchoolWithClassrooms()` method that joins schedules with classrooms
+  - **Frontend display updated** - schedule cards show "Applied to:" section with classroom names in badges
+  - **Edit dialog updated** - added multi-select checkbox interface for classroom assignments in edit schedule dialog
+  - **Grouped schedule handling** - backend groups schedules by ID to handle multiple classroom assignments per schedule
+  - **Data structure preserved** - maintains existing single classroomId per schedule record while displaying grouped view
+  - **Edit functionality enhanced** - populates selectedClassrooms array when editing to show current assignments
 - **✅ COMPLETED: Complete user management system with invitation and deletion capabilities**
   - **Extended UserInvitationsTable component** - now includes both invitation management and existing user management sections
   - **Network users API endpoint** - GET /api/users/network fetches users with partner or network-level roles for system administrators

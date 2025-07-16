@@ -1014,7 +1014,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/schools/:schoolId/schedules', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;
-      const schedules = await storage.getClassroomSchedulesBySchool(schoolId);
+      const schedules = await storage.getClassroomSchedulesBySchoolWithClassrooms(schoolId);
       res.json(schedules);
     } catch (error) {
       console.error("Error fetching school schedules:", error);

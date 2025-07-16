@@ -3262,12 +3262,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user's current role
       const currentRole = await storage.getCurrentUserRole(user?.id || userId);
+      console.log('Network users auth check:', { userId: user?.id || userId, currentRole });
       if (!currentRole || !currentRole.name.includes('sysadmin')) {
         return res.status(403).json({ message: "Access denied. System administrator role required." });
       }
 
       // Get all network users (users with partner or network-level roles)
       const networkUsers = await storage.getNetworkUsers();
+      console.log('Network users found:', networkUsers.length);
       res.json(networkUsers);
     } catch (error) {
       console.error("Error fetching network users:", error);

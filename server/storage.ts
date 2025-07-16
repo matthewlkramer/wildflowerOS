@@ -448,19 +448,19 @@ export class DatabaseStorage implements IStorage {
 
   async getNetworkUsers(): Promise<User[]> {
     try {
-      // Use raw SQL to avoid Drizzle ORM issues
+      // Use raw SQL to get network users
       const result = await db.execute(sql`
         SELECT DISTINCT u.*
         FROM users u
         INNER JOIN user_roles ur ON u.id = ur.user_id
         INNER JOIN role_definitions rd ON ur.role_id = rd.id
-        WHERE u.is_active = true
-          AND ur.active = true
+        WHERE ur.active = true
           AND ur.school_id IS NULL
           AND (rd.name = 'partner' OR rd.name = 'sysadmin_administrator')
       `);
       
       console.log('Raw SQL result:', result.rows.length, 'users found');
+      console.log('Users:', result.rows);
       return result.rows as User[];
     } catch (error) {
       console.error('Error in getNetworkUsers:', error);

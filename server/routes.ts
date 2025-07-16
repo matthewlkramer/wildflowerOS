@@ -2889,5 +2889,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== NOTES AND PHOTOS ========================
+
+  // Create a note for a student
+  app.post('/api/classrooms/:classroomId/notes', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { studentId, content, date, type } = req.body;
+
+      // Get current user ID
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+
+      // For now, we'll just return success since we don't have a notes table yet
+      // In a real implementation, you'd save this to a notes table
+      const note = {
+        id: `note-${Date.now()}`,
+        studentId,
+        classroomId,
+        content,
+        date,
+        type,
+        createdBy: user?.id || userId,
+        createdAt: new Date()
+      };
+
+      res.status(201).json(note);
+    } catch (error) {
+      console.error("Error creating note:", error);
+      res.status(500).json({ message: "Failed to create note" });
+    }
+  });
+
+  // Upload a photo for a student
+  app.post('/api/classrooms/:classroomId/photos', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      
+      // Get current user ID
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+
+      // For now, we'll just return success since we don't have photo storage set up
+      // In a real implementation, you'd save the file and store metadata
+      const photo = {
+        id: `photo-${Date.now()}`,
+        studentId: req.body.studentId || 'unknown',
+        classroomId,
+        filename: 'photo.jpg',
+        date: req.body.date || new Date().toISOString().split('T')[0],
+        type: req.body.type || 'classroom',
+        uploadedBy: user?.id || userId,
+        uploadedAt: new Date()
+      };
+
+      res.status(201).json(photo);
+    } catch (error) {
+      console.error("Error uploading photo:", error);
+      res.status(500).json({ message: "Failed to upload photo" });
+    }
+  });
+
   return httpServer;
 }

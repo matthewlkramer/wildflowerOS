@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertTaskSchema, insertMessageSchema, insertChannelSchema } from "@shared/schema";
 import { z } from "zod";
 import { randomBytes } from "crypto";
+import { sendInvitationEmail } from "./emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -3017,11 +3018,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
-      // In a real implementation, you would send an email here
-      // For now, we'll just return the invitation with the token
+      // Send invitation email
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const emailSent = await sendInvitationEmail(
+        email,
+        firstName || null,
+        lastName || null,
+        token,
+        baseUrl
+      );
+
+      if (!emailSent) {
+        console.error(`Failed to send invitation email to ${email}`);
+        // Note: We still return success since the invitation was created in the database
+        // The user can manually resend if needed
+      }
+
       res.status(201).json({ 
         ...invitation,
-        invitationUrl: `${req.get('host')}/accept-invitation?token=${token}`
+        invitationUrl: `${baseUrl}/accept-invitation?token=${token}`,
+        emailSent
       });
     } catch (error) {
       console.error("Error creating user invitation:", error);
@@ -3061,10 +3077,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
-      // In a real implementation, you would send a new email here
+      if (!updatedInvitation) {
+        return res.status(404).json({ message: "Invitation not found" });
+      }
+
+      // Send invitation email
+      const baseUrl = `${req.protocol}://${req.get('host')}`;
+      const emailSent = await sendInvitationEmail(
+        updatedInvitation.email,
+        updatedInvitation.firstName,
+        updatedInvitation.lastName,
+        token,
+        baseUrl
+      );
+
+      if (!emailSent) {
+        console.error(`Failed to resend invitation email to ${updatedInvitation.email}`);
+      }
+
       res.json({ 
         ...updatedInvitation,
-        invitationUrl: `${req.get('host')}/accept-invitation?token=${token}`
+        invitationUrl: `${baseUrl}/accept-invitation?token=${token}`,
+        emailSent
       });
     } catch (error) {
       console.error("Error resending user invitation:", error);

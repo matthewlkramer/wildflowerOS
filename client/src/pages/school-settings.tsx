@@ -4270,7 +4270,7 @@ export default function SchoolSettingsPage() {
                                     Select which classrooms this schedule will apply to
                                   </p>
                                   <div className="grid grid-cols-1 gap-3 max-h-40 overflow-y-auto">
-                                    {classroomsData?.map((classroom: any) => (
+                                    {classrooms?.map((classroom: any) => (
                                       <div key={classroom.id} className="flex items-center space-x-3 p-2 border rounded-lg hover:bg-gray-50">
                                         <input
                                           type="checkbox"

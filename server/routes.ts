@@ -3253,27 +3253,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get network users (partners and network-level staff)
   app.get('/api/users/network', isAuthenticated, async (req: any, res) => {
     try {
+      // Check if user is system admin
       const userId = req.user.dbUserId || req.user.claims.sub;
       let user = await storage.getUser(userId);
-      
       if (!user && req.user.claims.email) {
         user = await storage.getUserByEmail(req.user.claims.email);
       }
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
 
-      // Check if user is system admin
-      const userRoles = await storage.getUserRoles(user.id);
-      const roleDefinitions = await storage.getRoleDefinitions();
-      const hasSystemAdminRole = userRoles.some(userRole => {
-        const roleDefinition = roleDefinitions.find(rd => rd.id === userRole.roleId);
-        return roleDefinition?.name === 'sysadmin';
-      });
-
-      if (!hasSystemAdminRole) {
-        return res.status(403).json({ message: "Only system administrators can view network users" });
+      // Get user's current role
+      const currentRole = await storage.getCurrentUserRole(user?.id || userId);
+      if (!currentRole || !currentRole.name.includes('sysadmin')) {
+        return res.status(403).json({ message: "Access denied. System administrator role required." });
       }
 
       // Get all network users (users with partner or network-level roles)
@@ -3288,33 +3278,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete user
   app.delete('/api/users/:userId', isAuthenticated, async (req: any, res) => {
     try {
+      // Check if user is system admin
       const userId = req.user.dbUserId || req.user.claims.sub;
       let user = await storage.getUser(userId);
-      
       if (!user && req.user.claims.email) {
         user = await storage.getUserByEmail(req.user.claims.email);
       }
-      
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
 
-      // Check if user is system admin
-      const userRoles = await storage.getUserRoles(user.id);
-      const roleDefinitions = await storage.getRoleDefinitions();
-      const hasSystemAdminRole = userRoles.some(userRole => {
-        const roleDefinition = roleDefinitions.find(rd => rd.id === userRole.roleId);
-        return roleDefinition?.name === 'sysadmin';
-      });
-
-      if (!hasSystemAdminRole) {
-        return res.status(403).json({ message: "Only system administrators can delete users" });
+      const currentRole = await storage.getCurrentUserRole(user?.id || userId);
+      if (!currentRole || !currentRole.name.includes('sysadmin')) {
+        return res.status(403).json({ message: "Access denied. System administrator role required." });
       }
 
       const userIdToDelete = req.params.userId;
       
       // Prevent self-deletion
-      if (userIdToDelete === user.id) {
+      if (userIdToDelete === (user?.id || userId)) {
         return res.status(400).json({ message: "Cannot delete your own account" });
       }
 

@@ -170,6 +170,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete user endpoint - requires sysadmin role
+  app.delete('/api/users/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      // If user not found by ID, try to find by email
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if user has sysadmin role
+      const userRoles = await storage.getUserRoles(user.id);
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const hasSystemAdminRole = userRoles.some(userRole => {
+        const roleDefinition = roleDefinitions.find(rd => rd.id === userRole.roleId);
+        return roleDefinition?.name === 'sysadmin_administrator' && userRole.active;
+      });
+      
+      if (!hasSystemAdminRole) {
+        return res.status(403).json({ message: "Access denied. System Administrator role required." });
+      }
+      
+      const { userId: targetUserId } = req.params;
+      
+      // Prevent users from deleting themselves
+      if (targetUserId === user.id) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+      
+      // Check if target user exists
+      const targetUser = await storage.getUser(targetUserId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User to delete not found" });
+      }
+      
+      await storage.deleteUser(targetUserId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   app.post('/api/user/switch-role', isAuthenticated, async (req: any, res) => {
     try {
       const { roleId } = req.body;
@@ -3199,6 +3247,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error accepting user invitation:", error);
       res.status(500).json({ message: "Failed to accept invitation" });
+    }
+  });
+
+  // Get network users (partners and network-level staff)
+  app.get('/api/users/network', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user is system admin
+      const userRoles = await storage.getUserRoles(user.id);
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const hasSystemAdminRole = userRoles.some(userRole => {
+        const roleDefinition = roleDefinitions.find(rd => rd.id === userRole.roleId);
+        return roleDefinition?.name === 'sysadmin';
+      });
+
+      if (!hasSystemAdminRole) {
+        return res.status(403).json({ message: "Only system administrators can view network users" });
+      }
+
+      // Get all network users (users with partner or network-level roles)
+      const networkUsers = await storage.getNetworkUsers();
+      res.json(networkUsers);
+    } catch (error) {
+      console.error("Error fetching network users:", error);
+      res.status(500).json({ message: "Failed to fetch network users" });
+    }
+  });
+
+  // Delete user
+  app.delete('/api/users/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if user is system admin
+      const userRoles = await storage.getUserRoles(user.id);
+      const roleDefinitions = await storage.getRoleDefinitions();
+      const hasSystemAdminRole = userRoles.some(userRole => {
+        const roleDefinition = roleDefinitions.find(rd => rd.id === userRole.roleId);
+        return roleDefinition?.name === 'sysadmin';
+      });
+
+      if (!hasSystemAdminRole) {
+        return res.status(403).json({ message: "Only system administrators can delete users" });
+      }
+
+      const userIdToDelete = req.params.userId;
+      
+      // Prevent self-deletion
+      if (userIdToDelete === user.id) {
+        return res.status(400).json({ message: "Cannot delete your own account" });
+      }
+
+      // Delete user and their roles
+      await storage.deleteUser(userIdToDelete);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
     }
   });
 

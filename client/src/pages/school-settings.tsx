@@ -5209,10 +5209,17 @@ function UserInvitationsTable() {
     firstName: "",
     lastName: ""
   });
+  const [deletingUser, setDeletingUser] = useState<any>(null);
 
   // Fetch user invitations
   const { data: invitations = [], isLoading, error } = useQuery({
     queryKey: ["/api/user-invitations"],
+    retry: false,
+  });
+
+  // Fetch existing users (partners and network users)
+  const { data: existingUsers = [], isLoading: usersLoading } = useQuery({
+    queryKey: ["/api/users/network"],
     retry: false,
   });
 
@@ -5278,6 +5285,29 @@ function UserInvitationsTable() {
       toast({
         title: "Error",
         description: "Failed to resend invitation.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const response = await apiRequest("DELETE", `/api/users/${userId}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/users/network"] });
+      setDeletingUser(null);
+      toast({
+        title: "User deleted",
+        description: "User has been deleted successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user.",
         variant: "destructive",
       });
     },
@@ -5449,6 +5479,108 @@ function UserInvitationsTable() {
           ))
         )}
       </div>
+
+      {/* Existing Users Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Existing Network Users</CardTitle>
+          <p className="text-sm text-gray-600">Manage users who have already joined the network.</p>
+        </CardHeader>
+        <CardContent>
+          {usersLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading users...</div>
+          ) : existingUsers.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              No network users found.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {existingUsers.map((user: any) => (
+                <Card key={user.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div>
+                            <p className="font-medium">
+                              {user.firstName || user.lastName 
+                                ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
+                                : user.email}
+                            </p>
+                            <p className="text-sm text-gray-600">{user.email}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge variant="outline" className="text-blue-600 border-blue-600">
+                                Network User
+                              </Badge>
+                              {user.createdAt && (
+                                <span className="text-xs text-gray-500">
+                                  Joined {new Date(user.createdAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setDeletingUser(user)}
+                          disabled={deleteUserMutation.isPending}
+                          className="text-red-600 border-red-600 hover:bg-red-50"
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Delete User Confirmation Dialog */}
+      {deletingUser && (
+        <Dialog open={!!deletingUser} onOpenChange={() => setDeletingUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete User</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this user? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-gray-600">
+                User: <span className="font-medium">{deletingUser.firstName || deletingUser.lastName 
+                  ? `${deletingUser.firstName || ''} ${deletingUser.lastName || ''}`.trim()
+                  : deletingUser.email}</span>
+              </p>
+              <p className="text-sm text-gray-600">
+                Email: <span className="font-medium">{deletingUser.email}</span>
+              </p>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setDeletingUser(null)}
+                disabled={deleteUserMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => deleteUserMutation.mutate(deletingUser.id)}
+                disabled={deleteUserMutation.isPending}
+              >
+                {deleteUserMutation.isPending ? "Deleting..." : "Delete User"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

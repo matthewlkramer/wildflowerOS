@@ -108,7 +108,9 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(userData: Partial<UpsertUser>): Promise<User>;
   updateUser(id: string, userData: Partial<UpsertUser>): Promise<User>;
+  deleteUser(id: string): Promise<void>;
   upsertUser(user: UpsertUser): Promise<User>;
+  getNetworkUsers(): Promise<User[]>;
   
   // Email address operations
   getEmailAddressesByUser(userId: string): Promise<EmailAddress[]>;
@@ -395,6 +397,23 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async deleteUser(id: string): Promise<void> {
+    // Get user email first for invitation cleanup
+    const user = await this.getUser(id);
+    
+    // Delete related records first (cascade deletion)
+    await db.delete(emailAddresses).where(eq(emailAddresses.userId, id));
+    await db.delete(userRoles).where(eq(userRoles.userId, id));
+    
+    // Delete any pending invitations for this user's email
+    if (user?.email) {
+      await db.delete(userInvitationsTable).where(eq(userInvitationsTable.email, user.email));
+    }
+    
+    // Delete the user
+    await db.delete(users).where(eq(users.id, id));
+  }
+
   async upsertUser(userData: UpsertUser): Promise<User> {
     // Remove id from userData if present to let UUID generate automatically
     const { id, ...userDataWithoutId } = userData;
@@ -425,6 +444,37 @@ export class DatabaseStorage implements IStorage {
     }
     
     return user;
+  }
+
+  async getNetworkUsers(): Promise<User[]> {
+    // Get users with partner or network-level roles (those not associated with a specific school)
+    const networkUsers = await db
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        isActive: users.isActive,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .innerJoin(userRoles, eq(users.id, userRoles.userId))
+      .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
+      .where(
+        and(
+          eq(users.isActive, true),
+          eq(userRoles.active, true),
+          or(
+            eq(roleDefinitions.name, 'partner'),
+            eq(roleDefinitions.name, 'sysadmin')
+          ),
+          isNull(userRoles.schoolId) // Network-level roles don't have school association
+        )
+      )
+      .groupBy(users.id, users.email, users.firstName, users.lastName, users.isActive, users.createdAt, users.updatedAt);
+
+    return networkUsers;
   }
 
   // Email address operations

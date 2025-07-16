@@ -1683,6 +1683,7 @@ export default function SchoolSettingsPage() {
   
   // System administrator tab state
   const [systemAdminTab, setSystemAdminTab] = useState("non-school-users");
+  const [addingUserInvitation, setAddingUserInvitation] = useState(false);
   
   const [staffForm, setStaffForm] = useState({
     firstName: "",
@@ -2889,13 +2890,19 @@ export default function SchoolSettingsPage() {
                   <TabsContent value="non-school-users" className="space-y-6">
                     <Card>
                       <CardHeader>
-                        <CardTitle>Network-Wide Users</CardTitle>
-                        <p className="text-sm text-gray-600">Users with roles that span across multiple schools or the entire network.</p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <CardTitle>Network-Wide Users</CardTitle>
+                            <p className="text-sm text-gray-600">Invite partners, central staff, and other network-wide team members.</p>
+                          </div>
+                          <Button onClick={() => setAddingUserInvitation(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Invite User
+                          </Button>
+                        </div>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-center py-8 text-gray-500">
-                          Non-school user management will be implemented here.
-                        </div>
+                        <UserInvitationsTable />
                       </CardContent>
                     </Card>
                   </TabsContent>
@@ -5198,6 +5205,237 @@ export default function SchoolSettingsPage() {
         </main>
       </div>
       <MobileBottomNav currentRole={currentRole} />
+    </div>
+  );
+}
+
+// User Invitations Table Component
+function UserInvitationsTable() {
+  const { toast } = useToast();
+  const [invitationForm, setInvitationForm] = useState({
+    email: "",
+    firstName: "",
+    lastName: ""
+  });
+
+  // Fetch user invitations
+  const { data: invitations = [], isLoading } = useQuery({
+    queryKey: ["/api/user-invitations"],
+  });
+
+  // Create invitation mutation
+  const createInvitationMutation = useMutation({
+    mutationFn: async (invitation: any) => {
+      return await apiRequest("/api/user-invitations", "POST", invitation);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-invitations"] });
+      toast({
+        title: "Invitation sent",
+        description: "User invitation has been created successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to create user invitation.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Cancel invitation mutation
+  const cancelInvitationMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      return await apiRequest(`/api/user-invitations/${invitationId}/cancel`, "PATCH");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-invitations"] });
+      toast({
+        title: "Invitation cancelled",
+        description: "User invitation has been cancelled.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to cancel invitation.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Resend invitation mutation
+  const resendInvitationMutation = useMutation({
+    mutationFn: async (invitationId: string) => {
+      return await apiRequest(`/api/user-invitations/${invitationId}/resend`, "POST");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user-invitations"] });
+      toast({
+        title: "Invitation resent",
+        description: "User invitation has been resent successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to resend invitation.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateInvitation = () => {
+    if (!invitationForm.email) {
+      toast({
+        title: "Email required",
+        description: "Please enter an email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    createInvitationMutation.mutate(invitationForm);
+    setInvitationForm({ email: "", firstName: "", lastName: "" });
+  };
+
+  const getStatusBadge = (invitation: any) => {
+    const isExpired = new Date(invitation.expiresAt) < new Date();
+    const status = isExpired ? 'expired' : invitation.status;
+    
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Pending</Badge>;
+      case 'accepted':
+        return <Badge variant="outline" className="text-green-600 border-green-600">Accepted</Badge>;
+      case 'cancelled':
+        return <Badge variant="outline" className="text-gray-600 border-gray-600">Cancelled</Badge>;
+      case 'expired':
+        return <Badge variant="outline" className="text-red-600 border-red-600">Expired</Badge>;
+      default:
+        return <Badge variant="outline">{invitation.status}</Badge>;
+    }
+  };
+
+  if (isLoading) {
+    return <div className="text-center py-8">Loading invitations...</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Create Invitation Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Invite New User</CardTitle>
+          <p className="text-sm text-gray-600">Send an invitation to join the Wildflower network as central staff or a partner.</p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="email">Email Address *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={invitationForm.email}
+                onChange={(e) => setInvitationForm(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="user@example.com"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                value={invitationForm.firstName}
+                onChange={(e) => setInvitationForm(prev => ({ ...prev, firstName: e.target.value }))}
+                placeholder="John"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={invitationForm.lastName}
+                onChange={(e) => setInvitationForm(prev => ({ ...prev, lastName: e.target.value }))}
+                placeholder="Doe"
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end mt-4">
+            <Button 
+              onClick={handleCreateInvitation}
+              disabled={createInvitationMutation.isPending || !invitationForm.email}
+            >
+              {createInvitationMutation.isPending ? "Sending..." : "Send Invitation"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Invitations List */}
+      <div className="space-y-3">
+        {invitations.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            No invitations sent yet. Create your first invitation above.
+          </div>
+        ) : (
+          invitations.map((invitation: any) => (
+            <Card key={invitation.id}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3">
+                      <div>
+                        <p className="font-medium">
+                          {invitation.firstName || invitation.lastName 
+                            ? `${invitation.firstName || ''} ${invitation.lastName || ''}`.trim()
+                            : invitation.email}
+                        </p>
+                        <p className="text-sm text-gray-600">{invitation.email}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          {getStatusBadge(invitation)}
+                          <span className="text-xs text-gray-500">
+                            Sent {new Date(invitation.createdAt).toLocaleDateString()}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            Expires {new Date(invitation.expiresAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex space-x-2">
+                    {invitation.status === 'pending' && new Date(invitation.expiresAt) > new Date() && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => resendInvitationMutation.mutate(invitation.id)}
+                          disabled={resendInvitationMutation.isPending}
+                        >
+                          Resend
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => cancelInvitationMutation.mutate(invitation.id)}
+                          disabled={cancelInvitationMutation.isPending}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
     </div>
   );
 }

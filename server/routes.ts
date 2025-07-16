@@ -2956,5 +2956,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== USER INVITATIONS ========================
+
+  // Get all user invitations (system admin only)
+  app.get('/api/user-invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if user is system admin
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+
+      // Get user's current role
+      const currentRole = await storage.getCurrentUserRole(user?.id || userId);
+      if (!currentRole || !currentRole.name.includes('sysadmin')) {
+        return res.status(403).json({ message: "Access denied. System administrator role required." });
+      }
+
+      const invitations = await storage.getUserInvitations();
+      res.json(invitations);
+    } catch (error) {
+      console.error("Error fetching user invitations:", error);
+      res.status(500).json({ message: "Failed to fetch user invitations" });
+    }
+  });
+
+  // Create user invitation
+  app.post('/api/user-invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      // Check if user is system admin
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+
+      const currentRole = await storage.getCurrentUserRole(user?.id || userId);
+      if (!currentRole || !currentRole.name.includes('sysadmin')) {
+        return res.status(403).json({ message: "Access denied. System administrator role required." });
+      }
+
+      const { email, firstName, lastName } = req.body;
+
+      // Generate unique token
+      const token = require('crypto').randomBytes(32).toString('hex');
+      
+      // Set expiration to 7 days from now
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      const invitation = await storage.createUserInvitation({
+        email,
+        firstName: firstName || null,
+        lastName: lastName || null,
+        token,
+        invitedBy: user?.id || userId,
+        expiresAt,
+        status: 'pending'
+      });
+
+      // In a real implementation, you would send an email here
+      // For now, we'll just return the invitation with the token
+      res.status(201).json({ 
+        ...invitation,
+        invitationUrl: `${req.get('host')}/accept-invitation?token=${token}`
+      });
+    } catch (error) {
+      console.error("Error creating user invitation:", error);
+      res.status(500).json({ message: "Failed to create user invitation" });
+    }
+  });
+
+  // Cancel user invitation
+  app.patch('/api/user-invitations/:invitationId/cancel', isAuthenticated, async (req: any, res) => {
+    try {
+      const { invitationId } = req.params;
+      
+      const updatedInvitation = await storage.updateUserInvitation(invitationId, {
+        status: 'cancelled'
+      });
+
+      res.json(updatedInvitation);
+    } catch (error) {
+      console.error("Error cancelling user invitation:", error);
+      res.status(500).json({ message: "Failed to cancel user invitation" });
+    }
+  });
+
+  // Resend user invitation
+  app.post('/api/user-invitations/:invitationId/resend', isAuthenticated, async (req: any, res) => {
+    try {
+      const { invitationId } = req.params;
+      
+      // Generate new token and extend expiration
+      const token = require('crypto').randomBytes(32).toString('hex');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      const updatedInvitation = await storage.updateUserInvitation(invitationId, {
+        token,
+        expiresAt,
+        status: 'pending'
+      });
+
+      // In a real implementation, you would send a new email here
+      res.json({ 
+        ...updatedInvitation,
+        invitationUrl: `${req.get('host')}/accept-invitation?token=${token}`
+      });
+    } catch (error) {
+      console.error("Error resending user invitation:", error);
+      res.status(500).json({ message: "Failed to resend user invitation" });
+    }
+  });
+
   return httpServer;
 }

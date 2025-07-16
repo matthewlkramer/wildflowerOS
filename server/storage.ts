@@ -4033,6 +4033,48 @@ export class DatabaseStorage implements IStorage {
   async deleteStudentYearGroup(id: string): Promise<void> {
     await db.delete(studentYearGroups).where(eq(studentYearGroups.id, id));
   }
+
+  // ======================== USER INVITATIONS ========================
+  
+  async createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation> {
+    const [created] = await this.db
+      .insert(userInvitationsTable)
+      .values(invitation)
+      .returning();
+    return created;
+  }
+
+  async getUserInvitations(): Promise<UserInvitation[]> {
+    const invitations = await this.db
+      .select()
+      .from(userInvitationsTable)
+      .orderBy(desc(userInvitationsTable.createdAt));
+    return invitations;
+  }
+
+  async getUserInvitationByToken(token: string): Promise<UserInvitation | null> {
+    const [invitation] = await this.db
+      .select()
+      .from(userInvitationsTable)
+      .where(eq(userInvitationsTable.token, token))
+      .limit(1);
+    return invitation || null;
+  }
+
+  async updateUserInvitation(id: string, updates: Partial<UserInvitation>): Promise<UserInvitation> {
+    const [updated] = await this.db
+      .update(userInvitationsTable)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(userInvitationsTable.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteUserInvitation(id: string): Promise<void> {
+    await this.db
+      .delete(userInvitationsTable)
+      .where(eq(userInvitationsTable.id, id));
+  }
 }
 
 export const storage = new DatabaseStorage();

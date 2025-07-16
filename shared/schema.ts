@@ -1507,7 +1507,20 @@ export const childSubsidyAssignmentsRelations = relations(childSubsidyAssignment
   }),
 }));
 
-
+// User invitation system for central staff/partners
+export const userInvitationsTable = pgTable("user_invitations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  firstName: varchar("first_name", { length: 100 }),
+  lastName: varchar("last_name", { length: 100 }),
+  status: varchar("status", { length: 50 }).notNull().default("pending"), // pending, accepted, expired, cancelled
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  invitedBy: uuid("invited_by").notNull().references(() => users.id),
+  expiresAt: timestamp("expires_at").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 export const familiesRelations = relations(families, ({ many }) => ({
   children: many(children),
@@ -2103,3 +2116,8 @@ export const insertSubsidyRateSchema = createInsertSchema(subsidyRates);
 export const insertChildSubsidyAssignmentSchema = createInsertSchema(childSubsidyAssignments);
 export const insertRoleSurveyResponseSchema = createInsertSchema(roleSurveyResponses);
 export const insertFinalRoleAssignmentSchema = createInsertSchema(finalRoleAssignments);
+export const insertUserInvitationSchema = createInsertSchema(userInvitationsTable);
+
+// User invitation types
+export type UserInvitation = typeof userInvitationsTable.$inferSelect;
+export type InsertUserInvitation = typeof userInvitationsTable.$inferInsert;

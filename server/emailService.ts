@@ -96,7 +96,7 @@ export async function sendInvitationEmail(
 
   return await sendEmail({
     to: email,
-    from: 'noreply@wildfloweros.replit.app', // Use the actual app domain
+    from: 'noreply@wildflowerschools.org', // Use a verified sender domain
     subject,
     text,
     html

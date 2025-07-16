@@ -4075,6 +4075,38 @@ export class DatabaseStorage implements IStorage {
       .delete(userInvitationsTable)
       .where(eq(userInvitationsTable.id, id));
   }
+
+  async getCurrentUserRole(userId: string): Promise<any> {
+    const [role] = await this.db
+      .select({
+        id: userRoles.id,
+        name: roleDefinitions.name,
+        displayName: roleDefinitions.displayName,
+        roleName: roleDefinitions.name,
+        schoolId: userRoles.schoolId,
+        classroomId: userRoles.classroomId
+      })
+      .from(userRoles)
+      .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
+      .where(
+        and(
+          eq(userRoles.userId, userId),
+          eq(userRoles.active, true),
+          or(
+            isNull(userRoles.startDate),
+            lte(userRoles.startDate, new Date())
+          ),
+          or(
+            isNull(userRoles.endDate),
+            gte(userRoles.endDate, new Date())
+          )
+        )
+      )
+      .orderBy(desc(userRoles.startDate))
+      .limit(1);
+
+    return role || null;
+  }
 }
 
 export const storage = new DatabaseStorage();

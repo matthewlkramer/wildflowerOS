@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertTaskSchema, insertMessageSchema, insertChannelSchema } from "@shared/schema";
 import { z } from "zod";
+import { randomBytes } from "crypto";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -3000,7 +3001,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email, firstName, lastName } = req.body;
 
       // Generate unique token
-      const token = require('crypto').randomBytes(32).toString('hex');
+      const token = randomBytes(32).toString('hex');
       
       // Set expiration to 7 days from now
       const expiresAt = new Date();
@@ -3050,7 +3051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { invitationId } = req.params;
       
       // Generate new token and extend expiration
-      const token = require('crypto').randomBytes(32).toString('hex');
+      const token = randomBytes(32).toString('hex');
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 7);
 

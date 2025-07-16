@@ -3270,11 +3270,6 @@ export default function SchoolSettingsPage() {
               </div>)
             ) : (null)}
             
-            {/* Public Subsidies Tab Content */}
-            <TabsContent value="public-subsidies">
-              <PublicSubsidies />
-            </TabsContent>
-            
             {currentRole?.roleName?.startsWith('parent') ? (
               // Parent View
               (<div className="space-y-6">

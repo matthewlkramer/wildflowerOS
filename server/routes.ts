@@ -3145,10 +3145,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const centralStaffRole = await storage.getRoleByName('central_staff');
         if (centralStaffRole) {
           const existingRole = await storage.getUserRoles(existingUser.id);
-          const hasCentralStaffRole = existingRole.some(role => role.id === centralStaffRole.id);
+          const hasCentralStaffRole = existingRole.some(role => role.roleId === centralStaffRole.id);
           
           if (!hasCentralStaffRole) {
-            await storage.assignUserRole(existingUser.id, centralStaffRole.id, null, null);
+            await storage.assignUserRole({
+              userId: existingUser.id,
+              roleId: centralStaffRole.id,
+              schoolId: null,
+              classroomId: null,
+              active: true,
+              startDate: new Date()
+            });
           }
         }
 
@@ -3168,7 +3175,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Assign central_staff role
         const centralStaffRole = await storage.getRoleByName('central_staff');
         if (centralStaffRole) {
-          await storage.assignUserRole(newUser.id, centralStaffRole.id, null, null);
+          await storage.assignUserRole({
+            userId: newUser.id,
+            roleId: centralStaffRole.id,
+            schoolId: null,
+            classroomId: null,
+            active: true,
+            startDate: new Date()
+          });
         }
 
         // Mark invitation as accepted

@@ -126,6 +126,7 @@ export interface IStorage {
   
   // Role definitions
   getRoleDefinitions(schoolId?: string): Promise<RoleDefinition[]>;
+  getRoleByName(name: string, schoolId?: string): Promise<RoleDefinition | undefined>;
   getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]>;
   getRolesByNamePrefix(namePrefix: string, schoolId?: string): Promise<RoleDefinition[]>;
   createRoleDefinition(role: InsertRoleDefinition): Promise<RoleDefinition>;
@@ -551,6 +552,30 @@ export class DatabaseStorage implements IStorage {
       .from(roleDefinitions)
       .where(whereClause)
       .orderBy(roleDefinitions.level, roleDefinitions.name);
+  }
+
+  async getRoleByName(name: string, schoolId?: string): Promise<RoleDefinition | undefined> {
+    const whereClause = schoolId 
+      ? and(
+          eq(roleDefinitions.name, name),
+          eq(roleDefinitions.active, true),
+          or(
+            eq(roleDefinitions.schoolId, schoolId),
+            isNull(roleDefinitions.schoolId)
+          )
+        )
+      : and(
+          eq(roleDefinitions.name, name),
+          eq(roleDefinitions.active, true)
+        );
+
+    const [role] = await db
+      .select()
+      .from(roleDefinitions)
+      .where(whereClause)
+      .limit(1);
+    
+    return role;
   }
 
   async getHierarchicalRoles(schoolId?: string): Promise<RoleDefinition[]> {

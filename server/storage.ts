@@ -4077,7 +4077,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCurrentUserRole(userId: string): Promise<any> {
-    const [role] = await this.db
+    const [role] = await db
       .select({
         id: userRoles.id,
         name: roleDefinitions.name,

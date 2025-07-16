@@ -448,30 +448,20 @@ export class DatabaseStorage implements IStorage {
 
   async getNetworkUsers(): Promise<User[]> {
     try {
-      // Simple query to get all users first
-      const allUsers = await db.query.users.findMany({
-        where: eq(users.isActive, true),
-      });
-
-      // Get user roles with role details
-      const userRolesWithDetails = await db.query.userRoles.findMany({
-        where: eq(userRoles.active, true),
-        with: {
-          roleDefinition: true,
-        },
-      });
-
-      // Filter users who have network-level roles
-      const networkUsers = allUsers.filter(user => {
-        return userRolesWithDetails.some(userRole => 
-          userRole.userId === user.id &&
-          userRole.schoolId === null &&
-          userRole.roleDefinition &&
-          (userRole.roleDefinition.name === 'partner' || userRole.roleDefinition.name === 'sysadmin_administrator')
-        );
-      });
-
-      return networkUsers;
+      // Use raw SQL to avoid Drizzle ORM issues
+      const result = await db.execute(sql`
+        SELECT DISTINCT u.*
+        FROM users u
+        INNER JOIN user_roles ur ON u.id = ur.user_id
+        INNER JOIN role_definitions rd ON ur.role_id = rd.id
+        WHERE u.is_active = true
+          AND ur.active = true
+          AND ur.school_id IS NULL
+          AND (rd.name = 'partner' OR rd.name = 'sysadmin_administrator')
+      `);
+      
+      console.log('Raw SQL result:', result.rows.length, 'users found');
+      return result.rows as User[];
     } catch (error) {
       console.error('Error in getNetworkUsers:', error);
       throw error;

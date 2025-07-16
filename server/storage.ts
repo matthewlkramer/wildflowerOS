@@ -447,34 +447,29 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNetworkUsers(): Promise<User[]> {
-    // Get users with partner or network-level roles (those not associated with a specific school)
-    const networkUsers = await db
+    // Get all active users
+    const allUsers = await db
       .select()
       .from(users)
-      .innerJoin(userRoles, eq(users.id, userRoles.userId))
+      .where(eq(users.isActive, true));
+
+    // Get all active user roles
+    const allUserRoles = await db
+      .select()
+      .from(userRoles)
       .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
-      .where(
-        and(
-          eq(users.isActive, true),
-          eq(userRoles.active, true),
-          or(
-            eq(roleDefinitions.name, 'partner'),
-            eq(roleDefinitions.name, 'sysadmin_administrator')
-          ),
-          isNull(userRoles.schoolId) // Network-level roles don't have school association
-        )
+      .where(eq(userRoles.active, true));
+
+    // Filter users who have network-level roles (partner or sysadmin_administrator) with no school association
+    const networkUsers = allUsers.filter(user => {
+      return allUserRoles.some(roleRow => 
+        roleRow.user_roles.userId === user.id &&
+        roleRow.user_roles.schoolId === null &&
+        (roleRow.role_definitions.name === 'partner' || roleRow.role_definitions.name === 'sysadmin_administrator')
       );
+    });
 
-    // Extract just the user data and remove duplicates
-    const uniqueUsers = networkUsers.reduce((acc: User[], row: any) => {
-      const user = row.users;
-      if (!acc.find(u => u.id === user.id)) {
-        acc.push(user);
-      }
-      return acc;
-    }, []);
-
-    return uniqueUsers;
+    return networkUsers;
   }
 
   // Email address operations

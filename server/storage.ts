@@ -91,6 +91,11 @@ import {
   type InsertLessonObservation,
   type StudentYearGroup,
   type InsertStudentYearGroup,
+  
+  // User Invitations
+  userInvitationsTable,
+  type UserInvitation,
+  type InsertUserInvitation,
 
 } from "@shared/schema";
 import { db } from "./db";
@@ -326,6 +331,14 @@ export interface IStorage {
   createStudentYearGroup(yearGroup: InsertStudentYearGroup): Promise<StudentYearGroup>;
   updateStudentYearGroup(id: string, yearGroup: Partial<InsertStudentYearGroup>): Promise<StudentYearGroup>;
   deleteStudentYearGroup(id: string): Promise<void>;
+  
+  // User invitations
+  createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation>;
+  getUserInvitations(): Promise<UserInvitation[]>;
+  getUserInvitationByToken(token: string): Promise<UserInvitation | null>;
+  updateUserInvitation(id: string, updates: Partial<UserInvitation>): Promise<UserInvitation>;
+  deleteUserInvitation(id: string): Promise<void>;
+  getCurrentUserRole(userId: string): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {

@@ -3269,7 +3269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get all network users (users with partner or network-level roles)
       const networkUsers = await storage.getNetworkUsers();
-      console.log('Network users found:', networkUsers.length);
+      console.log('Network users found:', networkUsers.length, networkUsers);
       res.json(networkUsers);
     } catch (error) {
       console.error("Error fetching network users:", error);

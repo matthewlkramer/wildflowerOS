@@ -449,15 +449,7 @@ export class DatabaseStorage implements IStorage {
   async getNetworkUsers(): Promise<User[]> {
     // Get users with partner or network-level roles (those not associated with a specific school)
     const networkUsers = await db
-      .selectDistinct({
-        id: users.id,
-        email: users.email,
-        firstName: users.firstName,
-        lastName: users.lastName,
-        isActive: users.isActive,
-        createdAt: users.createdAt,
-        updatedAt: users.updatedAt,
-      })
+      .select()
       .from(users)
       .innerJoin(userRoles, eq(users.id, userRoles.userId))
       .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
@@ -473,7 +465,16 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    return networkUsers;
+    // Extract just the user data and remove duplicates
+    const uniqueUsers = networkUsers.reduce((acc: User[], row: any) => {
+      const user = row.users;
+      if (!acc.find(u => u.id === user.id)) {
+        acc.push(user);
+      }
+      return acc;
+    }, []);
+
+    return uniqueUsers;
   }
 
   // Email address operations

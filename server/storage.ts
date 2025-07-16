@@ -447,29 +447,35 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getNetworkUsers(): Promise<User[]> {
-    // Get all active users
-    const allUsers = await db
-      .select()
-      .from(users)
-      .where(eq(users.isActive, true));
+    try {
+      // Simple query to get all users first
+      const allUsers = await db.query.users.findMany({
+        where: eq(users.isActive, true),
+      });
 
-    // Get all active user roles
-    const allUserRoles = await db
-      .select()
-      .from(userRoles)
-      .innerJoin(roleDefinitions, eq(userRoles.roleId, roleDefinitions.id))
-      .where(eq(userRoles.active, true));
+      // Get user roles with role details
+      const userRolesWithDetails = await db.query.userRoles.findMany({
+        where: eq(userRoles.active, true),
+        with: {
+          roleDefinition: true,
+        },
+      });
 
-    // Filter users who have network-level roles (partner or sysadmin_administrator) with no school association
-    const networkUsers = allUsers.filter(user => {
-      return allUserRoles.some(roleRow => 
-        roleRow.user_roles.userId === user.id &&
-        roleRow.user_roles.schoolId === null &&
-        (roleRow.role_definitions.name === 'partner' || roleRow.role_definitions.name === 'sysadmin_administrator')
-      );
-    });
+      // Filter users who have network-level roles
+      const networkUsers = allUsers.filter(user => {
+        return userRolesWithDetails.some(userRole => 
+          userRole.userId === user.id &&
+          userRole.schoolId === null &&
+          userRole.roleDefinition &&
+          (userRole.roleDefinition.name === 'partner' || userRole.roleDefinition.name === 'sysadmin_administrator')
+        );
+      });
 
-    return networkUsers;
+      return networkUsers;
+    } catch (error) {
+      console.error('Error in getNetworkUsers:', error);
+      throw error;
+    }
   }
 
   // Email address operations

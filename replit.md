@@ -11,6 +11,18 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 16, 2025
+- **✅ COMPLETED: User invitation system for network administrators**
+  - **Database schema created** - user_invitations table with id, email, firstName, lastName, token, status, expiresAt, acceptedAt fields
+  - **Complete API endpoints** - GET /api/user-invitations, POST to create, PATCH to cancel, POST to resend invitations
+  - **System admin authentication** - role-based access control ensuring only sysadmin users can manage invitations
+  - **Invitation workflow** - generates secure tokens, tracks status (pending/accepted/cancelled/expired), 7-day expiration
+  - **Frontend interface** - integrated form and list in UserInvitationsTable component within Non-School Users tab
+  - **Status tracking UI** - color-coded badges for different invitation states with timestamp display
+  - **Action buttons** - resend and cancel functionality for pending invitations
+  - **Error handling** - displays access denied message for non-admin users attempting to access the feature
+  - **Central staff role assignment** - invited users automatically assigned central_staff role upon acceptance
+  - **Email-based system** - designed to send invitation emails with unique acceptance links (email service integration pending)
+  - **CONFIRMED WORKING** - API returns empty array successfully, frontend displays properly when accessed as System Administrator
 - **✅ COMPLETED: Interactive animated app guide with comprehensive feature demonstrations**
   - **Six-step guided tour** - covers welcome, navigation, classroom management, observations grid, notes/photos, and family management
   - **Smooth animations** - using Framer Motion for engaging transitions and visual feedback

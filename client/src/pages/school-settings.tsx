@@ -5228,10 +5228,11 @@ function UserInvitationsTable() {
         description: "User invitation has been created successfully.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Create invitation error:", error);
       toast({
         title: "Error",
-        description: "Failed to create user invitation.",
+        description: error.message || "Failed to create user invitation.",
         variant: "destructive",
       });
     },
@@ -5279,7 +5280,7 @@ function UserInvitationsTable() {
     },
   });
 
-  const handleCreateInvitation = () => {
+  const handleCreateInvitation = async () => {
     if (!invitationForm.email) {
       toast({
         title: "Email required",
@@ -5289,8 +5290,12 @@ function UserInvitationsTable() {
       return;
     }
 
-    createInvitationMutation.mutate(invitationForm);
-    setInvitationForm({ email: "", firstName: "", lastName: "" });
+    try {
+      await createInvitationMutation.mutateAsync(invitationForm);
+      setInvitationForm({ email: "", firstName: "", lastName: "" });
+    } catch (error) {
+      console.error("Error creating invitation:", error);
+    }
   };
 
   const getStatusBadge = (invitation: any) => {

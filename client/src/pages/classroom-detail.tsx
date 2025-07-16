@@ -174,62 +174,6 @@ export default function ClassroomDetailPage() {
                 </div>
               </div>
 
-              {/* Quick Actions Bar - Tablet Optimized */}
-              <Card className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                    <Button 
-                      onClick={() => setActiveTab('attendance')}
-                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
-                      variant="ghost"
-                    >
-                      <UserCheck className="h-5 w-5" />
-                      <span className="text-xs">Attendance</span>
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab('observations')}
-                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
-                      variant="ghost"
-                    >
-                      <ClipboardList className="h-5 w-5" />
-                      <span className="text-xs">Observe</span>
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab('lessons')}
-                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
-                      variant="ghost"
-                    >
-                      <BookOpen className="h-5 w-5" />
-                      <span className="text-xs">Lessons</span>
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab('photos')}
-                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
-                      variant="ghost"
-                    >
-                      <Camera className="h-5 w-5" />
-                      <span className="text-xs">Photos</span>
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab('notes')}
-                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
-                      variant="ghost"
-                    >
-                      <FileText className="h-5 w-5" />
-                      <span className="text-xs">Notes</span>
-                    </Button>
-                    <Button 
-                      onClick={() => setActiveTab('conferences')}
-                      className="h-16 flex-col space-y-1 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700" 
-                      variant="ghost"
-                    >
-                      <CalendarIcon className="h-5 w-5" />
-                      <span className="text-xs">Conferences</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Main Content Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7">

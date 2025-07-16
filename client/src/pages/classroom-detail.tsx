@@ -43,29 +43,63 @@ import {
   Upload,
   QrCode,
   Tablet,
-  X
+  X,
+  ChevronRight
 } from "lucide-react";
 
 // AttendanceInterface Component
 function AttendanceInterface({ classroomId, students, classroom }: { classroomId: string; students: any[]; classroom: any }) {
   const [attendanceMode, setAttendanceMode] = useState<'teacher' | 'family' | 'qr'>('teacher');
   const [attendanceData, setAttendanceData] = useState<Record<string, boolean>>({});
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [showQRDialog, setShowQRDialog] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState<string>('');
+  const [correctionReason, setCorrectionReason] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Initialize attendance data - default all students to present
+  // Initialize attendance data - default all students to present or load current attendance
   React.useEffect(() => {
     const initialData: Record<string, boolean> = {};
-    students.forEach(student => {
-      initialData[student.id] = true; // Default to present
-    });
+    
+    // If we have current attendance data, use it
+    if (currentAttendance.length > 0) {
+      students.forEach(student => {
+        const existingRecord = currentAttendance.find(record => record.studentId === student.id);
+        initialData[student.id] = existingRecord ? existingRecord.isPresent : true;
+      });
+    } else {
+      // Default all students to present
+      students.forEach(student => {
+        initialData[student.id] = true;
+      });
+    }
+    
     setAttendanceData(initialData);
-  }, [students]);
+  }, [students, currentAttendance]);
+
+  // Fetch current attendance for selected date
+  const { data: currentAttendance = [], isLoading: loadingCurrentAttendance } = useQuery({
+    queryKey: [`/api/classrooms/${classroomId}/attendance/${selectedDate}/current`],
+    enabled: !!classroomId && !!selectedDate,
+  });
+
+  // Fetch attendance history
+  const { data: attendanceHistory = [], isLoading: loadingHistory } = useQuery({
+    queryKey: [`/api/classrooms/${classroomId}/attendance-history`],
+    enabled: !!classroomId && showHistory,
+  });
+
+  // Fetch detailed records for selected history date
+  const { data: historyRecords = [], isLoading: loadingHistoryRecords } = useQuery({
+    queryKey: [`/api/classrooms/${classroomId}/attendance/${selectedHistoryDate}`],
+    enabled: !!classroomId && !!selectedHistoryDate,
+  });
 
   // Save attendance mutation
   const saveAttendanceMutation = useMutation({
-    mutationFn: async (data: { date: string; attendance: Record<string, boolean> }) => {
+    mutationFn: async (data: { date: string; attendance: Record<string, boolean>; correctionReason?: string }) => {
       return apiRequest('POST', `/api/classrooms/${classroomId}/attendance`, data);
     },
     onSuccess: () => {
@@ -73,7 +107,9 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
         title: "Attendance saved",
         description: "Daily attendance has been recorded successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/classrooms", classroomId, "attendance"] });
+      queryClient.invalidateQueries({ queryKey: [`/api/classrooms/${classroomId}/attendance`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/classrooms/${classroomId}/attendance-history`] });
+      setCorrectionReason('');
     },
     onError: (error: Error) => {
       toast({
@@ -115,10 +151,10 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
   };
 
   const handleSaveAttendance = () => {
-    const today = new Date().toISOString().split('T')[0];
     saveAttendanceMutation.mutate({
-      date: today,
-      attendance: attendanceData
+      date: selectedDate,
+      attendance: attendanceData,
+      correctionReason: correctionReason || undefined
     });
   };
 
@@ -149,6 +185,19 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Date Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Attendance Date
+              </label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <div className="text-2xl font-bold text-green-700 dark:text-green-400">{presentCount}</div>
@@ -159,6 +208,22 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
                 <div className="text-sm text-red-600 dark:text-red-500">Absent</div>
               </div>
             </div>
+
+            {/* Correction Reason */}
+            {currentAttendance.length > 0 && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Reason for Update (optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g., Student arrived late, Correcting error..."
+                  value={correctionReason}
+                  onChange={(e) => setCorrectionReason(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+                />
+              </div>
+            )}
 
             {/* Student List */}
             <div className="space-y-3">
@@ -198,13 +263,137 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
             <div className="mt-6 flex justify-end">
               <Button
                 onClick={handleSaveAttendance}
-                disabled={saveAttendanceMutation.isPending}
+                disabled={saveAttendanceMutation.isPending || loadingCurrentAttendance}
                 className="w-full sm:w-auto"
               >
                 {saveAttendanceMutation.isPending ? 'Saving...' : 'Save Attendance'}
               </Button>
             </div>
           </CardContent>
+        </Card>
+
+        {/* Attendance History */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <ClipboardList className="mr-2 h-5 w-5" />
+                Attendance History
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowHistory(!showHistory)}
+              >
+                {showHistory ? 'Hide History' : 'View History'}
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          {showHistory && (
+            <CardContent>
+              {loadingHistory ? (
+                <div className="text-center py-4">Loading history...</div>
+              ) : attendanceHistory.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No attendance records found</div>
+              ) : (
+                <div className="space-y-3">
+                  {attendanceHistory.map((record: any) => (
+                    <div
+                      key={record.date}
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                      onClick={() => setSelectedHistoryDate(record.date)}
+                    >
+                      <div>
+                        <div className="font-medium">{new Date(record.date).toLocaleDateString()}</div>
+                        <div className="text-sm text-gray-500">{record.recordCount} record(s)</div>
+                      </div>
+                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Selected Date Details */}
+              {selectedHistoryDate && (
+                <div className="mt-6 border-t pt-6">
+                  <h4 className="font-medium mb-4">
+                    Records for {new Date(selectedHistoryDate).toLocaleDateString()}
+                  </h4>
+                  {loadingHistoryRecords ? (
+                    <div className="text-center py-4">Loading records...</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {Object.entries(
+                        historyRecords.reduce((groups: any, record: any) => {
+                          const key = `${record.studentFirstName} ${record.studentLastName}`;
+                          if (!groups[key]) groups[key] = [];
+                          groups[key].push(record);
+                          return groups;
+                        }, {})
+                      ).map(([studentName, records]: [string, any[]]) => (
+                        <div key={studentName} className="border rounded-lg p-4">
+                          <h5 className="font-medium mb-3">{studentName}</h5>
+                          <div className="space-y-2">
+                            {records.map((record: any, index: number) => (
+                              <div
+                                key={record.id}
+                                className={`flex items-center justify-between p-2 rounded ${
+                                  record.isCurrent 
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800' 
+                                    : 'bg-gray-50 dark:bg-gray-800'
+                                }`}
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center space-x-2">
+                                    <span className={`px-2 py-1 rounded text-xs ${
+                                      record.isPresent 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : 'bg-red-100 text-red-800'
+                                    }`}>
+                                      {record.isPresent ? 'Present' : 'Absent'}
+                                    </span>
+                                    <span className="text-xs text-gray-500">{record.method}</span>
+                                    {record.isCurrent && (
+                                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Current</span>
+                                    )}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Entered at {new Date(record.enteredAt).toLocaleString()} 
+                                    {record.enteredByFirstName && (
+                                      <span> by {record.enteredByFirstName} {record.enteredByLastName}</span>
+                                    )}
+                                  </div>
+                                  {record.correctionReason && (
+                                    <div className="text-xs text-orange-600 mt-1">
+                                      Reason: {record.correctionReason}
+                                    </div>
+                                  )}
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setSelectedDate(selectedHistoryDate);
+                                    setAttendanceData(prev => ({
+                                      ...prev,
+                                      [record.studentId]: record.isPresent
+                                    }));
+                                    setCorrectionReason('');
+                                  }}
+                                >
+                                  Add Update
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          )}
         </Card>
       </div>
     );

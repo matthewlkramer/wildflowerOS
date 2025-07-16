@@ -281,6 +281,9 @@ export interface IStorage {
   // Attendance operations
   saveAttendance(attendance: InsertAttendance): Promise<Attendance>;
   getAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]>;
+  getCurrentAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]>;
+  getAttendanceHistoryByClassroom(classroomId: string): Promise<{ date: string; recordCount: number }[]>;
+  getAttendanceRecordsByClassroomAndDate(classroomId: string, date: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3727,43 +3730,101 @@ export class DatabaseStorage implements IStorage {
 
   // Attendance operations
   async saveAttendance(attendanceData: InsertAttendance): Promise<Attendance> {
+    // First, mark any existing records for this student/date as not current
+    await db
+      .update(attendance)
+      .set({ isCurrent: false })
+      .where(and(
+        eq(attendance.studentId, attendanceData.studentId),
+        eq(sql`date(${attendance.date})`, sql`date(${attendanceData.date})`)
+      ));
+
+    // Insert new record as current
     const [savedAttendance] = await db
       .insert(attendance)
       .values({
         ...attendanceData,
+        isCurrent: true,
         updatedAt: new Date(),
-      })
-      .onConflictDoUpdate({
-        target: [attendance.studentId, attendance.date],
-        set: {
-          isPresent: attendanceData.isPresent,
-          checkInTime: attendanceData.checkInTime,
-          checkOutTime: attendanceData.checkOutTime,
-          method: attendanceData.method,
-          notes: attendanceData.notes,
-          updatedAt: new Date(),
-        },
       })
       .returning();
     
     return savedAttendance;
   }
 
-  async getAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]> {
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+  async getCurrentAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]> {
+    const targetDate = new Date(date);
     
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
-
     return await db
       .select()
       .from(attendance)
       .where(and(
         eq(attendance.classroomId, classroomId),
-        gte(attendance.date, startOfDay),
-        lte(attendance.date, endOfDay)
+        eq(sql`date(${attendance.date})`, sql`date(${targetDate})`),
+        eq(attendance.isCurrent, true)
       ));
+  }
+
+  async getAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]> {
+    const targetDate = new Date(date);
+    
+    return await db
+      .select()
+      .from(attendance)
+      .where(and(
+        eq(attendance.classroomId, classroomId),
+        eq(sql`date(${attendance.date})`, sql`date(${targetDate})`)
+      ))
+      .orderBy(desc(attendance.enteredAt));
+  }
+
+  async getAttendanceHistoryByClassroom(classroomId: string): Promise<{ date: string; recordCount: number }[]> {
+    const results = await db
+      .select({
+        date: sql<string>`date(${attendance.date})`,
+        recordCount: sql<number>`count(*)`
+      })
+      .from(attendance)
+      .where(eq(attendance.classroomId, classroomId))
+      .groupBy(sql`date(${attendance.date})`)
+      .orderBy(desc(sql`date(${attendance.date})`));
+    
+    return results;
+  }
+
+  async getAttendanceRecordsByClassroomAndDate(classroomId: string, date: string): Promise<any[]> {
+    const targetDate = new Date(date);
+    
+    const results = await db
+      .select({
+        id: attendance.id,
+        studentId: attendance.studentId,
+        isPresent: attendance.isPresent,
+        checkInTime: attendance.checkInTime,
+        checkOutTime: attendance.checkOutTime,
+        method: attendance.method,
+        notes: attendance.notes,
+        enteredAt: attendance.enteredAt,
+        enteredBy: attendance.enteredBy,
+        isCurrent: attendance.isCurrent,
+        correctionReason: attendance.correctionReason,
+        studentFirstName: children.firstName,
+        studentLastName: children.lastName,
+        enteredByFirstName: users.firstName,
+        enteredByLastName: users.lastName,
+        enteredByEmail: users.email,
+      })
+      .from(attendance)
+      .leftJoin(enrollments, eq(attendance.studentId, enrollments.id))
+      .leftJoin(children, eq(enrollments.childId, children.id))
+      .leftJoin(users, eq(attendance.enteredBy, users.id))
+      .where(and(
+        eq(attendance.classroomId, classroomId),
+        eq(sql`date(${attendance.date})`, sql`date(${targetDate})`)
+      ))
+      .orderBy(children.firstName, children.lastName, desc(attendance.enteredAt));
+    
+    return results;
   }
 }
 

@@ -2650,10 +2650,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/classrooms/:classroomId/attendance', isAuthenticated, async (req: any, res) => {
     try {
       const { classroomId } = req.params;
-      const { date, attendance: attendanceData } = req.body;
+      const { date, attendance: attendanceData, correctionReason } = req.body;
 
       if (!date || !attendanceData) {
         return res.status(400).json({ message: "Missing required fields: date, attendance" });
+      }
+
+      // Get current user ID
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
       }
 
       // Get all students for this classroom
@@ -2674,6 +2681,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isPresent: attendanceData[studentId],
           method: 'teacher' as const,
           checkInTime: attendanceData[studentId] ? new Date() : null,
+          enteredBy: user?.id || null,
+          correctionReason: correctionReason || null,
         };
 
         const saved = await storage.saveAttendance(attendanceRecord);
@@ -2710,15 +2719,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get attendance for a classroom on a specific date
+  // Get current attendance for a classroom on a specific date
+  app.get('/api/classrooms/:classroomId/attendance/:date/current', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId, date } = req.params;
+      const attendance = await storage.getCurrentAttendanceByClassroomAndDate(classroomId, date);
+      res.json(attendance);
+    } catch (error) {
+      console.error("Error fetching current attendance:", error);
+      res.status(500).json({ message: "Failed to fetch current attendance" });
+    }
+  });
+
+  // Get all attendance records for a classroom on a specific date
   app.get('/api/classrooms/:classroomId/attendance/:date', isAuthenticated, async (req: any, res) => {
     try {
       const { classroomId, date } = req.params;
-      const attendance = await storage.getAttendanceByClassroomAndDate(classroomId, date);
-      res.json(attendance);
+      const records = await storage.getAttendanceRecordsByClassroomAndDate(classroomId, date);
+      res.json(records);
     } catch (error) {
-      console.error("Error fetching attendance:", error);
-      res.status(500).json({ message: "Failed to fetch attendance" });
+      console.error("Error fetching attendance records:", error);
+      res.status(500).json({ message: "Failed to fetch attendance records" });
+    }
+  });
+
+  // Get attendance history for a classroom
+  app.get('/api/classrooms/:classroomId/attendance-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const history = await storage.getAttendanceHistoryByClassroom(classroomId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching attendance history:", error);
+      res.status(500).json({ message: "Failed to fetch attendance history" });
     }
   });
 
@@ -2734,6 +2767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isPresent: true,
         method: 'qr_code' as const,
         checkInTime: new Date(),
+        enteredBy: null, // QR code check-ins don't have a logged-in user
       };
 
       const saved = await storage.saveAttendance(attendanceRecord);

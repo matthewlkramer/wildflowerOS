@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import "./lib/i18n"; // Initialize i18n
+import AppGuide from "@/components/AppGuide";
 import Dashboard from "@/pages/dashboard";
 import Landing from "@/pages/landing";
 import NotFound from "@/pages/not-found";
@@ -79,6 +80,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <AppGuide />
       </TooltipProvider>
     </QueryClientProvider>
   );

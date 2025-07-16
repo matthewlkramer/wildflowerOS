@@ -642,6 +642,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get individual classroom details
+  app.get('/api/classrooms/:classroomId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const classroom = await storage.getClassroomById(classroomId);
+      if (!classroom) {
+        return res.status(404).json({ message: "Classroom not found" });
+      }
+      res.json(classroom);
+    } catch (error) {
+      console.error("Error fetching classroom:", error);
+      res.status(500).json({ message: "Failed to fetch classroom" });
+    }
+  });
+
+  // Get students in a classroom
+  app.get('/api/classrooms/:classroomId/students', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const students = await storage.getEnrollmentsByClassroom(classroomId);
+      res.json(students);
+    } catch (error) {
+      console.error("Error fetching classroom students:", error);
+      res.status(500).json({ message: "Failed to fetch classroom students" });
+    }
+  });
+
   // Staff management
   app.get('/api/schools/:schoolId/staff', isAuthenticated, async (req: any, res) => {
     try {

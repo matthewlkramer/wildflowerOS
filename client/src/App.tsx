@@ -13,6 +13,8 @@ import FamiliesPage from "@/pages/families";
 import FamilyDetailsPage from "@/pages/family-details";
 import FamilyBillingPage from "@/pages/family-billing";
 import ChildDetailsPage from "@/pages/child-details";
+import ClassroomsPage from "@/pages/classrooms";
+import ClassroomDetailPage from "@/pages/classroom-detail";
 import SchoolSettingsPage from "@/pages/school-settings";
 import StaffRolesPage from "@/pages/staff-roles";
 import MessagesPage from "@/pages/messages";
@@ -34,6 +36,8 @@ function Router() {
           <Route path="/families/:familyId" component={FamilyDetailsPage} />
           <Route path="/families/:familyId/billing" component={FamilyBillingPage} />
           <Route path="/children/:childId" component={ChildDetailsPage} />
+          <Route path="/classrooms" component={ClassroomsPage} />
+          <Route path="/classrooms/:classroomId" component={ClassroomDetailPage} />
           <Route path="/messages" component={MessagesPage} />
           <Route path="/enhanced-messages" component={EnhancedMessagesPage} />
           <Route path="/channel-test" component={ChannelTestPage} />

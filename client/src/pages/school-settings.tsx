@@ -4502,7 +4502,7 @@ export default function SchoolSettingsPage() {
                               {/* Schedule Selection Row */}
                               <div className="flex items-center gap-3">
                                 <div className="flex-1">
-                                  {(classroom.schedules && classroom.schedules.length > 0) ? (
+                                  {(classroom.schedules && classroom.schedules.filter((s: any) => s?.id && s.id.toString().trim() !== '').length > 0) ? (
                                     <Select 
                                       value={selectedClassroomSchedule} 
                                       onValueChange={(value) => {
@@ -4523,16 +4523,25 @@ export default function SchoolSettingsPage() {
                                         <SelectValue placeholder="Select a schedule..." />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {classroom.schedules?.filter((schedule: any) => schedule?.id && schedule.id.trim() !== '').map((schedule: any) => (
-                                          <SelectItem key={schedule.id} value={schedule.id}>
-                                            <div className="flex items-center justify-between w-full">
-                                              <span className="font-medium">{schedule.name || 'Unnamed Schedule'}</span>
-                                              <span className="text-xs text-gray-500 ml-2">
-                                                {schedule.startTime} - {schedule.endTime} • {calculateHoursPerWeek(schedule)} hrs/week
-                                              </span>
-                                            </div>
-                                          </SelectItem>
-                                        ))}
+                                        {classroom.schedules
+                                          ?.filter((schedule: any) => {
+                                            // Ensure schedule exists, has an id, and it's not empty
+                                            return schedule && 
+                                                   schedule.id && 
+                                                   schedule.id.toString().trim() !== '' &&
+                                                   schedule.id !== 'undefined' &&
+                                                   schedule.id !== 'null';
+                                          })
+                                          .map((schedule: any) => (
+                                            <SelectItem key={schedule.id} value={schedule.id.toString()}>
+                                              <div className="flex items-center justify-between w-full">
+                                                <span className="font-medium">{schedule.name || 'Unnamed Schedule'}</span>
+                                                <span className="text-xs text-gray-500 ml-2">
+                                                  {schedule.startTime} - {schedule.endTime} • {calculateHoursPerWeek(schedule)} hrs/week
+                                                </span>
+                                              </div>
+                                            </SelectItem>
+                                          ))}
                                         <SelectItem value="create-new">
                                           <div className="flex items-center text-blue-600">
                                             <Plus className="mr-2 h-4 w-4" />

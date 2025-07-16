@@ -3141,16 +3141,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           acceptedAt: new Date()
         });
 
-        // Assign central_staff role if not already assigned
-        const centralStaffRole = await storage.getRoleByName('central_staff');
-        if (centralStaffRole) {
+        // Assign partner role if not already assigned
+        const partnerRole = await storage.getRoleByName('partner');
+        if (partnerRole) {
           const existingRole = await storage.getUserRoles(existingUser.id);
-          const hasCentralStaffRole = existingRole.some(role => role.roleId === centralStaffRole.id);
+          const hasPartnerRole = existingRole.some(role => role.roleId === partnerRole.id);
           
-          if (!hasCentralStaffRole) {
+          if (!hasPartnerRole) {
             await storage.assignUserRole({
               userId: existingUser.id,
-              roleId: centralStaffRole.id,
+              roleId: partnerRole.id,
               schoolId: null,
               classroomId: null,
               active: true,
@@ -3172,12 +3172,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: true
         });
 
-        // Assign central_staff role
-        const centralStaffRole = await storage.getRoleByName('central_staff');
-        if (centralStaffRole) {
+        // Assign partner role
+        const partnerRole = await storage.getRoleByName('partner');
+        if (partnerRole) {
           await storage.assignUserRole({
             userId: newUser.id,
-            roleId: centralStaffRole.id,
+            roleId: partnerRole.id,
             schoolId: null,
             classroomId: null,
             active: true,

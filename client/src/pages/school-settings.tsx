@@ -5210,6 +5210,7 @@ function UserInvitationsTable() {
     lastName: ""
   });
   const [deletingUser, setDeletingUser] = useState<any>(null);
+  const [showPreUsers, setShowPreUsers] = useState(false);
 
   // Fetch user invitations
   const { data: invitations = [], isLoading, error } = useQuery({
@@ -5418,85 +5419,36 @@ function UserInvitationsTable() {
         </CardContent>
       </Card>
 
-      {/* Invitations List */}
-      <div className="space-y-3">
-        {invitations.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            No invitations sent yet. Create your first invitation above.
-          </div>
-        ) : (
-          invitations.map((invitation: any) => (
-            <Card key={invitation.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <div>
-                        <p className="font-medium">
-                          {invitation.firstName || invitation.lastName 
-                            ? `${invitation.firstName || ''} ${invitation.lastName || ''}`.trim()
-                            : invitation.email}
-                        </p>
-                        <p className="text-sm text-gray-600">{invitation.email}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          {getStatusBadge(invitation)}
-                          <span className="text-xs text-gray-500">
-                            Sent {new Date(invitation.createdAt).toLocaleDateString()}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            Expires {new Date(invitation.expiresAt).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex space-x-2">
-                    {invitation.status === 'pending' && new Date(invitation.expiresAt) > new Date() && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => resendInvitationMutation.mutate(invitation.id)}
-                          disabled={resendInvitationMutation.isPending}
-                        >
-                          Resend
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => cancelInvitationMutation.mutate(invitation.id)}
-                          disabled={cancelInvitationMutation.isPending}
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-
-      {/* Existing Users Management */}
+      {/* Unified Users Management */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Existing Network Users</CardTitle>
-          <p className="text-sm text-gray-600">Manage users who have already joined the network.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Network Users</CardTitle>
+              <p className="text-sm text-gray-600">Manage users who have joined or been invited to the network.</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="show-pre-users" className="text-sm font-normal">
+                Include pre-user records
+              </Label>
+              <input
+                id="show-pre-users"
+                type="checkbox"
+                checked={showPreUsers}
+                onChange={(e) => setShowPreUsers(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          {usersLoading ? (
-            <div className="text-center py-8 text-gray-500">Loading users...</div>
-          ) : existingUsers.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No network users found.
-            </div>
+          {usersLoading || isLoading ? (
+            <div className="text-center py-8 text-gray-500">Loading...</div>
           ) : (
             <div className="space-y-3">
+              {/* Show existing users */}
               {existingUsers.map((user: any) => (
-                <Card key={user.id}>
+                <Card key={`user-${user.id}`}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -5537,6 +5489,69 @@ function UserInvitationsTable() {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Show invitations if toggle is on */}
+              {showPreUsers && invitations.map((invitation: any) => (
+                <Card key={`invitation-${invitation.id}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3">
+                          <div>
+                            <p className="font-medium">
+                              {invitation.firstName || invitation.lastName 
+                                ? `${invitation.firstName || ''} ${invitation.lastName || ''}`.trim()
+                                : invitation.email}
+                            </p>
+                            <p className="text-sm text-gray-600">{invitation.email}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              {getStatusBadge(invitation)}
+                              <span className="text-xs text-gray-500">
+                                Sent {new Date(invitation.createdAt).toLocaleDateString()}
+                              </span>
+                              {invitation.status === 'pending' && (
+                                <span className="text-xs text-gray-500">
+                                  Expires {new Date(invitation.expiresAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex space-x-2">
+                        {invitation.status === 'pending' && new Date(invitation.expiresAt) > new Date() && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => resendInvitationMutation.mutate(invitation.id)}
+                              disabled={resendInvitationMutation.isPending}
+                            >
+                              Resend
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => cancelInvitationMutation.mutate(invitation.id)}
+                              disabled={cancelInvitationMutation.isPending}
+                            >
+                              Cancel
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+
+              {/* Show empty state if no data */}
+              {existingUsers.length === 0 && (!showPreUsers || invitations.length === 0) && (
+                <div className="text-center py-8 text-gray-500">
+                  No network users found. Send an invitation above to get started.
+                </div>
+              )}
             </div>
           )}
         </CardContent>

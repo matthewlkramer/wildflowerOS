@@ -154,29 +154,29 @@ export default function FamiliesPage() {
           <div className="p-4 lg:p-6 pb-20">
             <div className="max-w-6xl mx-auto">
               {/* Page Header */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between">
+              <div className="mb-6 sm:mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
-                      <Users className="mr-3 h-8 w-8 text-primary" />
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center">
+                      <Users className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                       {t("families")}
                     </h1>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                    <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                       {t("family_management")}
                     </p>
                   </div>
-                  <Button className="flex items-center">
+                  <Button className="flex items-center w-full sm:w-auto justify-center sm:justify-start">
                     <Plus className="mr-2 h-4 w-4" />
-                    {t("add")} {t("families")}
+                    <span className="sm:inline">{t("add")} {t("families")}</span>
                   </Button>
                 </div>
               </div>
 
               {/* Filters and Search */}
-              <Card className="mb-6">
-                <CardContent className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="relative">
+              <Card className="mb-4 sm:mb-6">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-4">
+                    <div className="relative col-span-full sm:col-span-1">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                       <Input
                         placeholder={t("search_families")}
@@ -210,8 +210,9 @@ export default function FamiliesPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-                      {filteredFamilies.length} {t("families_found")}
+                    <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center sm:justify-start bg-gray-50 dark:bg-gray-800 rounded p-2 sm:bg-transparent sm:p-0">
+                      <span className="font-medium">{filteredFamilies.length}</span>
+                      <span className="ml-1">{t("families_found")}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -221,97 +222,119 @@ export default function FamiliesPage() {
               <div className="space-y-4">
                 {filteredFamilies.map((familyGroup: any) => (
                   <Card key={familyGroup.family.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-4">
+                    <CardContent className="p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
+                        {/* Family Header - Mobile Optimized */}
+                        <div className="flex items-center space-x-4 sm:flex-col sm:space-x-0 sm:space-y-2 sm:flex-shrink-0">
                           {/* Family Avatar */}
-                          <div className="flex-shrink-0">
-                            <div className="h-12 w-12 rounded-full bg-primary text-white dark:text-gray-200 flex items-center justify-center">
-                              <span className="text-lg font-medium">
-                                {getFamilyInitials(familyGroup.family.name)}
-                              </span>
-                            </div>
+                          <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-primary text-white dark:text-gray-200 flex items-center justify-center flex-shrink-0">
+                            <span className="text-lg sm:text-xl font-medium">
+                              {getFamilyInitials(familyGroup.family.name)}
+                            </span>
+                          </div>
+                          
+                          {/* Mobile: Family Name and Count inline with avatar */}
+                          <div className="flex-1 sm:hidden">
+                            <Link href={`/families/${familyGroup.family.id}`}>
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">
+                                {familyGroup.family.name || "Unnamed Family"}
+                              </h3>
+                            </Link>
+                            <Badge className="bg-blue-100 text-blue-800 text-xs">
+                              {familyGroup.children.length} {familyGroup.children.length === 1 ? "child" : "children"}
+                            </Badge>
+                          </div>
+                        </div>
+
+                        {/* Family Info */}
+                        <div className="flex-1 min-w-0">
+                          {/* Desktop: Family Name and Count */}
+                          <div className="hidden sm:flex sm:items-center sm:space-x-3 sm:mb-3">
+                            <Link href={`/families/${familyGroup.family.id}`}>
+                              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">
+                                {familyGroup.family.name || "Unnamed Family"}
+                              </h3>
+                            </Link>
+                            <Badge className="bg-blue-100 text-blue-800">
+                              {familyGroup.children.length} {familyGroup.children.length === 1 ? "child" : "children"}
+                            </Badge>
                           </div>
 
-                          {/* Family Info */}
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-3 mb-2">
-                              <Link href={`/families/${familyGroup.family.id}`}>
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors">
-                                  {familyGroup.family.name || "Unnamed Family"}
-                                </h3>
-                              </Link>
-                              <Badge className="bg-blue-100 text-blue-800">
-                                {familyGroup.children.length} {familyGroup.children.length === 1 ? "child" : "children"}
-                              </Badge>
-                            </div>
+                          {/* Contact Info - Stack on mobile, grid on larger screens */}
+                          <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-1 lg:grid-cols-3 sm:gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            {familyGroup.family.email && (
+                              <div className="flex items-center">
+                                <Mail className="mr-2 h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{familyGroup.family.email}</span>
+                              </div>
+                            )}
+                            {familyGroup.family.phone && (
+                              <div className="flex items-center">
+                                <Phone className="mr-2 h-4 w-4 flex-shrink-0" />
+                                {familyGroup.family.phone}
+                              </div>
+                            )}
+                            {familyGroup.family.address && (
+                              <div className="flex items-center">
+                                <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
+                                <span className="truncate">{familyGroup.family.address}</span>
+                              </div>
+                            )}
+                          </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600 dark:text-gray-400">
-                              {familyGroup.family.email && (
-                                <div className="flex items-center">
-                                  <Mail className="mr-2 h-4 w-4" />
-                                  {familyGroup.family.email}
-                                </div>
-                              )}
-                              {familyGroup.family.phone && (
-                                <div className="flex items-center">
-                                  <Phone className="mr-2 h-4 w-4" />
-                                  {familyGroup.family.phone}
-                                </div>
-                              )}
-                              {familyGroup.family.address && (
-                                <div className="flex items-center">
-                                  <MapPin className="mr-2 h-4 w-4" />
-                                  {familyGroup.family.address}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Children */}
-                            <div className="mt-4">
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Children:</h4>
-                              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                                {familyGroup.children.map((child: any) => (
-                                  <Link key={child.id} href={`/children/${child.id}`}>
-                                    <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
-                                      <div className="flex items-center space-x-3 min-w-0 flex-1">
-                                        <GraduationCap className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
-                                        <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
-                                          {child.firstName} {child.lastName}
-                                        </span>
-                                        {child.classroom && (
-                                          <Badge className={`${getClassroomColor(child.classroom.level)} flex-shrink-0`}>
-                                            {child.classroom.name}
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      <Badge className={`${getStatusColor(child.status)} flex-shrink-0 ml-2`}>
+                          {/* Children */}
+                          <div>
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">Children:</h4>
+                            <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-1 lg:grid-cols-2 sm:gap-3">
+                              {familyGroup.children.map((child: any) => (
+                                <Link key={child.id} href={`/children/${child.id}`}>
+                                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors">
+                                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                      <GraduationCap className="h-4 w-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                                      <span className="font-medium text-gray-900 dark:text-gray-100 truncate">
+                                        {child.firstName} {child.lastName}
+                                      </span>
+                                      {child.classroom && (
+                                        <Badge className={`${getClassroomColor(child.classroom.level)} flex-shrink-0 hidden sm:inline-flex`}>
+                                          {child.classroom.name}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center space-x-2 flex-shrink-0">
+                                      {child.classroom && (
+                                        <Badge className={`${getClassroomColor(child.classroom.level)} text-xs sm:hidden`}>
+                                          {child.classroom.name}
+                                        </Badge>
+                                      )}
+                                      <Badge className={`${getStatusColor(child.status)} text-xs`}>
                                         {child.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                       </Badge>
                                     </div>
-                                  </Link>
-                                ))}
-                              </div>
+                                  </div>
+                                </Link>
+                              ))}
                             </div>
                           </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex flex-col space-y-2">
-                          <Link href={`/families/${familyGroup.family.id}`}>
-                            <Button variant="outline" size="sm" className="w-full">
-                              View Details
+                        {/* Action Buttons - Mobile: horizontal, Desktop: vertical */}
+                        <div className="flex flex-row sm:flex-col space-x-2 sm:space-x-0 sm:space-y-2 flex-shrink-0">
+                          <Link href={`/families/${familyGroup.family.id}`} className="flex-1 sm:flex-none">
+                            <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm">
+                              <span className="sm:hidden">Details</span>
+                              <span className="hidden sm:inline">View Details</span>
                             </Button>
                           </Link>
-                          <Link href={`/families/${familyGroup.family.id}/billing`}>
-                            <Button variant="outline" size="sm" className="w-full">
-                              <DollarSign className="mr-2 h-4 w-4" />
+                          <Link href={`/families/${familyGroup.family.id}/billing`} className="flex-1 sm:flex-none">
+                            <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm">
+                              <DollarSign className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
                               Billing
                             </Button>
                           </Link>
-                          <Button variant="outline" size="sm" className="w-full">
-                            <MessageCircle className="mr-2 h-4 w-4" />
-                            Message
+                          <Button variant="outline" size="sm" className="flex-1 sm:flex-none w-full text-xs sm:text-sm">
+                            <MessageCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                            <span className="sm:hidden">Msg</span>
+                            <span className="hidden sm:inline">Message</span>
                           </Button>
                         </div>
                       </div>

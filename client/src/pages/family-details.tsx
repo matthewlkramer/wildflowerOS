@@ -412,40 +412,48 @@ export default function FamilyDetailsPage() {
           <div className="p-4 lg:p-6 pb-20">
             <div className="max-w-6xl mx-auto">
             {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col space-y-3 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-4">
                   <Link href="/families">
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="w-fit">
                       <ArrowLeft className="mr-2 h-4 w-4" />
-                      Back to Families
+                      <span className="hidden sm:inline">Back to Families</span>
+                      <span className="sm:hidden">Back</span>
                     </Button>
                   </Link>
                   <div>
-                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                      <Users className="mr-3 h-8 w-8 text-primary" />
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center">
+                      <Users className="mr-2 sm:mr-3 h-6 w-6 sm:h-8 sm:w-8 text-primary" />
                       {family.name || "Unnamed Family"}
                     </h1>
-                    <p className="mt-2 text-gray-600">
+                    <p className="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">
                       {children.length} {children.length === 1 ? "child" : "children"}
                     </p>
                   </div>
                 </div>
                 <div className="flex space-x-2">
-                  <Button>
+                  <Button className="w-full sm:w-auto">
                     <MessageCircle className="mr-2 h-4 w-4" />
-                    Send Message
+                    <span className="hidden sm:inline">Send Message</span>
+                    <span className="sm:hidden">Message</span>
                   </Button>
                 </div>
               </div>
             </div>
 
             <Tabs defaultValue="overview" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="enrollment">Enrollment</TabsTrigger>
-                <TabsTrigger value="billing">Billing</TabsTrigger>
-                <TabsTrigger value="communication">Communication</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+                <TabsTrigger value="enrollment" className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Enrollment</span>
+                  <span className="sm:hidden">Enroll</span>
+                </TabsTrigger>
+                <TabsTrigger value="billing" className="text-xs sm:text-sm">Billing</TabsTrigger>
+                <TabsTrigger value="communication" className="text-xs sm:text-sm">
+                  <span className="hidden sm:inline">Communication</span>
+                  <span className="sm:hidden">Comm</span>
+                </TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
@@ -499,17 +507,17 @@ export default function FamilyDetailsPage() {
                       <div className="text-center py-6">
                         <Users className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                         <p className="text-gray-500 text-sm mb-3">No adults added yet</p>
-                        <p className="text-xs text-gray-400 mb-3">Connect existing users with parent roles to this family</p>
+                        <p className="text-xs text-gray-400 mb-3 px-4">Connect existing users with parent roles to this family</p>
                         <Button size="sm" variant="outline">
                           <Plus className="mr-2 h-3 w-3" />
                           Add First Adult
                         </Button>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="space-y-4 sm:space-y-0 sm:grid sm:grid-cols-1 lg:grid-cols-2 sm:gap-4">
                         {adults.map((adult: any) => (
                           <div key={adult.id} className="p-4 border rounded-lg">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
                               <div className="min-w-0 flex-1">
                                 <div className="font-medium truncate">
                                   {adult.firstName} {adult.lastName}
@@ -517,25 +525,29 @@ export default function FamilyDetailsPage() {
                                 <div className="text-sm text-gray-500">
                                   Parent/Guardian
                                 </div>
-                                {adult.email && (
-                                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                                    <Mail className="mr-1 h-3 w-3 flex-shrink-0" />
-                                    <span className="truncate">{adult.email}</span>
-                                  </div>
-                                )}
-                                {adult.phone && (
-                                  <div className="flex items-center text-sm text-gray-600 mt-1">
-                                    <Phone className="mr-1 h-3 w-3 flex-shrink-0" />
-                                    {adult.phone}
-                                  </div>
-                                )}
+                                <div className="space-y-1 mt-2">
+                                  {adult.email && (
+                                    <div className="flex items-center text-sm text-gray-600">
+                                      <Mail className="mr-1 h-3 w-3 flex-shrink-0" />
+                                      <span className="truncate">{adult.email}</span>
+                                    </div>
+                                  )}
+                                  {adult.phone && (
+                                    <div className="flex items-center text-sm text-gray-600">
+                                      <Phone className="mr-1 h-3 w-3 flex-shrink-0" />
+                                      {adult.phone}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
-                              <div className="flex space-x-1 ml-2">
-                                <Button variant="ghost" size="sm">
-                                  <Edit className="h-3 w-3" />
+                              <div className="flex space-x-2 sm:space-x-1 sm:ml-2">
+                                <Button variant="ghost" size="sm" className="flex-1 sm:flex-none">
+                                  <Edit className="h-3 w-3 sm:mr-0 mr-1" />
+                                  <span className="sm:hidden">Edit</span>
                                 </Button>
-                                <Button variant="ghost" size="sm">
-                                  <Trash2 className="h-3 w-3" />
+                                <Button variant="ghost" size="sm" className="flex-1 sm:flex-none">
+                                  <Trash2 className="h-3 w-3 sm:mr-0 mr-1" />
+                                  <span className="sm:hidden">Remove</span>
                                 </Button>
                               </div>
                             </div>
@@ -711,33 +723,35 @@ export default function FamilyDetailsPage() {
                       const enrollment = enrollments.find((e: any) => e.childId === child.id);
                       return (
                         <div key={child.id} className="p-4 border rounded-lg">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-start">
                             <Link href={`/children/${child.id}`} className="flex-1 cursor-pointer">
                               <div className="hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded transition-colors">
-                                <h4 className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">{child.firstName} {child.lastName}</h4>
-                                <p className="text-sm text-gray-600">
-                                  Born: {new Date(child.birthDate).toLocaleDateString()} • Age: {formatAgeDisplay(child.birthDate)}
-                                </p>
-                                {child.genderId && (
+                                <h4 className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-lg sm:text-base">{child.firstName} {child.lastName}</h4>
+                                <div className="space-y-1 mt-2">
                                   <p className="text-sm text-gray-600">
-                                    Gender: {genders.find((g: any) => g.id === child.genderId)?.name || "Unknown"}
-                                    {child.genderOther && ` (${child.genderOther})`}
+                                    Born: {new Date(child.birthDate).toLocaleDateString()} • Age: {formatAgeDisplay(child.birthDate)}
                                   </p>
-                                )}
-                                {child.raceEthnicityIds && child.raceEthnicityIds.length > 0 && (
-                                  <p className="text-sm text-gray-600">
-                                    Race/Ethnicity: {getLabelForIds(child.raceEthnicityIds, raceEthnicities, "name")}
-                                    {child.raceEthnicityOther && ` (${child.raceEthnicityOther})`}
-                                  </p>
-                                )}
-                                {child.primaryLanguageIds && child.primaryLanguageIds.length > 0 && (
-                                  <p className="text-sm text-gray-600">
-                                    Languages: {getLabelForIds(child.primaryLanguageIds, languages, "nameEnglish")}
-                                    {child.primaryLanguageOther && ` (${child.primaryLanguageOther})`}
-                                  </p>
-                                )}
+                                  {child.genderId && (
+                                    <p className="text-sm text-gray-600">
+                                      Gender: {genders.find((g: any) => g.id === child.genderId)?.name || "Unknown"}
+                                      {child.genderOther && ` (${child.genderOther})`}
+                                    </p>
+                                  )}
+                                  {child.raceEthnicityIds && child.raceEthnicityIds.length > 0 && (
+                                    <p className="text-sm text-gray-600">
+                                      Race/Ethnicity: {getLabelForIds(child.raceEthnicityIds, raceEthnicities, "name")}
+                                      {child.raceEthnicityOther && ` (${child.raceEthnicityOther})`}
+                                    </p>
+                                  )}
+                                  {child.primaryLanguageIds && child.primaryLanguageIds.length > 0 && (
+                                    <p className="text-sm text-gray-600">
+                                      Languages: {getLabelForIds(child.primaryLanguageIds, languages, "nameEnglish")}
+                                      {child.primaryLanguageOther && ` (${child.primaryLanguageOther})`}
+                                    </p>
+                                  )}
+                                </div>
                                 {enrollment && (
-                                  <div className="mt-2 flex items-center space-x-2">
+                                  <div className="mt-3 flex flex-wrap items-center gap-2">
                                     <Badge className={getStatusColor(enrollment.status)}>
                                       {enrollment.status.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                     </Badge>
@@ -750,19 +764,22 @@ export default function FamilyDetailsPage() {
                                 )}
                               </div>
                             </Link>
-                            <div className="flex space-x-2">
-                              <Link href={`/children/${child.id}`}>
-                                <Button variant="outline" size="sm" title="View child details">
-                                  <Eye className="h-4 w-4" />
+                            <div className="flex flex-row sm:flex-col space-x-2 sm:space-x-0 sm:space-y-2 flex-shrink-0">
+                              <Link href={`/children/${child.id}`} className="flex-1 sm:flex-none">
+                                <Button variant="outline" size="sm" title="View child details" className="w-full">
+                                  <Eye className="h-4 w-4 sm:mr-0 mr-1" />
+                                  <span className="sm:hidden">View</span>
                                 </Button>
                               </Link>
-                              <Button variant="outline" size="sm" onClick={() => handleEditChild(child)}>
-                                <Edit className="h-4 w-4" />
+                              <Button variant="outline" size="sm" onClick={() => handleEditChild(child)} className="flex-1 sm:flex-none">
+                                <Edit className="h-4 w-4 sm:mr-0 mr-1" />
+                                <span className="sm:hidden">Edit</span>
                               </Button>
                               <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <Trash2 className="h-4 w-4" />
+                                  <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                                    <Trash2 className="h-4 w-4 sm:mr-0 mr-1" />
+                                    <span className="sm:hidden">Remove</span>
                                   </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
@@ -833,7 +850,7 @@ export default function FamilyDetailsPage() {
 
               {/* Billing Tab */}
               <TabsContent value="billing" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6 sm:space-y-0 sm:grid sm:grid-cols-1 lg:grid-cols-2 sm:gap-6">
               {/* Billing Setup */}
               <Card>
                 <CardHeader>

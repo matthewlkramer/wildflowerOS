@@ -59,11 +59,11 @@ export default function ActivityFeed() {
                   <div className="relative flex items-start space-x-3">
                     <div className="relative">
                       <img 
-                        className="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-8 ring-white object-cover" 
+                        className="h-10 w-10 rounded-full bg-gray-400 flex items-center justify-center ring-2 ring-gray-100 dark:ring-gray-700 object-cover" 
                         src={activity.user.profileImageUrl}
                         alt={activity.user.name}
                       />
-                      <span className="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
+                      <span className="absolute -bottom-0.5 -right-1 bg-gray-50 dark:bg-gray-800 rounded-tl px-0.5 py-px">
                         <i className={`${activity.icon} ${activity.iconColor} text-xs`}></i>
                       </span>
                     </div>

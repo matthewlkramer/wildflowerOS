@@ -10,6 +10,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### July 16, 2025
+- **✅ COMPLETED: Fixed bright white avatar rings on dashboard activity feed**
+  - **Reduced ring thickness** - Changed from thick `ring-8` to subtle `ring-2` for better visual balance
+  - **Improved ring colors** - Replaced bright `ring-white` with `ring-gray-100 dark:ring-gray-700` for theme-appropriate styling
+  - **Enhanced icon backgrounds** - Changed from harsh `bg-white` to softer `bg-gray-50 dark:bg-gray-800` for better integration
+  - **Dark mode compatibility** - Avatar styling now properly adapts to both light and dark themes
+  - **User experience improved** - Dashboard activity feed now has more pleasant, less intrusive avatar presentation
+  - **CONFIRMED WORKING** - Avatar rings no longer appear overly bright or distracting
+- **✅ COMPLETED: Classroom multi-selection functionality for schedule creation**
+  - **Added selectedClassrooms array** to schedule form state for tracking multiple classroom selections
+  - **Created multi-selection interface** with checkboxes, proper spacing, and visual layout as requested
+  - **Enhanced backend API** to handle multiple classroom assignments when creating schedules
+  - **Fixed UUID error** in tuition plan creation by properly handling empty schoolYearId values
+  - **Implemented validation** requiring at least one classroom selection before schedule creation
+  - **Added visual feedback** with warning message when no classrooms are selected
+  - **Backend compatibility** maintains legacy support for single classroom schedule creation
+  - **CONFIRMED WORKING** - Schedule creation form now supports multiple classroom selection
+
 ### July 15, 2025
 - **✅ COMPLETED: Simplified tuition pricing interface to single-selection dropdown model**
   - **Restored dropdown interface** - Each classroom now has a schedule dropdown with "Set Pricing" button

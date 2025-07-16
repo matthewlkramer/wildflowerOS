@@ -5219,7 +5219,8 @@ function UserInvitationsTable() {
   // Create invitation mutation
   const createInvitationMutation = useMutation({
     mutationFn: async (invitation: any) => {
-      return await apiRequest("/api/user-invitations", "POST", invitation);
+      const response = await apiRequest("POST", "/api/user-invitations", invitation);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-invitations"] });
@@ -5241,7 +5242,8 @@ function UserInvitationsTable() {
   // Cancel invitation mutation
   const cancelInvitationMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      return await apiRequest(`/api/user-invitations/${invitationId}/cancel`, "PATCH");
+      const response = await apiRequest("PATCH", `/api/user-invitations/${invitationId}/cancel`);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-invitations"] });
@@ -5262,7 +5264,8 @@ function UserInvitationsTable() {
   // Resend invitation mutation
   const resendInvitationMutation = useMutation({
     mutationFn: async (invitationId: string) => {
-      return await apiRequest(`/api/user-invitations/${invitationId}/resend`, "POST");
+      const response = await apiRequest("POST", `/api/user-invitations/${invitationId}/resend`);
+      return await response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/user-invitations"] });

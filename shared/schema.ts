@@ -270,6 +270,24 @@ export const classrooms = pgTable("classrooms", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ======================== ATTENDANCE ========================
+
+export const attendance = pgTable("attendance", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id, { onDelete: "cascade" }),
+  studentId: uuid("student_id").notNull().references(() => enrollments.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull(),
+  isPresent: boolean("is_present").notNull().default(true),
+  checkInTime: timestamp("check_in_time"),
+  checkOutTime: timestamp("check_out_time"),
+  method: varchar("method", { enum: ["teacher", "family_tablet", "qr_code"] }).notNull().default("teacher"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueStudentDate: unique().on(table.studentId, table.date),
+}));
+
 // ======================== DEMOGRAPHIC REFERENCE TABLES ========================
 
 export const genders = pgTable("genders", {
@@ -1185,6 +1203,18 @@ export const classroomsRelations = relations(classrooms, ({ one, many }) => ({
   enrollments: many(enrollments),
   schedules: many(classroomSchedules),
   programOfferings: many(programOfferings),
+  attendance: many(attendance),
+}));
+
+export const attendanceRelations = relations(attendance, ({ one }) => ({
+  classroom: one(classrooms, {
+    fields: [attendance.classroomId],
+    references: [classrooms.id],
+  }),
+  student: one(enrollments, {
+    fields: [attendance.studentId],
+    references: [enrollments.id],
+  }),
 }));
 
 export const classroomSchedulesRelations = relations(classroomSchedules, ({ one }) => ({
@@ -1806,6 +1836,8 @@ export type EmailAddress = typeof emailAddresses.$inferSelect;
 export type InsertEmailAddress = typeof emailAddresses.$inferInsert;
 export type UserRole = typeof userRoles.$inferSelect;
 export type InsertUserRole = typeof userRoles.$inferInsert;
+export type Attendance = typeof attendance.$inferSelect;
+export type InsertAttendance = typeof attendance.$inferInsert;
 export type RoleDefinition = typeof roleDefinitions.$inferSelect;
 export type InsertRoleDefinition = typeof roleDefinitions.$inferInsert;
 

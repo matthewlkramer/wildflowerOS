@@ -1,10 +1,16 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import * as React from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
@@ -34,8 +40,308 @@ import {
   MoreVertical,
   Settings,
   Video,
-  Upload
+  Upload,
+  QrCode,
+  Tablet,
+  X
 } from "lucide-react";
+
+// AttendanceInterface Component
+function AttendanceInterface({ classroomId, students, classroom }: { classroomId: string; students: any[]; classroom: any }) {
+  const [attendanceMode, setAttendanceMode] = useState<'teacher' | 'family' | 'qr'>('teacher');
+  const [attendanceData, setAttendanceData] = useState<Record<string, boolean>>({});
+  const [showQRDialog, setShowQRDialog] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Initialize attendance data - default all students to present
+  React.useEffect(() => {
+    const initialData: Record<string, boolean> = {};
+    students.forEach(student => {
+      initialData[student.id] = true; // Default to present
+    });
+    setAttendanceData(initialData);
+  }, [students]);
+
+  // Save attendance mutation
+  const saveAttendanceMutation = useMutation({
+    mutationFn: async (data: { date: string; attendance: Record<string, boolean> }) => {
+      return apiRequest('POST', `/api/classrooms/${classroomId}/attendance`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Attendance saved",
+        description: "Daily attendance has been recorded successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/classrooms", classroomId, "attendance"] });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error saving attendance",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Family check-in mutation
+  const checkInMutation = useMutation({
+    mutationFn: async (studentId: string) => {
+      return apiRequest('POST', `/api/classrooms/${classroomId}/check-in/${studentId}`, {
+        timestamp: new Date().toISOString()
+      });
+    },
+    onSuccess: (_, studentId) => {
+      setAttendanceData(prev => ({ ...prev, [studentId]: true }));
+      toast({
+        title: "Student checked in",
+        description: "Attendance recorded successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Check-in failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleAttendance = (studentId: string) => {
+    setAttendanceData(prev => ({
+      ...prev,
+      [studentId]: !prev[studentId]
+    }));
+  };
+
+  const handleSaveAttendance = () => {
+    const today = new Date().toISOString().split('T')[0];
+    saveAttendanceMutation.mutate({
+      date: today,
+      attendance: attendanceData
+    });
+  };
+
+  const presentCount = Object.values(attendanceData).filter(Boolean).length;
+  const absentCount = students.length - presentCount;
+
+  if (attendanceMode === 'teacher') {
+    return (
+      <div className="space-y-6">
+        {/* Mode Selection */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <UserCheck className="mr-2 h-5 w-5" />
+                Teacher Attendance
+              </div>
+              <div className="flex space-x-2">
+                <Button variant="outline" size="sm" onClick={() => setAttendanceMode('family')}>
+                  <Tablet className="mr-2 h-4 w-4" />
+                  Family Check-in
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setAttendanceMode('qr')}>
+                  <QrCode className="mr-2 h-4 w-4" />
+                  QR Code
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="text-2xl font-bold text-green-700 dark:text-green-400">{presentCount}</div>
+                <div className="text-sm text-green-600 dark:text-green-500">Present</div>
+              </div>
+              <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <div className="text-2xl font-bold text-red-700 dark:text-red-400">{absentCount}</div>
+                <div className="text-sm text-red-600 dark:text-red-500">Absent</div>
+              </div>
+            </div>
+
+            {/* Student List */}
+            <div className="space-y-3">
+              {students.map((student: any) => (
+                <div
+                  key={student.id}
+                  className={`flex items-center justify-between p-4 rounded-lg border transition-colors ${
+                    attendanceData[student.id]
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                      : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                  }`}
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className="h-10 w-10 rounded-full bg-primary text-white flex items-center justify-center">
+                      <span className="text-sm font-medium">
+                        {student.child?.firstName?.[0]}{student.child?.lastName?.[0]}
+                      </span>
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-gray-100">
+                        {student.child?.firstName} {student.child?.lastName}
+                      </div>
+                      <div className={`text-sm ${attendanceData[student.id] ? 'text-green-600' : 'text-red-600'}`}>
+                        {attendanceData[student.id] ? 'Present' : 'Absent'}
+                      </div>
+                    </div>
+                  </div>
+                  <Switch
+                    checked={attendanceData[student.id]}
+                    onCheckedChange={() => toggleAttendance(student.id)}
+                    className="data-[state=checked]:bg-green-600"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <Button
+                onClick={handleSaveAttendance}
+                disabled={saveAttendanceMutation.isPending}
+                className="w-full sm:w-auto"
+              >
+                {saveAttendanceMutation.isPending ? 'Saving...' : 'Save Attendance'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (attendanceMode === 'family') {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <Tablet className="mr-2 h-5 w-5" />
+                Family Check-in Tablet
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setAttendanceMode('teacher')}>
+                <X className="mr-2 h-4 w-4" />
+                Exit Tablet Mode
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                Welcome to {classroom?.name}!
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Please tap your child's name to check them in for today
+              </p>
+            </div>
+
+            {/* Large Check-in Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {students.map((student: any) => (
+                <Button
+                  key={student.id}
+                  variant={attendanceData[student.id] ? "default" : "outline"}
+                  size="lg"
+                  onClick={() => checkInMutation.mutate(student.id)}
+                  disabled={checkInMutation.isPending || attendanceData[student.id]}
+                  className="h-20 flex-col space-y-2 text-lg"
+                >
+                  <div className="font-semibold">
+                    {student.child?.firstName} {student.child?.lastName}
+                  </div>
+                  <div className="text-sm opacity-75">
+                    {attendanceData[student.id] ? 'Checked In ✓' : 'Tap to Check In'}
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (attendanceMode === 'qr') {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center">
+                <QrCode className="mr-2 h-5 w-5" />
+                QR Code Check-in
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setAttendanceMode('teacher')}>
+                <X className="mr-2 h-4 w-4" />
+                Exit QR Mode
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center">
+              <div className="w-64 h-64 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                <QrCode className="h-32 w-32 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                Scan to Check In
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Families can scan this QR code with their phones to automatically check in their children
+              </p>
+              <div className="space-y-3">
+                <Button onClick={() => setShowQRDialog(true)}>
+                  <QrCode className="mr-2 h-4 w-4" />
+                  View Individual QR Codes
+                </Button>
+                <div className="text-sm text-gray-500">
+                  QR Code URL: {window.location.origin}/check-in/{classroomId}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Check-ins */}
+            <div className="mt-8">
+              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-4">Recent Check-ins</h4>
+              <div className="space-y-2">
+                {students.filter(s => attendanceData[s.id]).map((student: any) => (
+                  <div key={student.id} className="flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium">{student.child?.firstName} {student.child?.lastName}</span>
+                    <span className="text-sm text-gray-500">Just now</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* QR Code Dialog */}
+        <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Individual QR Codes</DialogTitle>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+              {students.map((student: any) => (
+                <div key={student.id} className="text-center p-4 border rounded-lg">
+                  <div className="w-32 h-32 mx-auto mb-2 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
+                    <QrCode className="h-16 w-16 text-gray-400" />
+                  </div>
+                  <div className="font-medium text-sm">
+                    {student.child?.firstName} {student.child?.lastName}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  return null;
+}
 
 export default function ClassroomDetailPage() {
   const { user } = useAuth();
@@ -320,37 +626,7 @@ export default function ClassroomDetailPage() {
 
                 {/* Attendance Tab */}
                 <TabsContent value="attendance" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <UserCheck className="mr-2 h-5 w-5" />
-                          Daily Attendance
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Take Attendance
-                          </Button>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-12">
-                        <UserCheck className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                          Attendance System
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                          Tablet-optimized attendance taking with quick check-in/out functionality
-                        </p>
-                        <Button>
-                          <UserCheck className="mr-2 h-4 w-4" />
-                          Start Taking Attendance
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <AttendanceInterface classroomId={classroomId} students={students} classroom={classroom} />
                 </TabsContent>
 
                 {/* Lessons Tab */}

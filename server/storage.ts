@@ -20,6 +20,7 @@ import {
   children,
   guardians,
   enrollments,
+  attendance,
   tasks,
   messages,
   channels,
@@ -66,6 +67,8 @@ import {
   type Guardian,
   type InsertGuardian,
   type Enrollment,
+  type Attendance,
+  type InsertAttendance,
   type Task,
   type InsertTask,
   type Message,
@@ -274,6 +277,10 @@ export interface IStorage {
     pendingTasks: number;
     monthlyRevenue: number;
   }>;
+
+  // Attendance operations
+  saveAttendance(attendance: InsertAttendance): Promise<Attendance>;
+  getAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3716,6 +3723,47 @@ export class DatabaseStorage implements IStorage {
     }
     
     return holidays;
+  }
+
+  // Attendance operations
+  async saveAttendance(attendanceData: InsertAttendance): Promise<Attendance> {
+    const [savedAttendance] = await db
+      .insert(attendance)
+      .values({
+        ...attendanceData,
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: [attendance.studentId, attendance.date],
+        set: {
+          isPresent: attendanceData.isPresent,
+          checkInTime: attendanceData.checkInTime,
+          checkOutTime: attendanceData.checkOutTime,
+          method: attendanceData.method,
+          notes: attendanceData.notes,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    
+    return savedAttendance;
+  }
+
+  async getAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]> {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await db
+      .select()
+      .from(attendance)
+      .where(and(
+        eq(attendance.classroomId, classroomId),
+        gte(attendance.date, startOfDay),
+        lte(attendance.date, endOfDay)
+      ));
   }
 }
 

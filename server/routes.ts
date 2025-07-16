@@ -2644,5 +2644,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== ATTENDANCE ========================
+
+  // Save daily attendance for a classroom
+  app.post('/api/classrooms/:classroomId/attendance', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { date, attendance: attendanceData } = req.body;
+
+      if (!date || !attendanceData) {
+        return res.status(400).json({ message: "Missing required fields: date, attendance" });
+      }
+
+      // Get all students for this classroom
+      const students = await storage.getEnrollmentsByClassroom(classroomId);
+      const savedAttendance = [];
+
+      // Save attendance for each student
+      for (const studentId of Object.keys(attendanceData)) {
+        const student = students.find(s => s.id === studentId);
+        if (!student) {
+          continue; // Skip if student not found
+        }
+
+        const attendanceRecord = {
+          classroomId,
+          studentId,
+          date: new Date(date),
+          isPresent: attendanceData[studentId],
+          method: 'teacher' as const,
+          checkInTime: attendanceData[studentId] ? new Date() : null,
+        };
+
+        const saved = await storage.saveAttendance(attendanceRecord);
+        savedAttendance.push(saved);
+      }
+
+      res.status(201).json(savedAttendance);
+    } catch (error) {
+      console.error("Error saving attendance:", error);
+      res.status(500).json({ message: "Failed to save attendance" });
+    }
+  });
+
+  // Family check-in for individual student
+  app.post('/api/classrooms/:classroomId/check-in/:studentId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId, studentId } = req.params;
+      const { timestamp } = req.body;
+
+      const attendanceRecord = {
+        classroomId,
+        studentId,
+        date: new Date(),
+        isPresent: true,
+        method: 'family_tablet' as const,
+        checkInTime: timestamp ? new Date(timestamp) : new Date(),
+      };
+
+      const saved = await storage.saveAttendance(attendanceRecord);
+      res.status(201).json(saved);
+    } catch (error) {
+      console.error("Error checking in student:", error);
+      res.status(500).json({ message: "Failed to check in student" });
+    }
+  });
+
+  // Get attendance for a classroom on a specific date
+  app.get('/api/classrooms/:classroomId/attendance/:date', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId, date } = req.params;
+      const attendance = await storage.getAttendanceByClassroomAndDate(classroomId, date);
+      res.json(attendance);
+    } catch (error) {
+      console.error("Error fetching attendance:", error);
+      res.status(500).json({ message: "Failed to fetch attendance" });
+    }
+  });
+
+  // QR code check-in endpoint (public endpoint for families)
+  app.post('/api/qr-checkin/:classroomId/:studentId', async (req: any, res) => {
+    try {
+      const { classroomId, studentId } = req.params;
+
+      const attendanceRecord = {
+        classroomId,
+        studentId,
+        date: new Date(),
+        isPresent: true,
+        method: 'qr_code' as const,
+        checkInTime: new Date(),
+      };
+
+      const saved = await storage.saveAttendance(attendanceRecord);
+      res.status(201).json({ message: "Student checked in successfully", attendance: saved });
+    } catch (error) {
+      console.error("Error QR check-in:", error);
+      res.status(500).json({ message: "Failed to check in student" });
+    }
+  });
+
   return httpServer;
 }

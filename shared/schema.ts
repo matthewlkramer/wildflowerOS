@@ -1121,6 +1121,92 @@ export const finalRoleAssignments = pgTable("final_role_assignments", {
   uniqueAssignment: unique().on(table.roleId, table.schoolId, table.schoolYear),
 }));
 
+// ======================== MONTESSORI LESSONS & OBSERVATIONS ========================
+
+// Montessori curriculum lessons
+export const lessons = pgTable("lessons", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Curriculum organization
+  curriculumArea: varchar("curriculum_area", { 
+    enum: ["practical_life", "sensorial", "language", "mathematics", "cultural", "art", "music", "movement"]
+  }).notNull(),
+  
+  // Age group targeting
+  ageGroup: varchar("age_group", { 
+    enum: ["infant", "toddler", "primary", "lower_elem", "upper_elem", "junior_high", "high_school"]
+  }).notNull(),
+  
+  // Lesson sequencing
+  sequence: integer("sequence"), // Order within curriculum area
+  prerequisites: uuid("prerequisite_ids").array(), // Other lesson IDs that should come first
+  
+  // Lesson details
+  materials: text("materials"), // Materials needed
+  presentation: text("presentation"), // How to present the lesson
+  variations: text("variations"), // Different ways to present or extend
+  extensions: text("extensions"), // Follow-up activities
+  
+  // Metadata
+  networkDefault: boolean("network_default").default(false), // Available to all schools
+  schoolId: uuid("school_id").references(() => schools.id), // School-specific lessons
+  createdById: varchar("created_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Individual lesson presentations/observations
+export const lessonObservations = pgTable("lesson_observations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  lessonId: uuid("lesson_id").notNull().references(() => lessons.id),
+  studentId: uuid("student_id").notNull().references(() => users.id), // Student who received/practiced lesson
+  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id),
+  
+  // Observation details
+  observationType: varchar("observation_type", {
+    enum: ["presentation", "practice", "mastery", "interest"]
+  }).notNull(),
+  
+  // When and who
+  observationDate: timestamp("observation_date").notNull(),
+  observedById: varchar("observed_by_id").notNull().references(() => users.id), // Teacher/observer
+  
+  // Observation content
+  notes: text("notes"),
+  studentResponse: varchar("student_response", {
+    enum: ["eager", "interested", "neutral", "resistant", "not_ready"]
+  }),
+  skillLevel: varchar("skill_level", {
+    enum: ["introduced", "developing", "proficient", "mastered"]
+  }),
+  
+  // Follow up
+  nextSteps: text("next_steps"),
+  followUpDate: timestamp("follow_up_date"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Student year groups for filtering
+export const studentYearGroups = pgTable("student_year_groups", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  studentId: uuid("student_id").notNull().references(() => users.id),
+  classroomId: uuid("classroom_id").notNull().references(() => classrooms.id),
+  schoolYearId: uuid("school_year_id").notNull().references(() => schoolYears.id),
+  
+  yearGroup: varchar("year_group", {
+    enum: ["first_year", "second_year", "third_year", "fourth_year", "fifth_year", "sixth_year"]
+  }).notNull(),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  uniqueStudentYear: unique().on(table.studentId, table.classroomId, table.schoolYearId),
+}));
+
 // ======================== RELATIONS ========================
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -1837,6 +1923,19 @@ export type InsertEmailAddress = typeof emailAddresses.$inferInsert;
 export type UserRole = typeof userRoles.$inferSelect;
 export type InsertUserRole = typeof userRoles.$inferInsert;
 export type Attendance = typeof attendance.$inferSelect;
+
+// Lessons and Observations Types
+export type Lesson = typeof lessons.$inferSelect;
+export type InsertLesson = typeof lessons.$inferInsert;
+export type LessonObservation = typeof lessonObservations.$inferSelect;
+export type InsertLessonObservation = typeof lessonObservations.$inferInsert;
+export type StudentYearGroup = typeof studentYearGroups.$inferSelect;
+export type InsertStudentYearGroup = typeof studentYearGroups.$inferInsert;
+
+// Insert Schemas
+export const insertLessonSchema = createInsertSchema(lessons);
+export const insertLessonObservationSchema = createInsertSchema(lessonObservations);
+export const insertStudentYearGroupSchema = createInsertSchema(studentYearGroups);
 export type InsertAttendance = typeof attendance.$inferInsert;
 export type RoleDefinition = typeof roleDefinitions.$inferSelect;
 export type InsertRoleDefinition = typeof roleDefinitions.$inferInsert;

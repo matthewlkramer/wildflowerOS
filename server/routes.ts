@@ -2778,5 +2778,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ======================== LESSONS AND OBSERVATIONS ========================
+
+  // Get lessons for a classroom with optional filters
+  app.get('/api/classrooms/:classroomId/lessons', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { curriculumArea, ageGroup, presentedToYearGroup, schoolYearId } = req.query;
+      
+      const lessons = await storage.getLessonsByClassroom(classroomId, {
+        curriculumArea,
+        ageGroup,
+        presentedToYearGroup,
+        schoolYearId
+      });
+      
+      res.json(lessons);
+    } catch (error) {
+      console.error("Error fetching lessons:", error);
+      res.status(500).json({ message: "Failed to fetch lessons" });
+    }
+  });
+
+  // Get lesson observations for a classroom with optional filters
+  app.get('/api/classrooms/:classroomId/observations', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { observationType, studentIds, startDate, endDate } = req.query;
+      
+      const filters: any = {};
+      if (observationType) filters.observationType = Array.isArray(observationType) ? observationType : [observationType];
+      if (studentIds) filters.studentIds = Array.isArray(studentIds) ? studentIds : [studentIds];
+      if (startDate) filters.startDate = new Date(startDate);
+      if (endDate) filters.endDate = new Date(endDate);
+      
+      const observations = await storage.getLessonObservationsByClassroom(classroomId, filters);
+      res.json(observations);
+    } catch (error) {
+      console.error("Error fetching observations:", error);
+      res.status(500).json({ message: "Failed to fetch observations" });
+    }
+  });
+
+  // Create a single lesson observation
+  app.post('/api/classrooms/:classroomId/observations', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const observationData = req.body;
+
+      // Get current user ID
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+
+      const observation = await storage.createLessonObservation({
+        ...observationData,
+        classroomId,
+        observedById: user?.id || userId,
+        observationDate: new Date(observationData.observationDate || Date.now())
+      });
+
+      res.status(201).json(observation);
+    } catch (error) {
+      console.error("Error creating observation:", error);
+      res.status(500).json({ message: "Failed to create observation" });
+    }
+  });
+
+  // Create bulk lesson observations (for grid operations)
+  app.post('/api/classrooms/:classroomId/observations/bulk', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { observations } = req.body;
+
+      // Get current user ID
+      const userId = req.user.dbUserId || req.user.claims.sub;
+      let user = await storage.getUser(userId);
+      if (!user && req.user.claims.email) {
+        user = await storage.getUserByEmail(req.user.claims.email);
+      }
+
+      const preparedObservations = observations.map((obs: any) => ({
+        ...obs,
+        classroomId,
+        observedById: user?.id || userId,
+        observationDate: new Date(obs.observationDate || Date.now())
+      }));
+
+      const newObservations = await storage.createBulkLessonObservations(preparedObservations);
+      res.status(201).json(newObservations);
+    } catch (error) {
+      console.error("Error creating bulk observations:", error);
+      res.status(500).json({ message: "Failed to create bulk observations" });
+    }
+  });
+
+  // Get student year groups for filtering
+  app.get('/api/classrooms/:classroomId/student-year-groups', isAuthenticated, async (req: any, res) => {
+    try {
+      const { classroomId } = req.params;
+      const { schoolYearId } = req.query;
+      
+      const yearGroups = await storage.getStudentYearGroupsByClassroom(classroomId, schoolYearId);
+      res.json(yearGroups);
+    } catch (error) {
+      console.error("Error fetching student year groups:", error);
+      res.status(500).json({ message: "Failed to fetch student year groups" });
+    }
+  });
+
   return httpServer;
 }

@@ -46,6 +46,7 @@ import {
   X,
   ChevronRight
 } from "lucide-react";
+import ObservationsGrid from "@/components/ObservationsGrid";
 
 // AttendanceInterface Component
 function AttendanceInterface({ classroomId, students, classroom }: { classroomId: string; students: any[]; classroom: any }) {
@@ -58,6 +59,12 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
   const [correctionReason, setCorrectionReason] = useState<string>('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch current attendance for selected date
+  const { data: currentAttendance = [], isLoading: loadingCurrentAttendance } = useQuery({
+    queryKey: [`/api/classrooms/${classroomId}/attendance/${selectedDate}/current`],
+    enabled: !!classroomId && !!selectedDate,
+  });
 
   // Initialize attendance data - default all students to present or load current attendance
   React.useEffect(() => {
@@ -78,12 +85,6 @@ function AttendanceInterface({ classroomId, students, classroom }: { classroomId
     
     setAttendanceData(initialData);
   }, [students, currentAttendance]);
-
-  // Fetch current attendance for selected date
-  const { data: currentAttendance = [], isLoading: loadingCurrentAttendance } = useQuery({
-    queryKey: [`/api/classrooms/${classroomId}/attendance/${selectedDate}/current`],
-    enabled: !!classroomId && !!selectedDate,
-  });
 
   // Fetch attendance history
   const { data: attendanceHistory = [], isLoading: loadingHistory } = useQuery({
@@ -855,37 +856,7 @@ export default function ClassroomDetailPage() {
 
                 {/* Observations Tab */}
                 <TabsContent value="observations" className="space-y-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <Grid3X3 className="mr-2 h-5 w-5" />
-                          Student Observations Grid
-                        </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm">
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            New Observation
-                          </Button>
-                        </div>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-center py-12">
-                        <Grid3X3 className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                          Observation Grid System
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">
-                          Track student presentations, practice, and mastery in a visual grid format
-                        </p>
-                        <Button>
-                          <ClipboardList className="mr-2 h-4 w-4" />
-                          Start Observing
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <ObservationsGrid classroomId={classroomId} students={students} />
                 </TabsContent>
 
                 {/* Photos Tab */}

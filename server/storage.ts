@@ -80,6 +80,17 @@ import {
   type Gender,
   type RaceEthnicity,
   type Language,
+  
+  // Lessons and Observations
+  lessons,
+  lessonObservations,
+  studentYearGroups,
+  type Lesson,
+  type InsertLesson,
+  type LessonObservation,
+  type InsertLessonObservation,
+  type StudentYearGroup,
+  type InsertStudentYearGroup,
 
 } from "@shared/schema";
 import { db } from "./db";
@@ -284,6 +295,37 @@ export interface IStorage {
   getCurrentAttendanceByClassroomAndDate(classroomId: string, date: string): Promise<Attendance[]>;
   getAttendanceHistoryByClassroom(classroomId: string): Promise<{ date: string; recordCount: number }[]>;
   getAttendanceRecordsByClassroomAndDate(classroomId: string, date: string): Promise<any[]>;
+  
+  // Lessons and Observations
+  getLessonsByClassroom(classroomId: string, filters?: {
+    curriculumArea?: string;
+    ageGroup?: string;
+    presentedToYearGroup?: string;
+    schoolYearId?: string;
+  }): Promise<Lesson[]>;
+  getLessonById(id: string): Promise<Lesson | undefined>;
+  createLesson(lesson: InsertLesson): Promise<Lesson>;
+  updateLesson(id: string, lesson: Partial<InsertLesson>): Promise<Lesson>;
+  deleteLesson(id: string): Promise<void>;
+  
+  // Lesson observations for the grid
+  getLessonObservationsByClassroom(classroomId: string, filters?: {
+    observationType?: string[];
+    studentIds?: string[];
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<LessonObservation[]>;
+  getLessonObservationsByStudent(studentId: string, classroomId: string): Promise<LessonObservation[]>;
+  createLessonObservation(observation: InsertLessonObservation): Promise<LessonObservation>;
+  createBulkLessonObservations(observations: InsertLessonObservation[]): Promise<LessonObservation[]>;
+  updateLessonObservation(id: string, observation: Partial<InsertLessonObservation>): Promise<LessonObservation>;
+  deleteLessonObservation(id: string): Promise<void>;
+  
+  // Student year groups for filtering
+  getStudentYearGroupsByClassroom(classroomId: string, schoolYearId?: string): Promise<StudentYearGroup[]>;
+  createStudentYearGroup(yearGroup: InsertStudentYearGroup): Promise<StudentYearGroup>;
+  updateStudentYearGroup(id: string, yearGroup: Partial<InsertStudentYearGroup>): Promise<StudentYearGroup>;
+  deleteStudentYearGroup(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3825,6 +3867,171 @@ export class DatabaseStorage implements IStorage {
       .orderBy(children.firstName, children.lastName, desc(attendance.enteredAt));
     
     return results;
+  }
+
+  // ======================== LESSONS AND OBSERVATIONS ========================
+
+  async getLessonsByClassroom(classroomId: string, filters?: {
+    curriculumArea?: string;
+    ageGroup?: string;
+    presentedToYearGroup?: string;
+    schoolYearId?: string;
+  }): Promise<Lesson[]> {
+    let query = db.select().from(lessons);
+    
+    const conditions = [
+      or(
+        eq(lessons.schoolId, classroomId), // School-specific lessons
+        eq(lessons.networkDefault, true)   // Network-wide lessons
+      )
+    ];
+    
+    if (filters?.curriculumArea) {
+      conditions.push(eq(lessons.curriculumArea, filters.curriculumArea));
+    }
+    
+    if (filters?.ageGroup) {
+      conditions.push(eq(lessons.ageGroup, filters.ageGroup));
+    }
+    
+    return await query
+      .where(and(...conditions))
+      .orderBy(lessons.curriculumArea, lessons.sequence, lessons.name);
+  }
+
+  async getLessonById(id: string): Promise<Lesson | undefined> {
+    const [lesson] = await db.select().from(lessons).where(eq(lessons.id, id));
+    return lesson;
+  }
+
+  async createLesson(lesson: InsertLesson): Promise<Lesson> {
+    const [newLesson] = await db.insert(lessons).values(lesson).returning();
+    return newLesson;
+  }
+
+  async updateLesson(id: string, lesson: Partial<InsertLesson>): Promise<Lesson> {
+    const [updatedLesson] = await db
+      .update(lessons)
+      .set({ ...lesson, updatedAt: new Date() })
+      .where(eq(lessons.id, id))
+      .returning();
+    return updatedLesson;
+  }
+
+  async deleteLesson(id: string): Promise<void> {
+    await db.delete(lessons).where(eq(lessons.id, id));
+  }
+
+  // Lesson observations for the grid
+  async getLessonObservationsByClassroom(classroomId: string, filters?: {
+    observationType?: string[];
+    studentIds?: string[];
+    startDate?: Date;
+    endDate?: Date;
+  }): Promise<LessonObservation[]> {
+    let query = db.select().from(lessonObservations);
+    
+    const conditions = [eq(lessonObservations.classroomId, classroomId)];
+    
+    if (filters?.observationType && filters.observationType.length > 0) {
+      conditions.push(
+        or(...filters.observationType.map(type => eq(lessonObservations.observationType, type)))
+      );
+    }
+    
+    if (filters?.studentIds && filters.studentIds.length > 0) {
+      conditions.push(
+        or(...filters.studentIds.map(id => eq(lessonObservations.studentId, id)))
+      );
+    }
+    
+    if (filters?.startDate) {
+      conditions.push(gte(lessonObservations.observationDate, filters.startDate));
+    }
+    
+    if (filters?.endDate) {
+      conditions.push(lte(lessonObservations.observationDate, filters.endDate));
+    }
+    
+    return await query
+      .where(and(...conditions))
+      .orderBy(lessonObservations.observationDate);
+  }
+
+  async getLessonObservationsByStudent(studentId: string, classroomId: string): Promise<LessonObservation[]> {
+    return await db
+      .select()
+      .from(lessonObservations)
+      .where(and(
+        eq(lessonObservations.studentId, studentId),
+        eq(lessonObservations.classroomId, classroomId)
+      ))
+      .orderBy(lessonObservations.observationDate);
+  }
+
+  async createLessonObservation(observation: InsertLessonObservation): Promise<LessonObservation> {
+    const [newObservation] = await db
+      .insert(lessonObservations)
+      .values(observation)
+      .returning();
+    return newObservation;
+  }
+
+  async createBulkLessonObservations(observations: InsertLessonObservation[]): Promise<LessonObservation[]> {
+    const newObservations = await db
+      .insert(lessonObservations)
+      .values(observations)
+      .returning();
+    return newObservations;
+  }
+
+  async updateLessonObservation(id: string, observation: Partial<InsertLessonObservation>): Promise<LessonObservation> {
+    const [updatedObservation] = await db
+      .update(lessonObservations)
+      .set({ ...observation, updatedAt: new Date() })
+      .where(eq(lessonObservations.id, id))
+      .returning();
+    return updatedObservation;
+  }
+
+  async deleteLessonObservation(id: string): Promise<void> {
+    await db.delete(lessonObservations).where(eq(lessonObservations.id, id));
+  }
+
+  // Student year groups for filtering
+  async getStudentYearGroupsByClassroom(classroomId: string, schoolYearId?: string): Promise<StudentYearGroup[]> {
+    const conditions = [eq(studentYearGroups.classroomId, classroomId)];
+    
+    if (schoolYearId) {
+      conditions.push(eq(studentYearGroups.schoolYearId, schoolYearId));
+    }
+    
+    return await db
+      .select()
+      .from(studentYearGroups)
+      .where(and(...conditions))
+      .orderBy(studentYearGroups.yearGroup);
+  }
+
+  async createStudentYearGroup(yearGroup: InsertStudentYearGroup): Promise<StudentYearGroup> {
+    const [newYearGroup] = await db
+      .insert(studentYearGroups)
+      .values(yearGroup)
+      .returning();
+    return newYearGroup;
+  }
+
+  async updateStudentYearGroup(id: string, yearGroup: Partial<InsertStudentYearGroup>): Promise<StudentYearGroup> {
+    const [updatedYearGroup] = await db
+      .update(studentYearGroups)
+      .set({ ...yearGroup, updatedAt: new Date() })
+      .where(eq(studentYearGroups.id, id))
+      .returning();
+    return updatedYearGroup;
+  }
+
+  async deleteStudentYearGroup(id: string): Promise<void> {
+    await db.delete(studentYearGroups).where(eq(studentYearGroups.id, id));
   }
 }
 

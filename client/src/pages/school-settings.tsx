@@ -2890,16 +2890,8 @@ export default function SchoolSettingsPage() {
                   <TabsContent value="non-school-users" className="space-y-6">
                     <Card>
                       <CardHeader>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <CardTitle>Network-Wide Users</CardTitle>
-                            <p className="text-sm text-gray-600">Invite partners, central staff, and other network-wide team members.</p>
-                          </div>
-                          <Button onClick={() => setAddingUserInvitation(true)}>
-                            <Plus className="mr-2 h-4 w-4" />
-                            Invite User
-                          </Button>
-                        </div>
+                        <CardTitle>Network-Wide Users</CardTitle>
+                        <p className="text-sm text-gray-600">Invite partners, central staff, and other network-wide team members.</p>
                       </CardHeader>
                       <CardContent>
                         <UserInvitationsTable />

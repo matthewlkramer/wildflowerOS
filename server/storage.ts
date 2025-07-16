@@ -4037,7 +4037,7 @@ export class DatabaseStorage implements IStorage {
   // ======================== USER INVITATIONS ========================
   
   async createUserInvitation(invitation: InsertUserInvitation): Promise<UserInvitation> {
-    const [created] = await this.db
+    const [created] = await db
       .insert(userInvitationsTable)
       .values(invitation)
       .returning();
@@ -4045,7 +4045,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserInvitations(): Promise<UserInvitation[]> {
-    const invitations = await this.db
+    const invitations = await db
       .select()
       .from(userInvitationsTable)
       .orderBy(desc(userInvitationsTable.createdAt));
@@ -4053,7 +4053,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserInvitationByToken(token: string): Promise<UserInvitation | null> {
-    const [invitation] = await this.db
+    const [invitation] = await db
       .select()
       .from(userInvitationsTable)
       .where(eq(userInvitationsTable.token, token))
@@ -4062,7 +4062,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserInvitation(id: string, updates: Partial<UserInvitation>): Promise<UserInvitation> {
-    const [updated] = await this.db
+    const [updated] = await db
       .update(userInvitationsTable)
       .set({ ...updates, updatedAt: new Date() })
       .where(eq(userInvitationsTable.id, id))
@@ -4071,7 +4071,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUserInvitation(id: string): Promise<void> {
-    await this.db
+    await db
       .delete(userInvitationsTable)
       .where(eq(userInvitationsTable.id, id));
   }

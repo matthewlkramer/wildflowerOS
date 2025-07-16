@@ -958,9 +958,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/schools/:schoolId/schedules', isAuthenticated, async (req: any, res) => {
     try {
       const { schoolId } = req.params;
-      const scheduleData = { ...req.body, schoolId, networkDefault: false };
-      const schedule = await storage.createClassroomSchedule(scheduleData);
-      res.status(201).json(schedule);
+      const { classroomIds, ...scheduleData } = req.body;
+      
+      if (classroomIds && Array.isArray(classroomIds) && classroomIds.length > 0) {
+        // Create a schedule for each selected classroom
+        const createdSchedules = [];
+        for (const classroomId of classroomIds) {
+          const schedule = await storage.createClassroomSchedule({
+            ...scheduleData,
+            schoolId,
+            classroomId,
+            networkDefault: false
+          });
+          createdSchedules.push(schedule);
+        }
+        res.status(201).json(createdSchedules);
+      } else {
+        // Fallback for single schedule creation (legacy support)
+        const schedule = await storage.createClassroomSchedule({
+          ...scheduleData,
+          schoolId,
+          networkDefault: false
+        });
+        res.status(201).json(schedule);
+      }
     } catch (error) {
       console.error("Error creating school schedule:", error);
       res.status(500).json({ message: "Failed to create school schedule" });

@@ -1760,6 +1760,7 @@ export default function SchoolSettingsPage() {
     fridayOpen: false,
     saturdayOpen: false,
     sundayOpen: false,
+    selectedClassrooms: [] as string[], // Array of classroom IDs
   });
 
   const [subsidyForm, setSubsidyForm] = useState({
@@ -2269,6 +2270,7 @@ export default function SchoolSettingsPage() {
         fridayOpen: false,
         saturdayOpen: false,
         sundayOpen: false,
+        selectedClassrooms: [],
       });
       toast({
         title: "Schedule created",
@@ -2304,6 +2306,7 @@ export default function SchoolSettingsPage() {
         fridayOpen: false,
         saturdayOpen: false,
         sundayOpen: false,
+        selectedClassrooms: [],
       });
       toast({
         title: "Schedule updated",
@@ -2358,7 +2361,9 @@ export default function SchoolSettingsPage() {
     addTuitionPlanMutation.mutate({
       ...formData,
       classroomId: selectedSchedule.classroom.id,
-      classroomScheduleId: selectedSchedule.schedule.id
+      classroomScheduleId: selectedSchedule.schedule.id,
+      // Convert empty string to null for UUID fields
+      schoolYearId: formData.schoolYearId === "" ? null : formData.schoolYearId
     });
   };
 
@@ -2652,9 +2657,11 @@ export default function SchoolSettingsPage() {
 
   // Schedule handler functions
   const handleAddSchedule = () => {
+    const { selectedClassrooms, ...scheduleData } = scheduleForm;
     addScheduleMutation.mutate({
-      ...scheduleForm,
-      schoolId: effectiveSchoolId
+      ...scheduleData,
+      schoolId: effectiveSchoolId,
+      classroomIds: selectedClassrooms
     });
   };
 
@@ -2672,6 +2679,7 @@ export default function SchoolSettingsPage() {
       fridayOpen: schedule.fridayOpen,
       saturdayOpen: schedule.saturdayOpen,
       sundayOpen: schedule.sundayOpen,
+      selectedClassrooms: [], // Reset for editing
     });
     setEditingSchedule(schedule);
   };
@@ -4254,13 +4262,57 @@ export default function SchoolSettingsPage() {
                                     ))}
                                   </div>
                                 </div>
-                                <div className="flex justify-end space-x-2">
+                                
+                                {/* Classroom Multi-Selection */}
+                                <div className="mt-6 space-y-3">
+                                  <Label className="text-base font-medium">Apply Schedule to Classrooms</Label>
+                                  <p className="text-sm text-gray-600">
+                                    Select which classrooms this schedule will apply to
+                                  </p>
+                                  <div className="grid grid-cols-1 gap-3 max-h-40 overflow-y-auto">
+                                    {classroomsData?.map((classroom: any) => (
+                                      <div key={classroom.id} className="flex items-center space-x-3 p-2 border rounded-lg hover:bg-gray-50">
+                                        <input
+                                          type="checkbox"
+                                          id={`classroom-${classroom.id}`}
+                                          checked={scheduleForm.selectedClassrooms.includes(classroom.id)}
+                                          onChange={(e) => {
+                                            const classroomId = classroom.id;
+                                            setScheduleForm(prev => ({
+                                              ...prev,
+                                              selectedClassrooms: e.target.checked
+                                                ? [...prev.selectedClassrooms, classroomId]
+                                                : prev.selectedClassrooms.filter(id => id !== classroomId)
+                                            }));
+                                          }}
+                                          className="h-4 w-4 text-primary rounded border-gray-300"
+                                        />
+                                        <label 
+                                          htmlFor={`classroom-${classroom.id}`}
+                                          className="flex-1 cursor-pointer"
+                                        >
+                                          <div className="font-medium">{classroom.name}</div>
+                                          <div className="text-sm text-gray-500">
+                                            {classroom.level.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())} • {classroom.ageRange}
+                                          </div>
+                                        </label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  {scheduleForm.selectedClassrooms.length === 0 && (
+                                    <p className="text-sm text-amber-600 bg-amber-50 p-2 rounded">
+                                      Select at least one classroom to apply this schedule
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="flex justify-end space-x-2 pt-4">
                                   <Button variant="outline" onClick={() => setAddingSchedule(false)}>
                                     Cancel
                                   </Button>
                                   <Button 
                                     onClick={handleAddSchedule}
-                                    disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime}
+                                    disabled={!scheduleForm.name || !scheduleForm.startTime || !scheduleForm.endTime || scheduleForm.selectedClassrooms.length === 0}
                                   >
                                     Create Schedule
                                   </Button>

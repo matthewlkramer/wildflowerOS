@@ -22,12 +22,16 @@ import MessagesPage from "@/pages/messages";
 import TasksPage from "@/pages/tasks";
 import EnhancedMessagesPage from "@/pages/enhanced-messages";
 import ChannelTestPage from "@/pages/channel-test";
+import AcceptInvitationPage from "@/pages/accept-invitation";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
+      {/* Public route for invitation acceptance */}
+      <Route path="/accept-invitation" component={AcceptInvitationPage} />
+      
       {isLoading || !isAuthenticated ? (
         <Route path="/" component={Landing} />
       ) : (

@@ -1690,6 +1690,21 @@ export default function SchoolSettingsPage() {
   const [systemAdminTab, setSystemAdminTab] = useState("non-school-users");
   const [addingUserInvitation, setAddingUserInvitation] = useState(false);
   
+  // Role assignment state
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedRoleId, setSelectedRoleId] = useState("");
+  
+  // Classroom creation state
+  const [showCreateClassroomDialog, setShowCreateClassroomDialog] = useState(false);
+  const [newClassroomForm, setNewClassroomForm] = useState({
+    name: "",
+    level: "primary",
+    capacity: "",
+    ageRange: "3-6 years",
+    description: ""
+  });
+  
   const [staffForm, setStaffForm] = useState({
     firstName: "",
     lastName: "",
@@ -1781,9 +1796,6 @@ export default function SchoolSettingsPage() {
   });
 
   // Role management state
-  const [showRoleDialog, setShowRoleDialog] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string>("");
-  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   
@@ -2661,6 +2673,43 @@ export default function SchoolSettingsPage() {
     if (selectedUserId && selectedRoleId) {
       assignRoleMutation.mutate({ userId: selectedUserId, roleId: selectedRoleId });
     }
+  };
+
+  // Add classroom creation mutation
+  const createClassroomMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest('POST', `/api/schools/${effectiveSchoolId}/classrooms`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", effectiveSchoolId, "classrooms"] });
+      setShowCreateClassroomDialog(false);
+      setNewClassroomForm({
+        name: "",
+        level: "",
+        capacity: "",
+        ageRange: "",
+        description: ""
+      });
+      toast({
+        title: "Classroom created",
+        description: "New classroom has been created successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error creating classroom",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleCreateClassroom = () => {
+    createClassroomMutation.mutate({
+      ...newClassroomForm,
+      capacity: parseInt(newClassroomForm.capacity) || null,
+      schoolId: effectiveSchoolId
+    });
   };
 
 

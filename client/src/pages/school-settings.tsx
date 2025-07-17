@@ -49,7 +49,9 @@ import {
   School,
   ChevronDown,
   ChevronRight,
-  Download
+  Download,
+  FileText,
+  Shield
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -57,6 +59,8 @@ import { useAuth } from "@/hooks/useAuth";
 import TopNavigation from "@/components/layout/TopNavigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { PublicSubsidies } from "@/components/settings/PublicSubsidies";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Network School Year Holidays Component
 function SchoolYearHolidays({ schoolYearId }: { schoolYearId: string }) {
@@ -1776,6 +1780,13 @@ export default function SchoolSettingsPage() {
     requiredDocumentation: ""
   });
 
+  // Role management state
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [selectedRoleId, setSelectedRoleId] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -1822,7 +1833,7 @@ export default function SchoolSettingsPage() {
   });
 
   // Fetch classrooms
-  const { data: classrooms = [] } = useQuery({
+  const { data: classrooms = [], isLoading: isLoadingClassrooms } = useQuery({
     queryKey: ["/api/schools", effectiveSchoolId, "classrooms"],
     enabled: !!effectiveSchoolId,
   });
@@ -1871,6 +1882,38 @@ export default function SchoolSettingsPage() {
     queryKey: ["/api/network-school-years"],
     enabled: !!currentRole,
   });
+
+  // Fetch admin roles for role assignment
+  const { data: adminRoles = [] } = useQuery({
+    queryKey: ["/api/roles", "educator_admin"],
+    enabled: !!effectiveSchoolId,
+  });
+
+  // Fetch school roles (staff with their assigned roles)
+  const { data: schoolRoles = [], isLoading: isLoadingRoles } = useQuery({
+    queryKey: ["/api/schools", effectiveSchoolId, "roles"],
+    enabled: !!effectiveSchoolId,
+  });
+
+  // Helper function to group roles by user
+  const groupRolesByUser = (roles: any[]) => {
+    const grouped = roles.reduce((acc: any, role: any) => {
+      const userId = role.userId;
+      if (!acc[userId]) {
+        acc[userId] = {
+          userId,
+          firstName: role.firstName,
+          lastName: role.lastName,
+          email: role.email,
+          profileImageUrl: role.profileImageUrl,
+          roles: []
+        };
+      }
+      acc[userId].roles.push(role);
+      return acc;
+    }, {});
+    return Object.values(grouped);
+  };
 
   // Add staff mutation
   const addStaffMutation = useMutation({
@@ -2585,6 +2628,39 @@ export default function SchoolSettingsPage() {
       level,
       ageRange: levelAgeRanges[level as keyof typeof levelAgeRanges] || ""
     }));
+  };
+
+  // Add role assignment mutation
+  const assignRoleMutation = useMutation({
+    mutationFn: async ({ userId, roleId }: { userId: string; roleId: string }) => {
+      return apiRequest('POST', `/api/schools/${effectiveSchoolId}/roles/assign`, {
+        userId,
+        roleId,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/schools", effectiveSchoolId, "staff"] });
+      setShowRoleDialog(false);
+      setSelectedUserId("");
+      setSelectedRoleId("");
+      toast({
+        title: "Role assigned",
+        description: "Role has been assigned successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error assigning role",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddRole = () => {
+    if (selectedUserId && selectedRoleId) {
+      assignRoleMutation.mutate({ userId: selectedUserId, roleId: selectedRoleId });
+    }
   };
 
 

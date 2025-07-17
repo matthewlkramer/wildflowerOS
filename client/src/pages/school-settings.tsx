@@ -5397,20 +5397,24 @@ export default function SchoolSettingsPage() {
                 </Tabs>
               </div>
             )}
-            {currentRole?.roleName?.startsWith('parent') ? (
-              // Parent View
-              <div className="space-y-6">
-                {/* Parent Header */}
-                <div className="border-b border-gray-200 pb-5">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">Family Settings</h3>
-                  <p className="mt-2 max-w-4xl text-sm text-gray-500">
-                    Manage your family's enrollment, billing, and communication preferences.
-                  </p>
-                </div>
-                {/* Parent-specific content */}
-                <Tabs defaultValue="family-info" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="family-info" className="flex items-center">
+          </div>
+        </main>
+      </div>
+      <MobileBottomNav currentRole={currentRole} />
+    </div>
+  );
+}
+
+// User Invitations Table Component
+function UserInvitationsTable() {
+  const { toast } = useToast();
+  const [invitationForm, setInvitationForm] = useState({
+    email: "",
+    firstName: "",
+    lastName: ""
+  });
+  const [deletingUser, setDeletingUser] = useState<any>(null);
+  const [showPreUsers, setShowPreUsers] = useState(false);
                       <Users className="mr-2 h-4 w-4" />
                       Family Info
                     </TabsTrigger>

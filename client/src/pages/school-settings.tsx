@@ -49,7 +49,8 @@ import {
   School,
   ChevronDown,
   ChevronRight,
-  Download
+  Download,
+  Upload
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";

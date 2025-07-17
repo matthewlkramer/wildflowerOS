@@ -2880,7 +2880,7 @@ export default function SchoolSettingsPage() {
                 </div>
                 {/* System Admin Top Level Tabs */}
                 <Tabs value={systemAdminTab} onValueChange={setSystemAdminTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
+                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="non-school-users" className="flex items-center">
                       <Users className="mr-2 h-4 w-4" />
                       Non-School Users
@@ -2892,6 +2892,10 @@ export default function SchoolSettingsPage() {
                     <TabsTrigger value="sensible-defaults" className="flex items-center">
                       <Settings className="mr-2 h-4 w-4" />
                       Sensible Defaults
+                    </TabsTrigger>
+                    <TabsTrigger value="new-subsidy-data" className="flex items-center">
+                      <DollarSign className="mr-2 h-4 w-4" />
+                      New Subsidy Data Set
                     </TabsTrigger>
                   </TabsList>
 
@@ -3103,6 +3107,23 @@ export default function SchoolSettingsPage() {
                         </Card>
                       </TabsContent>
                     </Tabs>
+                  </TabsContent>
+                  
+                  {/* New Subsidy Data Set Tab */}
+                  <TabsContent value="new-subsidy-data" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>New Subsidy Data Set</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          Create and manage new public subsidy data sets for schools in the network.
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="text-center py-8 text-gray-500">
+                          New subsidy data set functionality will be implemented here.
+                        </div>
+                      </CardContent>
+                    </Card>
                   </TabsContent>
                 </Tabs>
                 {/* Add Network School Year Dialog */}

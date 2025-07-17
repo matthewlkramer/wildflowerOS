@@ -5852,22 +5852,77 @@ export default function SchoolSettingsPage() {
 
                   {/* School Years Tab */}
                   <TabsContent value="school-years" className="space-y-6">
-                    <SchoolYears />
+                    {/* School Years Card */}
+                    <Card>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>School Years</CardTitle>
+                          <Button onClick={() => setAddingSchoolYear(true)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add School Year
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingSchoolYears ? (
+                          <div className="space-y-2">
+                            <Skeleton className="h-24 w-full" />
+                            <Skeleton className="h-24 w-full" />
+                          </div>
+                        ) : schoolYears?.length === 0 ? (
+                          <p className="text-gray-500">No school years defined yet.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {schoolYears?.map((year) => (
+                              <Card key={year.id}>
+                                <CardContent className="p-4">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <h4 className="font-medium">{year.name}</h4>
+                                      <p className="text-sm text-gray-600">
+                                        {new Date(year.startDate).toLocaleDateString()} - {new Date(year.endDate).toLocaleDateString()}
+                                      </p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleViewCalendar(year)}
+                                      >
+                                        <Calendar className="mr-2 h-4 w-4" />
+                                        Calendar
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => handleEditSchoolYear(year)}
+                                      >
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => setDeletingSchoolYear(year)}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                     <AcademicCalendarOverview 
                       schoolYears={schoolYears || []}
                       isLoading={isLoadingSchoolYears}
                     />
                   </TabsContent>
 
-                  {/* Schedules Tab */}
-                  <TabsContent value="schedules" className="space-y-6">
-                    <ClassroomSchedules />
-                  </TabsContent>
-
-                  {/* Tuition Tab */}
-                  <TabsContent value="tuition" className="space-y-6">
-                    <TuitionPlans />
-                  </TabsContent>
+                  {/* Schedules Tab already exists earlier in the file */}
+                  {/* Tuition Tab already exists earlier in the file */}
 
                   {/* Public Subsidies Tab */}
                   <TabsContent value="subsidies" className="space-y-6">

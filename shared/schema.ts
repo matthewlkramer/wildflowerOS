@@ -1435,6 +1435,134 @@ export const subsidyRates = pgTable("subsidy_rates", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// ======================== CCAP SUBSIDY TRACKING MODELS ========================
+
+// CCAP Provider Rate Tables by State/County with versioning
+export const ccapProviderRates = pgTable("ccap_provider_rates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // Geographic location
+  state: varchar("state", { length: 2 }).notNull(), // e.g., "MN", "WI"
+  county: varchar("county", { length: 100 }).notNull(), // e.g., "Hennepin", "Ramsey"
+  
+  // Provider type and quality rating
+  providerType: varchar("provider_type", { 
+    enum: ["center", "family_child_care", "group_family_child_care", "school_age_only"] 
+  }).notNull(),
+  qualityRating: integer("quality_rating"), // For states with quality rating systems (0-4 stars)
+  
+  // Age categories with different rate structures
+  ageCategory: varchar("age_category", {
+    enum: ["infant", "toddler", "preschool", "school_age"]
+  }).notNull(),
+  
+  // Rate amounts
+  dailyRate: decimal("daily_rate", { precision: 10, scale: 2 }).notNull(),
+  weeklyRate: decimal("weekly_rate", { precision: 10, scale: 2 }),
+  monthlyRate: decimal("monthly_rate", { precision: 10, scale: 2 }),
+  
+  // Special rates
+  partTimeDailyRate: decimal("part_time_daily_rate", { precision: 10, scale: 2 }),
+  partTimeWeeklyRate: decimal("part_time_weekly_rate", { precision: 10, scale: 2 }),
+  
+  // Registration fees (annual)
+  registrationFee: decimal("registration_fee", { precision: 10, scale: 2 }),
+  
+  // Version control with dates
+  effectiveDate: timestamp("effective_date").notNull(),
+  expirationDate: timestamp("expiration_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Metadata
+  sourceDocument: varchar("source_document", { length: 255 }), // Reference to uploaded PDF
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// CCAP Family Copayment Tables with income ranges
+export const ccapCopaymentSchedules = pgTable("ccap_copayment_schedules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  // Geographic location
+  state: varchar("state", { length: 2 }).notNull(),
+  county: varchar("county", { length: 100 }), // Some states have statewide copay, others by county
+  
+  // Family size
+  familySize: integer("family_size").notNull(),
+  
+  // Income range
+  incomeRangeMin: decimal("income_range_min", { precision: 12, scale: 2 }).notNull(),
+  incomeRangeMax: decimal("income_range_max", { precision: 12, scale: 2 }), // NULL for highest bracket
+  
+  // Copayment amounts
+  copaymentAmount: decimal("copayment_amount", { precision: 10, scale: 2 }).notNull(),
+  copaymentPercentage: decimal("copayment_percentage", { precision: 5, scale: 2 }), // Some states use percentage
+  
+  // Special conditions
+  additionalChildAdjustment: decimal("additional_child_adjustment", { precision: 10, scale: 2 }), // Per additional child
+  maxFamilyCopayment: decimal("max_family_copayment", { precision: 10, scale: 2 }), // Cap on total family copay
+  
+  // Version control
+  effectiveDate: timestamp("effective_date").notNull(),
+  expirationDate: timestamp("expiration_date"),
+  isActive: boolean("is_active").notNull().default(true),
+  
+  // Metadata
+  sourceDocument: varchar("source_document", { length: 255 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// CCAP State/County Configuration
+export const ccapStateConfigurations = pgTable("ccap_state_configurations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  
+  state: varchar("state", { length: 2 }).notNull().unique(),
+  stateName: varchar("state_name", { length: 100 }).notNull(),
+  
+  // Program details
+  programName: varchar("program_name", { length: 255 }).notNull(), // e.g., "Child Care Assistance Program"
+  adminAgency: varchar("admin_agency", { length: 255 }).notNull(), // e.g., "Department of Human Services"
+  
+  // Income calculation method
+  incomeCalculationMethod: varchar("income_calculation_method", {
+    enum: ["gross", "net", "adjusted_gross"]
+  }).notNull().default("gross"),
+  
+  // Federal poverty level percentage for eligibility
+  fplPercentageLimit: integer("fpl_percentage_limit").notNull().default(185), // e.g., 185% of FPL
+  
+  // Quality rating system
+  hasQualityRatingSystem: boolean("has_quality_rating_system").notNull().default(false),
+  qualityRatingName: varchar("quality_rating_name", { length: 100 }), // e.g., "Parent Aware"
+  maxQualityRating: integer("max_quality_rating").default(4),
+  
+  // Rate structure
+  rateStructureType: varchar("rate_structure_type", {
+    enum: ["statewide", "county", "region", "zip_code"]
+  }).notNull().default("county"),
+  
+  // Copayment structure
+  copaymentStructureType: varchar("copayment_structure_type", {
+    enum: ["statewide", "county", "sliding_scale"]
+  }).notNull().default("sliding_scale"),
+  
+  // Registration fee policy
+  allowsRegistrationFees: boolean("allows_registration_fees").notNull().default(true),
+  maxAnnualRegistrationFee: decimal("max_annual_registration_fee", { precision: 10, scale: 2 }),
+  
+  // Additional settings
+  websiteUrl: varchar("website_url", { length: 500 }),
+  contactPhone: varchar("contact_phone", { length: 20 }),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Individual child subsidy assignments
 export const childSubsidyAssignments = pgTable("child_subsidy_assignments", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -2117,6 +2245,16 @@ export const insertChildSubsidyAssignmentSchema = createInsertSchema(childSubsid
 export const insertRoleSurveyResponseSchema = createInsertSchema(roleSurveyResponses);
 export const insertFinalRoleAssignmentSchema = createInsertSchema(finalRoleAssignments);
 export const insertUserInvitationSchema = createInsertSchema(userInvitationsTable);
+
+// CCAP subsidy types
+export type CcapProviderRate = typeof ccapProviderRates.$inferSelect;
+export type InsertCcapProviderRate = typeof ccapProviderRates.$inferInsert;
+export type CcapCopaymentSchedule = typeof ccapCopaymentSchedules.$inferSelect;
+export type InsertCcapCopaymentSchedule = typeof ccapCopaymentSchedules.$inferInsert;
+
+// CCAP subsidy insert schemas
+export const insertCcapProviderRateSchema = createInsertSchema(ccapProviderRates);
+export const insertCcapCopaymentScheduleSchema = createInsertSchema(ccapCopaymentSchedules);
 
 // User invitation types
 export type UserInvitation = typeof userInvitationsTable.$inferSelect;

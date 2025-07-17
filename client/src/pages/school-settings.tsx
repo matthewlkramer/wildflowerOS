@@ -1775,6 +1775,14 @@ export default function SchoolSettingsPage() {
     requiredDocumentation: ""
   });
 
+  // Subsidy-related state variables
+  const [selectedState, setSelectedState] = useState<string>("");
+  const [addingStateConfig, setAddingStateConfig] = useState(false);
+  const [rateFilterState, setRateFilterState] = useState<string>("");
+  const [rateFilterCounty, setRateFilterCounty] = useState<string>("");
+  const [rateFilterProviderType, setRateFilterProviderType] = useState<string>("");
+  const [addingProviderRate, setAddingProviderRate] = useState(false);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -3111,16 +3119,274 @@ export default function SchoolSettingsPage() {
                   
                   {/* New Subsidy Data Set Tab */}
                   <TabsContent value="new-subsidy-data" className="space-y-6">
+                    {/* State Configuration Overview */}
                     <Card>
                       <CardHeader>
-                        <CardTitle>New Subsidy Data Set</CardTitle>
+                        <CardTitle>CCAP State Configurations</CardTitle>
                         <p className="text-sm text-gray-600">
-                          Create and manage new public subsidy data sets for schools in the network.
+                          Configure state-specific Child Care Assistance Program settings and requirements.
                         </p>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-center py-8 text-gray-500">
-                          New subsidy data set functionality will be implemented here.
+                        <div className="space-y-4">
+                          {/* State selector and add button */}
+                          <div className="flex justify-between items-center">
+                            <div className="flex-1 max-w-md">
+                              <Select value={selectedState} onValueChange={setSelectedState}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a state to view or edit" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="MN">Minnesota</SelectItem>
+                                  <SelectItem value="CA">California</SelectItem>
+                                  <SelectItem value="NY">New York</SelectItem>
+                                  <SelectItem value="TX">Texas</SelectItem>
+                                  <SelectItem value="FL">Florida</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <Button onClick={() => setAddingStateConfig(true)}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add State Configuration
+                            </Button>
+                          </div>
+
+                          {/* State configuration details */}
+                          {selectedState && (
+                            <div className="mt-6 space-y-4 p-4 border rounded-lg">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-sm font-medium">Program Name</Label>
+                                  <p className="text-sm text-gray-600">Child Care Assistance Program</p>
+                                </div>
+                                <div>
+                                  <Label className="text-sm font-medium">Admin Agency</Label>
+                                  <p className="text-sm text-gray-600">Department of Human Services</p>
+                                </div>
+                                <div>
+                                  <Label className="text-sm font-medium">FPL Limit</Label>
+                                  <p className="text-sm text-gray-600">185% of Federal Poverty Level</p>
+                                </div>
+                                <div>
+                                  <Label className="text-sm font-medium">Rate Structure</Label>
+                                  <p className="text-sm text-gray-600">County-based</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Provider Rates Management */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>CCAP Provider Rates</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          Manage provider reimbursement rates by state, county, and provider type.
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Filters */}
+                          <div className="grid grid-cols-3 gap-4">
+                            <Select value={rateFilterState} onValueChange={setRateFilterState}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select state" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="MN">Minnesota</SelectItem>
+                                <SelectItem value="CA">California</SelectItem>
+                                <SelectItem value="NY">New York</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Select value={rateFilterCounty} onValueChange={setRateFilterCounty}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select county" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="hennepin">Hennepin County</SelectItem>
+                                <SelectItem value="ramsey">Ramsey County</SelectItem>
+                                <SelectItem value="dakota">Dakota County</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Select value={rateFilterProviderType} onValueChange={setRateFilterProviderType}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Provider type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="center">Center-based</SelectItem>
+                                <SelectItem value="family">Family Child Care</SelectItem>
+                                <SelectItem value="group_family">Group Family</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Add rate button */}
+                          <div className="flex justify-end">
+                            <Button onClick={() => setAddingProviderRate(true)}>
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add Provider Rate
+                            </Button>
+                          </div>
+
+                          {/* Rates table */}
+                          <div className="border rounded-lg overflow-hidden">
+                            <table className="w-full">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Age Category</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Daily Rate</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weekly Rate</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monthly Rate</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Effective Date</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                <tr>
+                                  <td className="px-4 py-3 text-sm">Infant</td>
+                                  <td className="px-4 py-3 text-sm">$45.00</td>
+                                  <td className="px-4 py-3 text-sm">$225.00</td>
+                                  <td className="px-4 py-3 text-sm">$975.00</td>
+                                  <td className="px-4 py-3 text-sm">Jan 1, 2025</td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-4 py-3 text-sm">Toddler</td>
+                                  <td className="px-4 py-3 text-sm">$40.00</td>
+                                  <td className="px-4 py-3 text-sm">$200.00</td>
+                                  <td className="px-4 py-3 text-sm">$866.00</td>
+                                  <td className="px-4 py-3 text-sm">Jan 1, 2025</td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-4 py-3 text-sm">Preschool</td>
+                                  <td className="px-4 py-3 text-sm">$35.00</td>
+                                  <td className="px-4 py-3 text-sm">$175.00</td>
+                                  <td className="px-4 py-3 text-sm">$758.00</td>
+                                  <td className="px-4 py-3 text-sm">Jan 1, 2025</td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Family Copayment Schedules */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Family Copayment Schedules</CardTitle>
+                        <p className="text-sm text-gray-600">
+                          Configure income-based copayment amounts for families receiving CCAP assistance.
+                        </p>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {/* Upload button */}
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm text-gray-600">
+                              Upload PDF documents to extract copayment schedules automatically.
+                            </p>
+                            <Button variant="outline">
+                              <Upload className="h-4 w-4 mr-2" />
+                              Upload Copayment Schedule PDF
+                            </Button>
+                          </div>
+
+                          {/* Copayment table */}
+                          <div className="border rounded-lg overflow-hidden">
+                            <table className="w-full">
+                              <thead className="bg-gray-50">
+                                <tr>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Family Size</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Income Range</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Copayment</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Max Family Copay</th>
+                                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-200">
+                                <tr>
+                                  <td className="px-4 py-3 text-sm">2</td>
+                                  <td className="px-4 py-3 text-sm">$0 - $25,000</td>
+                                  <td className="px-4 py-3 text-sm">$10/month</td>
+                                  <td className="px-4 py-3 text-sm">$10/month</td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-4 py-3 text-sm">3</td>
+                                  <td className="px-4 py-3 text-sm">$25,001 - $40,000</td>
+                                  <td className="px-4 py-3 text-sm">$50/month</td>
+                                  <td className="px-4 py-3 text-sm">$75/month</td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                                <tr>
+                                  <td className="px-4 py-3 text-sm">4</td>
+                                  <td className="px-4 py-3 text-sm">$40,001 - $60,000</td>
+                                  <td className="px-4 py-3 text-sm">$125/month</td>
+                                  <td className="px-4 py-3 text-sm">$200/month</td>
+                                  <td className="px-4 py-3 text-sm">
+                                    <div className="flex space-x-2">
+                                      <Button variant="ghost" size="sm">
+                                        <Edit className="h-4 w-4" />
+                                      </Button>
+                                      <Button variant="ghost" size="sm">
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>

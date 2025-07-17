@@ -11,16 +11,6 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 ### July 16, 2025
-- **✅ COMPLETED: Public Subsidies management system for system administrators**
-  - **Added Public Subsidies tab** - new top-level tab in System Administrator settings at same level as Sensible Defaults and Schools
-  - **Database schema created** - subsidyPrograms table with provider payment rates and parent eligibility/copay information
-  - **Document upload support** - subsidyProgramDocuments table for storing rate sheets and eligibility documents
-  - **Complex eligibility criteria** - supports multiple age/grade eligibility ranges within single subsidy program
-  - **CRUD API endpoints** - full create, read, update, delete operations at /api/schools/:schoolId/public-subsidies
-  - **PublicSubsidies component** - comprehensive management interface for adding and editing subsidy programs
-  - **TabsList grid updated** - expanded from 3-column to 4-column layout to accommodate new Public Subsidies tab
-  - **DollarSign icon** - visual indicator for financial subsidy management functionality
-  - **CONFIRMED WORKING** - Public Subsidies tab properly positioned and accessible in System Administrator view
 - **Enhanced classroom schedule display with classroom assignments**
   - **Schedule cards now show classroom assignments** - each schedule displays which classrooms it applies to with badge format
   - **Backend API enhanced** - created `getClassroomSchedulesBySchoolWithClassrooms()` method that joins schedules with classrooms

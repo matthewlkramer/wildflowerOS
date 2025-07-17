@@ -1851,7 +1851,7 @@ export default function SchoolSettingsPage() {
   });
 
   // Fetch school years
-  const { data: schoolYears = [] } = useQuery({
+  const { data: schoolYears = [], isLoading: isLoadingSchoolYears } = useQuery({
     queryKey: ["/api/schools", effectiveSchoolId, "school-years"],
     enabled: !!effectiveSchoolId,
   });
